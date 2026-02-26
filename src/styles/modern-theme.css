@@ -1,0 +1,600 @@
+/* Modern Theme - Ink Flow Enhanced */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+    /* Cores principais aprimoradas */
+    --primary-dark: #0a0a0a;
+    --secondary-dark: #151515;
+    --tertiary-dark: #202020;
+    --quaternary-dark: #2a2a2a;
+    
+    /* Vermelho com mais variações */
+    --accent-red: #ff0040;
+    --accent-red-light: #ff4d6d;
+    --accent-red-dark: #cc0033;
+    --accent-red-glow: #ff0040;
+    
+    /* Cores de texto melhoradas */
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --text-dark: #666666;
+    
+    /* Gradientes modernos */
+    --gradient-primary: linear-gradient(135deg, #0a0a0a 0%, #151515 25%, #202020 50%, #151515 75%, #0a0a0a 100%);
+    --gradient-red: linear-gradient(135deg, #cc0033 0%, #ff0040 50%, #ff4d6d 100%);
+    --gradient-card: linear-gradient(145deg, rgba(21, 21, 21, 0.9) 0%, rgba(10, 10, 10, 0.95) 100%);
+    --gradient-glass: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    
+    /* Sombras e efeitos */
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-strong: 0 16px 48px rgba(0, 0, 0, 0.6);
+    --shadow-red: 0 8px 32px rgba(255, 0, 64, 0.3);
+    --shadow-red-strong: 0 16px 48px rgba(255, 0, 64, 0.4);
+    
+    /* Bordas e raios */
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 20px;
+    --border-radius-xl: 32px;
+    
+    /* Transições */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* Reset e base melhorados */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--gradient-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Efeito de partículas de fundo */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 0, 64, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 0, 64, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 0, 64, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Tipografia melhorada */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+h3 {
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+    font-weight: 600;
+}
+
+p {
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-medium);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.glass-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-strong);
+    border-color: rgba(255, 0, 64, 0.3);
+}
+
+/* Botões modernos */
+.btn-modern {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    background: var(--gradient-red);
+    color: var(--text-primary);
+    text-decoration: none;
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-red);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left var(--transition-slow);
+}
+
+.btn-modern:hover::before {
+    left: 100%;
+}
+
+.btn-modern:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-red-strong);
+    filter: brightness(1.1);
+}
+
+.btn-modern:active {
+    transform: translateY(-1px);
+}
+
+.btn-outline-modern {
+    background: transparent;
+    border: 2px solid var(--accent-red);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-outline-modern:hover {
+    background: var(--gradient-red);
+    box-shadow: var(--shadow-red);
+}
+
+/* Header moderno */
+.header-modern {
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 0, 64, 0.2);
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+}
+
+.logo-modern {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.8rem;
+    font-weight: 900;
+    background: var(--gradient-red);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-decoration: none;
+    letter-spacing: 2px;
+    position: relative;
+}
+
+.logo-modern::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--gradient-red);
+    transform: scaleX(0);
+    transition: transform var(--transition-normal);
+}
+
+.logo-modern:hover::after {
+    transform: scaleX(1);
+}
+
+/* Navegação moderna */
+.nav-link-modern {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.nav-link-modern::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--gradient-red);
+    transition: all var(--transition-normal);
+    transform: translateX(-50%);
+}
+
+.nav-link-modern:hover,
+.nav-link-modern.active {
+    color: var(--text-primary);
+    background: rgba(255, 0, 64, 0.1);
+}
+
+.nav-link-modern:hover::before,
+.nav-link-modern.active::before {
+    width: 80%;
+}
+
+/* Hero section moderna */
+.hero-modern {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 30% 70%, rgba(255, 0, 64, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 70% 30%, rgba(255, 0, 64, 0.1) 0%, transparent 50%);
+    animation: heroGlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes heroGlow {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.hero-title-modern {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 900;
+    background: var(--gradient-red);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 40px rgba(255, 0, 64, 0.3);
+    animation: titlePulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes titlePulse {
+    0% { filter: brightness(1); }
+    100% { filter: brightness(1.2); }
+}
+
+.hero-subtitle-modern {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+/* Seções modernas */
+.section-modern {
+    padding: 6rem 2rem;
+    position: relative;
+}
+
+.section-title-modern {
+    text-align: center;
+    margin-bottom: 4rem;
+    position: relative;
+}
+
+.section-title-modern h2 {
+    background: var(--gradient-red);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.section-title-modern::after {
+    content: '';
+    position: absolute;
+    bottom: -1rem;
+    left: 50%;
+    width: 60px;
+    height: 3px;
+    background: var(--gradient-red);
+    transform: translateX(-50%);
+    border-radius: 2px;
+}
+
+/* Grid moderno */
+.grid-modern {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+/* Cards de serviço modernos */
+.service-card-modern {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem;
+    text-align: center;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-medium);
+}
+
+.service-card-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 0, 64, 0.5), transparent);
+}
+
+.service-card-modern:hover {
+    transform: translateY(-12px);
+    box-shadow: var(--shadow-strong);
+    border-color: rgba(255, 0, 64, 0.3);
+}
+
+.service-icon-modern {
+    width: 80px;
+    height: 80px;
+    background: var(--gradient-red);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    font-size: 2rem;
+    color: white;
+    box-shadow: var(--shadow-red);
+    position: relative;
+    overflow: hidden;
+}
+
+.service-icon-modern::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: iconShine 3s linear infinite;
+}
+
+@keyframes iconShine {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Carousel moderno */
+.carousel-modern {
+    position: relative;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-strong);
+    background: var(--gradient-card);
+}
+
+.carousel-modern img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+
+.carousel-modern:hover img {
+    transform: scale(1.05);
+}
+
+.carousel-btn-modern {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 0, 64, 0.9);
+    backdrop-filter: blur(10px);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-red);
+}
+
+.carousel-btn-modern:hover {
+    background: var(--accent-red);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: var(--shadow-red-strong);
+}
+
+/* Footer moderno */
+.footer-modern {
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 0, 64, 0.2);
+    box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Animações de entrada */
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.fade-in-up:nth-child(1) { animation-delay: 0.1s; }
+.fade-in-up:nth-child(2) { animation-delay: 0.2s; }
+.fade-in-up:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Efeitos de hover para imagens */
+.image-hover-effect {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--border-radius-md);
+}
+
+.image-hover-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255, 0, 64, 0.2), transparent);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    z-index: 1;
+}
+
+.image-hover-effect:hover::before {
+    opacity: 1;
+}
+
+.image-hover-effect img {
+    transition: transform var(--transition-slow);
+}
+
+.image-hover-effect:hover img {
+    transform: scale(1.1);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--primary-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gradient-red);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-red-light);
+}
+
+/* Seleção de texto */
+::selection {
+    background: var(--accent-red);
+    color: white;
+}
+
+::-moz-selection {
+    background: var(--accent-red);
+    color: white;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .section-modern {
+        padding: 4rem 1rem;
+    }
+    
+    .grid-modern {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .service-card-modern {
+        padding: 2rem;
+    }
+    
+    .carousel-btn-modern {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-modern {
+        padding: 2rem 1rem;
+    }
+    
+    .service-card-modern {
+        padding: 1.5rem;
+    }
+    
+    .service-icon-modern {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+}

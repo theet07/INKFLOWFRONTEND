@@ -1,0 +1,28 @@
+<svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#ff0000" stroke="#ff0000" stroke-width="8">
+    <!-- Engrenagem externa -->
+    <path d="M464 232h-48l-16-32 32-32-32-32-32 32-32-16V104h-48v48l-32 16-32-32-32 32 32 32-16 32H48v48h48l16 32-32 32 32 32 32-32 32 16v48h48v-48l32-16 32 32 32-32-32-32 16-32h48v-48z" fill="none"/>
+    
+    <!-- Círculo central -->
+    <circle cx="256" cy="256" r="120" fill="none" stroke-width="12"/>
+    
+    <!-- Lâmpada -->
+    <circle cx="256" cy="220" r="40" fill="none" stroke-width="8"/>
+    <rect x="236" y="260" width="40" height="20" fill="none" stroke-width="6"/>
+    <rect x="240" y="280" width="32" height="8" fill="none" stroke-width="4"/>
+    <rect x="244" y="288" width="24" height="16" rx="4" fill="none" stroke-width="4"/>
+    
+    <!-- Detalhes da lâmpada -->
+    <path d="M236 200 L246 210 M256 190 L256 200 M276 200 L266 210" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- Mãos/braços -->
+    <path d="M180 280 Q160 300 160 320 Q160 340 180 340 Q200 340 200 320" fill="none" stroke-width="8"/>
+    <path d="M332 280 Q352 300 352 320 Q352 340 332 340 Q312 340 312 320" fill="none" stroke-width="8"/>
+    
+    <!-- Dedos -->
+    <circle cx="170" cy="350" r="8" fill="#ff0000"/>
+    <circle cx="190" cy="350" r="8" fill="#ff0000"/>
+    <circle cx="322" cy="350" r="8" fill="#ff0000"/>
+    <circle cx="342" cy="350" r="8" fill="#ff0000"/>
+  </g>
+</svg>
