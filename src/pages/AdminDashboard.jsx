@@ -8,6 +8,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
+    // IMPORTANTE: Esta verificação é apenas visual. 
+    // A proteção real deve ser feita no backend com JWT/roles.
     const user = JSON.parse(localStorage.getItem('user') || '{}')
     if (!user.isAdmin) {
       navigate('/login')

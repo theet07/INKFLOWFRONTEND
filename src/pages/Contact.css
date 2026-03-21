@@ -1,0 +1,54 @@
+/* Contact Page Specific Styles */
+.contact-modern-page {
+  /* No forced position: absolute overrides as per user request */
+}
+
+.custom-input-solid {
+  background-color: white;
+  border: none;
+  color: #000;
+  padding: 14px 16px;
+  border-radius: 0;
+  transition: all 0.3s ease;
+}
+
+.custom-input-solid:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255,0,0,0.5);
+}
+
+.custom-input-transparent {
+  background-color: transparent;
+  border: none;
+  color: #a0a0a0;
+  padding: 12px 0;
+  border-radius: 0;
+  resize: none;
+}
+
+.custom-input-transparent::placeholder {
+  color: #555;
+}
+
+.custom-input-transparent:focus {
+  outline: none;
+}
+
+/* Toast Animation */
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.toast-enter { 
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+}
+
+.toast-exit { 
+  animation: fadeOut 0.3s ease-out forwards; 
+}

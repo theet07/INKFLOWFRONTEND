@@ -86,7 +86,7 @@ const WhatsAppSection = () => {
           }}>CLIQUE AQUI EMBAIXO E NOS CHAME PELO WHATSAPP</h2>
 
           <a 
-            href="https://api.whatsapp.com/send?phone=5511999999999&text=Olá!%20Vim%20pelo%20site%20e%20quero%20fazer%20um%20orçamento%20de%20tatuagem."
+            href="https://api.whatsapp.com/send?phone=5515144373894&text=Olá!%20Vim%20pelo%20site%20e%20quero%20fazer%20um%20orçamento%20de%20tatuagem."
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -410,7 +410,7 @@ const Home = () => {
               }}>Fundador & Artista Principal</p>
             </div>
             
-            <a href="https://wa.me/5511999999999" style={{
+            <a href="https://wa.me/5515144373894" style={{
               background: '#25d366',
               color: 'white',
               padding: '1rem 2rem',

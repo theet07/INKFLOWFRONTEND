@@ -91,7 +91,7 @@ const About = () => {
             }}>Fundador & Artista Principal</p>
           </div>
           
-          <a href="https://wa.me/5511999999999" style={{
+          <a href="https://wa.me/5515144373894" style={{
             background: '#25d366',
             color: 'white',
             padding: '1rem 2rem',

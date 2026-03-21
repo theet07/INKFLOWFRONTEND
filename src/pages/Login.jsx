@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { clienteService } from '../services/inkflowApi'
+import { formatPhone } from '../utils/formatPhone'
 import './Login.css'
 
 const Login = () => {
@@ -16,33 +17,9 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    // Login de admin
-    if (isLogin && formData.email === 'admin@inkflow.com' && formData.senha === 'admin123') {
-      localStorage.setItem('user', JSON.stringify({ 
-        email: formData.email, 
-        nome: 'Administrador',
-        isAdmin: true 
-      }))
-      alert('Login de administrador realizado!')
-      navigate('/admin')
-      return
-    }
-    
-    // Usuário de teste local
-    if (isLogin && formData.email === 'teste@teste.com' && formData.senha === '123') {
-      localStorage.setItem('user', JSON.stringify({ 
-        id: 999,
-        email: formData.email, 
-        nome: 'Usuário Teste',
-        isAdmin: false 
-      }))
-      alert('Login de teste realizado!')
-      navigate('/agendamento')
-      return
-    }
-    
     try {
       if (isLogin) {
+        // TODO: Substituir por endpoint POST /api/clientes/login quando disponível no backend
         const response = await clienteService.getAll()
         const cliente = response.data.find(c => 
           c.email === formData.email && c.password === formData.senha
@@ -53,10 +30,14 @@ const Login = () => {
             id: cliente.id,
             email: cliente.email,
             nome: cliente.fullName || cliente.username,
-            isAdmin: false
+            isAdmin: cliente.isAdmin || false
           }))
-          alert('Login realizado com sucesso!')
-          navigate('/agendamento')
+          
+          if (cliente.isAdmin) {
+            navigate('/admin')
+          } else {
+            navigate('/agendamento')
+          }
         } else {
           alert('Email ou senha incorretos!')
         }
@@ -75,24 +56,19 @@ const Login = () => {
           telefone: formData.telefone
         }
         
-        console.log('Dados sendo enviados:', novoCliente)
-        const response = await clienteService.create(novoCliente)
-        console.log('Resposta da API:', response)
+        await clienteService.create(novoCliente)
         
         alert('Cadastro realizado com sucesso! Faça login para continuar.')
         setIsLogin(true)
         setFormData({ email: '', senha: '', nome: '', telefone: '' })
       }
     } catch (error) {
-      console.error('Erro completo:', error)
-      console.error('Resposta do erro:', error.response)
+      console.error('Erro:', error)
       if (isLogin) {
-        alert('Erro ao fazer login. Verifique suas credenciais.')
+        alert('Email ou senha incorretos.')
       } else {
-        if (error.response?.status === 400) {
+        if (error.response?.status === 400 || error.response?.status === 409) {
           alert('Email já cadastrado!')
-        } else if (error.response?.status === 409) {
-          alert('Email já existe no sistema!')
         } else {
           alert(`Erro ao processar solicitação: ${error.response?.data?.message || error.message || 'Tente novamente.'}`)
         }
@@ -223,7 +199,8 @@ const Login = () => {
                         name="telefone"
                         placeholder="Digite seu telefone"
                         value={formData.telefone}
-                        onChange={handleChange}
+                        onChange={(e) => setFormData({...formData, telefone: formatPhone(e.target.value)})}
+                        maxLength={15}
                       />
                     </div>
                   </div>
@@ -250,13 +227,7 @@ const Login = () => {
               
 
               
-              {isLogin && (
-                <div className="login-links">
-                  <a href="#" className="link-text forgot-password">
-                    Esqueceu sua senha?
-                  </a>
-                </div>
-              )}
+
               
               {isLogin && (
                 <div className="login-footer" style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.8rem', color: '#888' }}>
@@ -295,9 +266,9 @@ const Login = () => {
               <p>Transforme sua paixão por tatuagem em arte. Nosso estúdio oferece um ambiente profissional e criativo, com artistas experientes especializados em diversos estilos. Desde tatuagens realistas até designs minimalistas, criamos obras únicas que contam sua história. Agende seu horário e explore nossos serviços exclusivos de tatuagem, piercing e arte corporal.</p>
               <div className="info-links">
                 <Link to="/portfolio" className="info-link">Ver Portfólio</Link>
-                <Link to="/services" className="info-link">Nossos Serviços</Link>
-                <Link to="/about" className="info-link">Sobre o Estúdio</Link>
-                <Link to="/contact" className="info-link">Contato</Link>
+                <Link to="/servicos" className="info-link">Nossos Serviços</Link>
+                <Link to="/sobre" className="info-link">Sobre o Estúdio</Link>
+                <Link to="/contato" className="info-link">Contato</Link>
               </div>
             </div>
           </div>

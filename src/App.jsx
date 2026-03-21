@@ -13,7 +13,6 @@ import Login from './pages/Login'
 import Booking from './pages/Booking'
 import AdminDashboard from './pages/AdminDashboard'
 import Profile from './pages/Profile'
-import TestConnection from './components/TestConnection'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -44,7 +43,6 @@ function AppContent() {
           <Route path="/agendamento" element={<Booking />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/perfil" element={<Profile />} />
-          <Route path="/test" element={<TestConnection />} />
         </Routes>
       </main>
       {!isLoginPage && <Footer />}

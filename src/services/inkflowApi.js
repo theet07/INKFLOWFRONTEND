@@ -11,6 +11,9 @@ const api = axios.create({
 
 // Serviços de Cliente
 export const clienteService = {
+  // Login de cliente
+  login: (credentials) => api.post('/api/clientes/login', credentials),
+  
   // Listar todos os clientes
   getAll: () => api.get('/api/clientes'),
   

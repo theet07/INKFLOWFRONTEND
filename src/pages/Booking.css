@@ -1,0 +1,706 @@
+/* Booking Page - Multi-Step Design */
+
+.booking-page {
+  min-height: 100vh;
+  background: var(--primary-dark, #000);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 2rem;
+  padding-top: 8rem;
+}
+
+.booking-layout {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 3rem;
+}
+
+/* ==================== SIDEBAR ==================== */
+
+.booking-sidebar {
+  position: sticky;
+  top: 6rem;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.step-indicators {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.step-label {
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.step-indicator.active {
+  color: #fff;
+}
+
+.step-indicator.active .step-number {
+  background: var(--accent-red, #ff0000);
+  border-color: var(--accent-red, #ff0000);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+}
+
+.step-indicator.completed .step-number {
+  background: var(--accent-red, #ff0000);
+  border-color: var(--accent-red, #ff0000);
+  color: #fff;
+}
+
+.step-indicator.completed {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Sidebar Info Panel */
+.sidebar-panel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 1.75rem;
+}
+
+.sidebar-panel h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-red, #ff0000);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.panel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-red, #ff0000);
+  flex-shrink: 0;
+}
+
+.sidebar-panel .info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0.3rem 0;
+}
+
+.sidebar-panel .info-row.highlight {
+  font-weight: 700;
+  color: #fff;
+}
+
+.policy-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.policy-list li {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0.3rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.policy-list li::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 0, 0, 0.15);
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23ff0000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px;
+}
+
+/* ==================== MAIN CONTENT ==================== */
+
+.booking-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+/* Section Headers */
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  margin: 0;
+  line-height: 1;
+  color: #fff;
+}
+
+.section-header p {
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+}
+
+.step-badge {
+  color: var(--accent-red, #ff0000);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ==================== STEP 1: STYLES ==================== */
+
+.styles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.style-card {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 16px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.style-card:hover {
+  border-color: var(--accent-red, #ff0000);
+}
+
+.style-card.selected {
+  border-color: var(--accent-red, #ff0000);
+}
+
+.style-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.2) 40%, transparent 100%);
+  z-index: 2;
+}
+
+.style-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.style-card:hover img {
+  transform: scale(1.1);
+}
+
+.style-card-info {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 3;
+}
+
+.style-card-info h3 {
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  font-size: 1.1rem;
+  line-height: 1;
+  margin: 0;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.style-card.selected .style-card-info h3 {
+  color: var(--accent-red, #ff0000);
+}
+
+.style-card-info span {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.style-checkmark {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 5;
+  background: var(--accent-red, #ff0000);
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.4);
+}
+
+/* ==================== STEP 2: ARTISTS ==================== */
+
+.artists-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.artist-card {
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.artist-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.artist-card.selected {
+  border-color: rgba(255, 0, 0, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
+}
+
+.artist-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255, 0, 0, 0.2);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.artist-card.selected .artist-avatar {
+  border-color: var(--accent-red, #ff0000);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+}
+
+.artist-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.artist-info h4 {
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  font-size: 1rem;
+  margin: 0;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.artist-card.selected .artist-info h4 {
+  color: var(--accent-red, #ff0000);
+}
+
+.artist-info p {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0.25rem 0 0;
+}
+
+/* Dimmed state for non-matching artists */
+.artist-card.dimmed {
+  opacity: 0.35;
+  filter: grayscale(0.5);
+}
+
+.artist-card.dimmed:hover {
+  opacity: 0.7;
+  filter: grayscale(0);
+}
+
+/* ==================== STEP 3 & 4: CALENDAR + FORM ==================== */
+
+.steps-3-4-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+}
+
+/* Calendar */
+.calendar-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.calendar-nav button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+}
+
+.calendar-nav button:hover {
+  color: var(--accent-red, #ff0000);
+}
+
+.calendar-nav span {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.calendar-weekdays span {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0.5rem 0;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.calendar-day {
+  padding: 0.6rem 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.calendar-day:hover:not(.disabled):not(.empty) {
+  background: rgba(255, 0, 0, 0.2);
+}
+
+.calendar-day.selected {
+  background: var(--accent-red, #ff0000);
+  color: #fff;
+  font-weight: 700;
+}
+
+.calendar-day.disabled,
+.calendar-day.empty {
+  color: rgba(255, 255, 255, 0.15);
+  cursor: not-allowed;
+}
+
+/* Time Slots */
+.time-slots-section {
+  margin-top: 2rem;
+}
+
+.time-slots-section h4 {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 1rem;
+}
+
+.time-periods-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.time-period {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.8rem 0.5rem;
+  border-radius: 12px;
+  background: rgba(255, 0, 0, 0.08);
+  border: 1px solid rgba(255, 0, 0, 0.2);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.time-period:hover {
+  background: rgba(255, 0, 0, 0.2);
+  border-color: rgba(255, 0, 0, 0.4);
+}
+
+.time-period.selected {
+  background: var(--accent-red, #ff0000);
+  border-color: var(--accent-red, #ff0000);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+}
+
+.time-period-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Form Section */
+.form-section-booking {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-field label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-left: 0.25rem;
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  color: #fff;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  border-color: var(--accent-red, #ff0000);
+  box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.15);
+}
+
+.form-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding-top: 0.5rem;
+}
+
+.form-terms input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--accent-red, #ff0000);
+}
+
+.form-terms span {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.5;
+}
+
+.booking-submit-btn {
+  width: 100%;
+  background: var(--accent-red, #ff0000);
+  border: none;
+  color: #fff;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 1.1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  box-shadow: 0 8px 24px rgba(255, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.booking-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(255, 0, 0, 0.4);
+}
+
+.booking-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Success Toast */
+.booking-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #10b981;
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+  z-index: 999;
+  animation: toastSlideUp 0.3s ease-out forwards;
+}
+
+@keyframes toastSlideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 1024px) {
+  .booking-layout {
+    grid-template-columns: 1fr;
+  }
+  .booking-sidebar {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .step-indicators {
+    flex-direction: row;
+    gap: 1rem;
+    width: 100%;
+    justify-content: center;
+  }
+  .step-label {
+    display: none;
+  }
+  .styles-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .booking-page {
+    padding: 1rem;
+    padding-top: 5rem;
+  }
+  .section-header h2 {
+    font-size: 1.8rem;
+  }
+  .styles-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .artists-grid {
+    grid-template-columns: 1fr;
+  }
+  .steps-3-4-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Fix calendar specific things */
+.react-calendar {
+  background-color: transparent !important;
+  color: #fff !important;
+  border: 1px solid #333 !important;
+  border-radius: 16px !important;
+}
+.react-calendar__tile {
+  color: #fff !important;
+}
+.react-calendar__tile:hover {
+  background-color: #333 !important;
+}
+.react-calendar__tile--active {
+  background-color: #FF0000 !important;
+}

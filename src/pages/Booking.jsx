@@ -1,624 +1,333 @@
 import { useState, useEffect } from 'react'
-import Calendar from '../components/Calendar'
-import oioiImage from '../assets/oioi.png'
-
 import { agendamentoService, clienteService } from '../services/inkflowApi'
+import './Booking.css'
 
 const Booking = () => {
-  const [selectedDate, setSelectedDate] = useState(null)
-  const [selectedTime, setSelectedTime] = useState('')
-  const [currentImageSlide, setCurrentImageSlide] = useState(0)
-  const [formData, setFormData] = useState({
-    nome: '',
-    email: '',
-    telefone: '',
-    servico: '',
-    descricao: ''
-  })
-
-  const timeSlots = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00']
-  const services = ['Tatuagem Pequena', 'Tatuagem Média', 'Tatuagem Grande', 'Retoque', 'Consulta']
-  
-  const getAvailableSlots = () => {
-    const slots = {}
-    const today = new Date()
-    
-    for (let i = 0; i < 30; i++) {
-      const date = new Date(today)
-      date.setDate(today.getDate() + i)
-      const dateStr = date.toISOString().split('T')[0]
-      
-      if (date.getDay() !== 0) {
-        const availableHours = timeSlots.filter(() => Math.random() > 0.3)
-        if (availableHours.length > 0) {
-          slots[dateStr] = availableHours
-        }
-      }
-    }
-    return slots
-  }
-  
-  const availableSlots = getAvailableSlots()
-  
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}')
-    if (user.email) {
-      setFormData(prev => ({
-        ...prev,
-        nome: user.nome || '',
-        email: user.email || ''
-      }))
-    }
-  }, [])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageSlide((prev) => (prev + 1) % 6)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitSuccess, setSubmitSuccess] = useState(false)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    
-    try {
-      let clienteId
-      const user = JSON.parse(localStorage.getItem('user') || '{}')
-      
-      if (user.id) {
-        clienteId = user.id
-      } else {
-        const novoCliente = {
-          username: formData.email.split('@')[0],
-          email: formData.email,
-          password: '123456',
-          fullName: formData.nome
-        }
-        
-        const clienteResponse = await clienteService.create(novoCliente)
-        clienteId = clienteResponse.data.id
-      }
-      
-      const dataHora = `${selectedDate}T${selectedTime}:00`
-      const novoAgendamento = {
-        cliente: { id: clienteId },
-        dataHora: dataHora,
-        servico: formData.servico,
-        descricao: formData.descricao
-      }
-      
-      await agendamentoService.create(novoAgendamento)
-      
-      setSubmitSuccess(true)
-      setTimeout(() => {
-        setFormData({ nome: '', email: '', telefone: '', servico: '', descricao: '' })
-        setSelectedDate(null)
-        setSelectedTime('')
-        setSubmitSuccess(false)
-      }, 3000)
-      
-    } catch (error) {
-      console.error('Erro ao criar agendamento:', error)
-      alert('Erro ao realizar agendamento. Tente novamente.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+    const [bookingState, setBookingState] = useState({
+        style: 'Blackwork',
+        artist: 'Sasha K.',
+        day: '12',
+        time: '01:30 PM'
     })
-  }
 
-  return (
-    <div style={{
-      backgroundImage: `url(${oioiImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
+    const [formData, setFormData] = useState({
+        name: '',
+        phone: '',
+        email: '',
+        desc: '',
+        terms: false
+    })
 
-      minHeight: '100vh',
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-      padding: '2rem',
-      paddingTop: '6rem',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'flex-start',
-      position: 'relative'
-    }}>
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.1)',
-        zIndex: 1
-      }} />
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [toasts, setToasts] = useState([])
 
-      <div style={{
-        maxWidth: '800px',
-        width: '100%',
-        background: 'transparent',
-        borderRadius: '0',
-        padding: '3rem',
-        boxShadow: 'none',
-        border: 'none',
-        position: 'relative',
-        zIndex: 2
-      }}>
-        {submitSuccess && (
-          <div style={{
-            background: 'linear-gradient(135deg, #10b981, #059669)',
-            padding: '1rem 2rem',
-            borderRadius: '8px',
-            marginBottom: '2rem',
-            color: '#fff',
-            fontSize: '1.1rem',
-            fontWeight: '600'
-          }}>
-            ✅ Agendamento enviado com sucesso! Entraremos em contato em breve.
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '2rem',
-              marginBottom: '1rem'
-            }}>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem'
-              }}>
-                <div>
-                  <label style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    color: '#ffffff',
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    marginBottom: '0.5rem',
-                    textAlign: 'left',
-                    letterSpacing: '0.3px',
-                    textTransform: 'uppercase'
-                  }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#e11d48">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                    Nome
-                  </label>
-                  <input
-                    type="text"
-                    name="nome"
-                    value={formData.nome}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      background: '#121212',
-                      border: '1px solid #262626',
-                      borderRadius: '8px',
-                      color: '#f1f1f1',
-                      fontSize: '1rem',
-                      transition: 'all 0.3s ease',
-                      outline: 'none'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#e11d48'
-                      e.target.style.boxShadow = '0 0 0 2px rgba(225, 29, 72, 0.2)'
-                      e.target.style.backgroundColor = '#1f1f1f'
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#262626'
-                      e.target.style.boxShadow = 'none'
-                      e.target.style.backgroundColor = '#121212'
-                    }}
-                  />
-                </div>
-                
-                <div>
-                  <label style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    color: '#ffffff',
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    marginBottom: '0.5rem',
-                    textAlign: 'left',
-                    letterSpacing: '0.3px',
-                    textTransform: 'uppercase'
-                  }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#ffffff">
-                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                    </svg>
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      background: '#121212',
-                      border: '1px solid #262626',
-                      borderRadius: '8px',
-                      color: '#f1f1f1',
-                      fontSize: '1rem',
-                      transition: 'all 0.3s ease',
-                      outline: 'none'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#e11d48'
-                      e.target.style.boxShadow = '0 0 0 2px rgba(225, 29, 72, 0.2)'
-                      e.target.style.backgroundColor = '#1f1f1f'
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#262626'
-                      e.target.style.boxShadow = 'none'
-                      e.target.style.backgroundColor = '#121212'
-                    }}
-                  />
-                </div>
-                
-                <div>
-                  <label style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    color: '#ffffff',
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    marginBottom: '0.5rem',
-                    textAlign: 'left',
-                    letterSpacing: '0.3px',
-                    textTransform: 'uppercase'
-                  }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#10b981">
-                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-                    </svg>
-                    Telefone
-                  </label>
-                  <input
-                    type="tel"
-                    name="telefone"
-                    value={formData.telefone}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      background: '#121212',
-                      border: '1px solid #262626',
-                      borderRadius: '8px',
-                      color: '#f1f1f1',
-                      fontSize: '1rem',
-                      transition: 'all 0.3s ease',
-                      outline: 'none'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#e11d48'
-                      e.target.style.boxShadow = '0 0 0 2px rgba(225, 29, 72, 0.2)'
-                      e.target.style.backgroundColor = '#1f1f1f'
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#262626'
-                      e.target.style.boxShadow = 'none'
-                      e.target.style.backgroundColor = '#121212'
-                    }}
-                  />
-                </div>
-                
-                <div>
-                  <label style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    color: '#ffffff',
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    marginBottom: '0.5rem',
-                    textAlign: 'left',
-                    letterSpacing: '0.3px',
-                    textTransform: 'uppercase'
-                  }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#fbbf24">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                    Serviço
-                  </label>
-                  <select
-                    name="servico"
-                    value={formData.servico}
-                    onChange={handleChange}
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      background: '#121212',
-                      border: '1px solid #262626',
-                      borderRadius: '8px',
-                      color: '#f1f1f1',
-                      fontSize: '1rem',
-                      transition: 'all 0.3s ease',
-                      outline: 'none'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#e11d48'
-                      e.target.style.boxShadow = '0 0 0 2px rgba(225, 29, 72, 0.2)'
-                      e.target.style.backgroundColor = '#1f1f1f'
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#262626'
-                      e.target.style.boxShadow = 'none'
-                      e.target.style.backgroundColor = '#121212'
-                    }}
-                  >
-                    <option value="">Selecione um serviço</option>
-                    {services.map(service => (
-                      <option key={service} value={service} style={{background: '#121212'}}>{service}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              
-              <Calendar 
-                selectedDate={selectedDate}
-                onDateSelect={setSelectedDate}
-                availableSlots={availableSlots}
-              />
-            </div>
-            
-            {selectedDate && (
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{
-                  display: 'block',
-                  color: '#e11d48',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  marginBottom: '0.5rem',
-                  textAlign: 'left',
-                  letterSpacing: '0.3px',
-                  textTransform: 'uppercase'
-                }}>🕒 Horário Disponível *</label>
-                <p style={{
-                  color: '#a1a1a1',
-                  fontSize: '0.9rem',
-                  marginBottom: '0.5rem',
-                  textAlign: 'left',
-                  letterSpacing: '0.3px'
-                }}>Disponível das 9h às 18h</p>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-                  gap: '0.75rem'
-                }}>
-                  {timeSlots.map(time => (
-                    <button
-                      key={time}
-                      type="button"
-                      onClick={() => setSelectedTime(time)}
-                      style={{
-                        padding: '0.875rem',
-                        background: selectedTime === time ? '#e11d48' : '#121212',
-                        border: selectedTime === time ? '2px solid #e11d48' : '1px solid #262626',
-                        borderRadius: '8px',
-                        color: '#f1f1f1',
-                        fontSize: '0.9rem',
-                        fontWeight: selectedTime === time ? '600' : '400',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        transform: selectedTime === time ? 'translateY(-2px) scale(1.05)' : 'scale(1)',
-                        boxShadow: selectedTime === time ? '0 4px 10px rgba(225, 29, 72, 0.4)' : 'none'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (selectedTime !== time) {
-                          e.target.style.background = '#1f1f1f'
-                          e.target.style.transform = 'translateY(-2px)'
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (selectedTime !== time) {
-                          e.target.style.background = '#121212'
-                          e.target.style.transform = 'scale(1)'
-                        }
-                      }}
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                color: '#ffffff',
-                fontSize: '0.875rem',
-                fontWeight: '600',
-                marginBottom: '0.5rem',
-                textAlign: 'left',
-                letterSpacing: '0.3px',
-                textTransform: 'uppercase'
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#ffffff">
-                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                </svg>
-                Descrição do projeto
-              </label>
-              <textarea
-                name="descricao"
-                value={formData.descricao}
-                onChange={handleChange}
-                rows="3"
-                maxLength="500"
-                placeholder="Descreva sua ideia de tatuagem, tamanho aproximado e local no corpo."
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  background: '#121212',
-                  border: '1px solid #262626',
-                  borderRadius: '8px',
-                  color: '#f1f1f1',
-                  fontSize: '1rem',
-                  resize: 'vertical',
-                  transition: 'all 0.3s ease',
-                  outline: 'none',
-                  fontFamily: 'Inter, sans-serif'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#e11d48'
-                  e.target.style.boxShadow = '0 0 0 2px rgba(225, 29, 72, 0.2)'
-                  e.target.style.backgroundColor = '#1f1f1f'
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#262626'
-                  e.target.style.boxShadow = 'none'
-                  e.target.style.backgroundColor = '#121212'
-                }}
-              />
-              <p style={{
-                color: '#a1a1a1',
-                fontSize: '0.8rem',
-                textAlign: 'right',
-                marginTop: '0.25rem',
-                letterSpacing: '0.3px'
-              }}>{formData.descricao.length}/500 caracteres</p>
-            </div>
-            
-            <button 
-              type="submit" 
-              disabled={!selectedDate || !selectedTime || isSubmitting}
-              style={{
-                width: '100%',
-                padding: '1rem 2rem',
-                background: (!selectedDate || !selectedTime || isSubmitting) ? '#666' : '#e11d48',
-                border: 'none',
-                borderRadius: '8px',
-                color: '#f1f1f1',
-                fontSize: '1.1rem',
-                fontWeight: '700',
-                cursor: (!selectedDate || !selectedTime || isSubmitting) ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s ease',
-                transform: 'scale(1)',
-                boxShadow: (!selectedDate || !selectedTime || isSubmitting) ? 'none' : '0 4px 15px rgba(225, 29, 72, 0.4)',
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase'
-              }}
-              onMouseEnter={(e) => {
-                if (selectedDate && selectedTime && !isSubmitting) {
-                  e.target.style.transform = 'translateY(-2px)'
-                  e.target.style.boxShadow = '0 6px 20px rgba(225, 29, 72, 0.5)'
+    const stylesOptions = [
+        { name: 'Realism', artists: 3, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDPLPjgMK9FYYycsAS-RoGWEouIFm6rwjICxkCo87EQAdpuLrbWMZNZuozsY9Pk6koWfEGbYpWfJc7wisgjFWuMq4QBJDUkN9uLEUDx9e9gYmuE6rJn6IUkFfiZDmbj1UKnbbfsRfCVaJ6NIkN2J4Lzpya4cXxD6nkIrfq-jdoWvoLAr9FH4O_QIIFGwbD6_c-LYYgPgf9CTJV30juolMrK-bVKVzpnmX1iUAbL2nenBGw6E999zhNxGEixCK73hkvd3NY5FD9yYDc' },
+        { name: 'Blackwork', artists: 5, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDkjpYAdUA2_WJ1yDEDzxLuB8OA9lcZsXnz71_aITrlK8oR9E0ga2rObC-6jmmd-FTxPw4Od5XbqFHB7vxXT_gcyk93c5vIPDwujOBaxxlKdXul4529pc-nZB1DEC7tsS4dpGoyB6-6c1VWq7lGZ4rHL77brCGsjUVrnhkAd_OxOtZoNOdVwUJpSGTsdDYenM9sG94cWarP_PIBFZa3PiH_EDIbNKI3pTvUiHjUSJtffrIeKoAlUHkYRHfcd1CsHe8G45KCt_ys1-g' },
+        { name: 'Traditional', artists: 2, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA3Gwkl0DNmMojl1mfs9YSdu7btaax-VOa5Xp17lF4qJHk8SKxgAeBGa48w5-6QR0KdOqExWcgE_PU1NYjmFmTLlLn9Y4U2La0I-kqnLuchA252nAajxD43VJXjlnGFPgZ-Fu8zcQF34nEv640A2VRQs53nCyGRwR3mmL_gEVi77uwkMJFLHFy3brmYCBjQgf-oO_XEdHUJ74QUcm1-XTKBFjFhLICvZrq3yuMWlsbi4ksyh68y_UZjXy_l33WnXPlD3jlaZamx7t4' },
+        { name: 'Geometric', artists: 4, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBUDQfNIYOBK4IsZokbpwD1uOE5-9jpsPLqD1IpqVeWEw0qisqUHXOg_p7AcQPGA4GebjAPBYtVZDRT5uuNO2Jwb8u8lbixq05FRfoE2IPRoMAI8bRTXRnMHfI2yp2U2kJRftbznZx8g4DvkT5oj6zXorE8YDZT8wr_u0yzZY6-TDGt1-L-WDLGtbFcKMMQ7WStblhFrNPZM8EE9mj6LBzTlziC2Q8PPQB1wB8nCk4ZLbKInG8rpJpAn0gNuk1bmZTi6Jk04NH7AAs' }
+    ]
+
+    const artistsOptions = [
+        { name: 'Marcos Silva', role: 'Realismo & Blackwork', img: '/assets/portifolio_tatuadores/Tatuador_1.png' },
+        { name: 'Julio Costa', role: 'Geométrico', img: '/assets/portifolio_tatuadores/Tatuador_2.png' },
+        { name: 'Sasha Mendes', role: 'Minimalista & Fine Line', img: '/assets/portifolio_tatuadores/Tatuadora_3.png' },
+        { name: 'Lucas Pereira', role: 'Tradicional', img: '/assets/portifolio_tatuadores/Tatuador_4.png' },
+        { name: 'Nina Ferreira', role: 'Aquarela', img: '/assets/portifolio_tatuadores/Tatuadora_5.png' }
+    ]
+
+    const days = [
+        { day: '1', active: true }, { day: '2', active: true }, { day: '3', active: true }, { day: '4', active: true },
+        { day: '5', active: true }, { day: '6', active: false }, { day: '7', active: true }, { day: '8', active: true },
+        { day: '9', active: true }, { day: '10', active: true }, { day: '11', active: true }, { day: '12', active: true },
+        { day: '13', active: false }, { day: '14', active: true, content: '•', isDot: true }, { day: '15', active: true },
+    ]
+
+    const timeSlots = ['10:00 AM', '01:30 PM', '04:00 PM']
+
+    const showToast = (message, type = 'success') => {
+        const id = Date.now()
+        setToasts(prev => [...prev, { id, message, type }])
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000)
+    }
+
+    const handleChange = (e) => {
+        const { id, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [id.replace('form-', '')]: type === 'checkbox' ? checked : value
+        }));
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+
+        if (!bookingState.style || !bookingState.artist || !bookingState.day || !bookingState.time) {
+            alert("Please complete the Style, Artist, Date, and Time selection steps above.");
+            return;
+        }
+        if (!formData.name || !formData.phone || !formData.email || !formData.desc) {
+            alert("Please fill in all your details.");
+            return;
+        }
+        if (!formData.terms) {
+            alert("You must agree to the booking terms to continue.");
+            return;
+        }
+
+        setIsSubmitting(true)
+
+        try {
+            let clienteId
+            const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+            if (user.id) {
+                clienteId = user.id
+            } else {
+                const novoCliente = {
+                    username: formData.email.split('@')[0],
+                    email: formData.email,
+                    password: '123456',
+                    fullName: formData.name
                 }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedDate && selectedTime && !isSubmitting) {
-                  e.target.style.transform = 'scale(1)'
-                  e.target.style.boxShadow = '0 4px 15px rgba(225, 29, 72, 0.4)'
-                }
-              }}
-            >
-              {isSubmitting ? '⏳ Enviando...' : '✅ Confirmar Agendamento'}
-            </button>
-        </form>
-        
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '1rem',
-          marginTop: '1rem'
-        }}>
-          <div style={{
-            background: '#181818',
-            padding: '1.5rem',
-            borderRadius: '1rem',
-            border: '1px solid #262626',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-            textAlign: 'left',
-            transition: 'all 0.3s ease'
-          }}>
-            <h3 style={{
-              color: '#e11d48',
-              fontSize: '1rem',
-              fontWeight: '700',
-              marginBottom: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              letterSpacing: '0.5px',
-              textTransform: 'uppercase'
-            }}>📋 Políticas de Agendamento</h3>
-            <ul style={{
-              color: '#f1f1f1',
-              fontSize: '0.85rem',
-              lineHeight: '1.5',
-              listStyle: 'none',
-              padding: 0,
-              letterSpacing: '0.3px'
-            }}>
-              <li style={{ marginBottom: '0.25rem' }}>• Agendamentos com 24h de antecedência</li>
-              <li style={{ marginBottom: '0.25rem' }}>• Cancelamento até 2h antes</li>
-              <li style={{ marginBottom: '0.25rem' }}>• Consulta inicial gratuita</li>
-              <li style={{ marginBottom: '0.25rem' }}>• Sinal de 50% para confirmar</li>
-            </ul>
-          </div>
-          
-          <div style={{
-            background: '#181818',
-            padding: '1.5rem',
-            borderRadius: '1rem',
-            border: '1px solid #262626',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-            textAlign: 'left',
-            transition: 'all 0.3s ease'
-          }}>
-            <h3 style={{
-              color: '#e11d48',
-              fontSize: '1rem',
-              fontWeight: '700',
-              marginBottom: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              letterSpacing: '0.5px',
-              textTransform: 'uppercase'
-            }}>🕒 Horários de Funcionamento</h3>
-            <ul style={{
-              color: '#f1f1f1',
-              fontSize: '0.85rem',
-              lineHeight: '1.5',
-              listStyle: 'none',
-              padding: 0,
-              letterSpacing: '0.3px'
-            }}>
-              <li style={{ marginBottom: '0.25rem' }}>• Segunda a Sexta: 9h às 18h</li>
-              <li style={{ marginBottom: '0.25rem' }}>• Sábado: 9h às 16h</li>
-              <li style={{ marginBottom: '0.25rem' }}>• Domingo: Fechado</li>
-              <li style={{ marginBottom: '0.25rem' }}>• Feriados: Consultar</li>
-            </ul>
-          </div>
+                const clienteResponse = await clienteService.create(novoCliente)
+                clienteId = clienteResponse.data.id
+            }
+
+            const formattedDate = `2024-10-${bookingState.day.padStart(2, '0')}`
+            let [hour, minutePeriod] = bookingState.time.split(':')
+            let [minute, period] = minutePeriod.split(' ')
+            let h = parseInt(hour)
+            if (period === 'PM' && h !== 12) h += 12
+            if (period === 'AM' && h === 12) h = 0
+            const dataHora = `${formattedDate}T${h.toString().padStart(2, '0')}:${minute}:00`
+
+            const novoAgendamento = {
+                cliente: { id: clienteId },
+                dataHora: dataHora,
+                servico: `${bookingState.style} with ${bookingState.artist}`,
+                descricao: formData.desc
+            }
+
+            await agendamentoService.create(novoAgendamento)
+
+            showToast('Booking Confirmed!', 'success')
+
+            setTimeout(() => {
+                setFormData({ name: '', phone: '', email: '', desc: '', terms: false })
+                window.scrollTo(0, 0)
+            }, 3000)
+
+        } catch (error) {
+            console.error('Erro ao criar agendamento:', error)
+            showToast('Error booking your session.', 'error')
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const getActiveStep = () => {
+        if (!bookingState.style) return 1
+        if (!bookingState.artist) return 2
+        if (!bookingState.day || !bookingState.time) return 3
+        return 4
+    }
+    const currentStep = getActiveStep()
+
+    return (
+        <div className="booking-page">
+            <div className="booking-layout">
+                {/* Sidebar Navigation */}
+                <aside className="booking-sidebar">
+                    <div className="step-indicators">
+                        {[
+                            { num: 1, label: 'Style Selection' },
+                            { num: 2, label: 'Choose Artist' },
+                            { num: 3, label: 'Date & Time' },
+                            { num: 4, label: 'Details' }
+                        ].map((step) => {
+                            let statusClass = '';
+                            if (currentStep === step.num) statusClass = 'active';
+                            if (currentStep > step.num) statusClass = 'completed';
+                            return (
+                                <div key={step.num} className={`step-indicator ${statusClass}`}>
+                                    <div className="step-number">{step.num}</div>
+                                    <span className="step-label">{step.label}</span>
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    <div className="sidebar-panel">
+                        <h3><span className="material-symbols-outlined panel-icon">schedule</span> Opening Hours</h3>
+                        <div className="info-row"><span>Mon - Fri</span><span>11:00 - 20:00</span></div>
+                        <div className="info-row highlight"><span>Saturday</span><span>10:00 - 22:00</span></div>
+                        <div className="info-row"><span>Sunday</span><span>Closed</span></div>
+                    </div>
+                </aside>
+
+                {/* Main Booking Content */}
+                <div className="booking-content">
+                    {/* Step 1: Styles */}
+                    <section id="styles-section">
+                        <div className="section-header">
+                            <div>
+                                <h2>Choose Your Vibe</h2>
+                                <p>Select a style to filter our specialized artists.</p>
+                            </div>
+                            <span className="step-badge">Step 01 / 04</span>
+                        </div>
+
+                        <div className="styles-grid">
+                            {stylesOptions.map(style => (
+                                <div
+                                    key={style.name}
+                                    onClick={() => setBookingState(prev => ({ ...prev, style: style.name }))}
+                                    className={`style-card ${bookingState.style === style.name ? 'selected' : ''}`}
+                                >
+                                    <div className="style-card-overlay"></div>
+                                    <img src={style.img} alt={style.name} />
+                                    <div className="style-card-info">
+                                        <h3>{style.name}</h3>
+                                        <span>{style.artists} Artists</span>
+                                    </div>
+                                    {bookingState.style === style.name && (
+                                        <div className="style-checkmark">
+                                            <span className="material-symbols-outlined text-sm">check</span>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Step 2: Artists */}
+                    <section id="artists-section">
+                        <div className="section-header">
+                            <div>
+                                <h2>The Masters</h2>
+                                <p>Specialized in Blackwork and Fine Line.</p>
+                            </div>
+                            <span className="step-badge">Step 02 / 04</span>
+                        </div>
+
+                        <div className="artists-grid">
+                            {artistsOptions.map(artist => (
+                                <div
+                                    key={artist.name}
+                                    onClick={() => setBookingState(prev => ({ ...prev, artist: artist.name }))}
+                                    className={`artist-card ${bookingState.artist === artist.name ? 'selected' : ''}`}
+                                >
+                                    <div className="artist-avatar">
+                                        <img src={artist.img} alt={artist.name} />
+                                    </div>
+                                    <div className="artist-info">
+                                        <h4>{artist.name}</h4>
+                                        <p>{artist.role}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Step 3 & 4: Calendar and Info */}
+                    <section id="datetime-section">
+                        <div className="steps-3-4-grid">
+                            {/* Date Selection */}
+                            <div className="booking-calendar-wrap">
+                                <div className="section-header">
+                                    <h2>The Session</h2>
+                                    <span className="step-badge">Step 03</span>
+                                </div>
+                                <div className="calendar-panel">
+                                    <div className="calendar-nav">
+                                        <button><span className="material-symbols-outlined">chevron_left</span></button>
+                                        <span>October 2024</span>
+                                        <button><span className="material-symbols-outlined">chevron_right</span></button>
+                                    </div>
+                                    <div className="calendar-weekdays">
+                                        <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+                                    </div>
+                                    <div className="calendar-days">
+                                        <div className="calendar-day empty">28</div><div className="calendar-day empty">29</div><div className="calendar-day empty">30</div><div className="calendar-day empty">31</div>
+                                        {days.map((d, i) => (
+                                            <div
+                                                key={i}
+                                                onClick={() => d.active && setBookingState(prev => ({ ...prev, day: d.day }))}
+                                                className={`calendar-day ${!d.active ? 'disabled' : ''} ${bookingState.day === d.day ? 'selected' : ''}`}
+                                            >
+                                                {d.isDot ? d.content : d.day}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="time-slots-section">
+                                        <h4>Available Slots</h4>
+                                        <div className="time-periods-grid">
+                                            {timeSlots.map(time => (
+                                                <div
+                                                    key={time}
+                                                    onClick={() => setBookingState(prev => ({ ...prev, time }))}
+                                                    className={`time-period ${bookingState.time === time ? 'selected' : ''}`}
+                                                >
+                                                    <span className="time-period-label">{time}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Form Section */}
+                            <div className="booking-details-wrap">
+                                <div className="section-header">
+                                    <h2>Your Detail</h2>
+                                    <span className="step-badge">Step 04</span>
+                                </div>
+                                <form className="form-section-booking" onSubmit={handleSubmit}>
+                                    <div className="form-row">
+                                        <div className="form-field">
+                                            <label>Full Name</label>
+                                            <input id="form-name" value={formData.name} onChange={handleChange} placeholder="John Doe" type="text" required />
+                                        </div>
+                                        <div className="form-field">
+                                            <label>Phone</label>
+                                            <input id="form-phone" value={formData.phone} onChange={handleChange} placeholder="+1 (555) 000-0000" type="tel" required />
+                                        </div>
+                                    </div>
+                                    <div className="form-field">
+                                        <label>Email</label>
+                                        <input id="form-email" value={formData.email} onChange={handleChange} placeholder="hello@inkflow.com" type="email" required />
+                                    </div>
+                                    <div className="form-field">
+                                        <label>Project Description</label>
+                                        <textarea id="form-desc" value={formData.desc} onChange={handleChange} placeholder="Tell us about the size, placement, and your idea..." rows="4" required></textarea>
+                                    </div>
+                                    <label className="form-terms">
+                                        <input id="form-terms" checked={formData.terms} onChange={handleChange} type="checkbox" />
+                                        <span>I agree to the <a href="#">booking terms</a> and confirm I am 18+ years of age.</span>
+                                    </label>
+                                    <button disabled={isSubmitting} className="booking-submit-btn" type="submit">
+                                        {isSubmitting ? (
+                                            <>PROCESSING...</>
+                                        ) : (
+                                            <>Confirm Booking</>
+                                        )}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            {/* Toasts */}
+            {toasts.map(toast => (
+                <div key={toast.id} className="booking-toast">
+                    {toast.message}
+                </div>
+            ))}
         </div>
-      </div>
-
-    </div>
-  )
+    )
 }
 
 export default Booking
