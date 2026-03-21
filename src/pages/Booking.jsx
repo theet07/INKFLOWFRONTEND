@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { agendamentoService, clienteService } from '../services/inkflowApi'
+import { formatPhone } from '../utils/formatPhone'
 import './Booking.css'
 
 const Booking = () => {
     const [bookingState, setBookingState] = useState({
-        style: 'Blackwork',
-        artist: 'Sasha K.',
+        style: 'BLACKWORK',
+        artist: 'LUCAS M.',
         day: '12',
-        time: '01:30 PM'
+        time: 'TARDE'
     })
 
     const [formData, setFormData] = useState({
@@ -21,29 +22,58 @@ const Booking = () => {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [toasts, setToasts] = useState([])
 
+    useEffect(() => {
+        const userData = localStorage.getItem('user')
+        if (userData) {
+            try {
+                const user = JSON.parse(userData)
+                if (user && user.id) {
+                    setFormData(prev => ({
+                        ...prev,
+                        name: user.fullName || user.nome || prev.name,
+                        email: user.email || prev.email,
+                        phone: user.telefone || prev.phone
+                    }))
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }, [])
+
     const stylesOptions = [
-        { name: 'Realism', artists: 3, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDPLPjgMK9FYYycsAS-RoGWEouIFm6rwjICxkCo87EQAdpuLrbWMZNZuozsY9Pk6koWfEGbYpWfJc7wisgjFWuMq4QBJDUkN9uLEUDx9e9gYmuE6rJn6IUkFfiZDmbj1UKnbbfsRfCVaJ6NIkN2J4Lzpya4cXxD6nkIrfq-jdoWvoLAr9FH4O_QIIFGwbD6_c-LYYgPgf9CTJV30juolMrK-bVKVzpnmX1iUAbL2nenBGw6E999zhNxGEixCK73hkvd3NY5FD9yYDc' },
-        { name: 'Blackwork', artists: 5, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDkjpYAdUA2_WJ1yDEDzxLuB8OA9lcZsXnz71_aITrlK8oR9E0ga2rObC-6jmmd-FTxPw4Od5XbqFHB7vxXT_gcyk93c5vIPDwujOBaxxlKdXul4529pc-nZB1DEC7tsS4dpGoyB6-6c1VWq7lGZ4rHL77brCGsjUVrnhkAd_OxOtZoNOdVwUJpSGTsdDYenM9sG94cWarP_PIBFZa3PiH_EDIbNKI3pTvUiHjUSJtffrIeKoAlUHkYRHfcd1CsHe8G45KCt_ys1-g' },
-        { name: 'Traditional', artists: 2, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA3Gwkl0DNmMojl1mfs9YSdu7btaax-VOa5Xp17lF4qJHk8SKxgAeBGa48w5-6QR0KdOqExWcgE_PU1NYjmFmTLlLn9Y4U2La0I-kqnLuchA252nAajxD43VJXjlnGFPgZ-Fu8zcQF34nEv640A2VRQs53nCyGRwR3mmL_gEVi77uwkMJFLHFy3brmYCBjQgf-oO_XEdHUJ74QUcm1-XTKBFjFhLICvZrq3yuMWlsbi4ksyh68y_UZjXy_l33WnXPlD3jlaZamx7t4' },
-        { name: 'Geometric', artists: 4, img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBUDQfNIYOBK4IsZokbpwD1uOE5-9jpsPLqD1IpqVeWEw0qisqUHXOg_p7AcQPGA4GebjAPBYtVZDRT5uuNO2Jwb8u8lbixq05FRfoE2IPRoMAI8bRTXRnMHfI2yp2U2kJRftbznZx8g4DvkT5oj6zXorE8YDZT8wr_u0yzZY6-TDGt1-L-WDLGtbFcKMMQ7WStblhFrNPZM8EE9mj6LBzTlziC2Q8PPQB1wB8nCk4ZLbKInG8rpJpAn0gNuk1bmZTi6Jk04NH7AAs' }
+        { name: 'REALISTA', img: '/assets/portifolio_novo/Rosto.webp' },
+        { name: 'BLACKWORK', img: '/assets/portifolio_novo/Caveira.webp' },
+        { name: 'GEEK', img: '/assets/portifolio_novo/HomemDeFerro.webp' },
+        { name: 'ORIENTAL', img: '/assets/portifolio_novo/tigrao.webp' },
+        { name: 'MAORI', img: '/assets/portifolio_novo/Rosa-Dos-Ventos-1.webp' },
+        { name: 'FLORAL', img: '/assets/portifolio_novo/Tattoo-Cobra-Floral.webp' }
     ]
 
     const artistsOptions = [
-        { name: 'Marcos Silva', role: 'Realismo & Blackwork', img: '/assets/portifolio_tatuadores/Tatuador_1.png' },
-        { name: 'Julio Costa', role: 'Geométrico', img: '/assets/portifolio_tatuadores/Tatuador_2.png' },
-        { name: 'Sasha Mendes', role: 'Minimalista & Fine Line', img: '/assets/portifolio_tatuadores/Tatuadora_3.png' },
-        { name: 'Lucas Pereira', role: 'Tradicional', img: '/assets/portifolio_tatuadores/Tatuador_4.png' },
-        { name: 'Nina Ferreira', role: 'Aquarela', img: '/assets/portifolio_tatuadores/Tatuadora_5.png' }
+        { name: 'LUCAS M.', role: 'Especialista Realismo', img: '/assets/portifolio_tatuadores/Tatuador_1.png', specialties: ['REALISTA'] },
+        { name: 'LILLY K.', role: 'Realismo & Fine Line', img: '/assets/portifolio_tatuadores/Tatuadora_3.png', specialties: ['REALISTA'] },
+        { name: 'RAFAEL S.', role: 'Blackwork & Ornamental', img: '/assets/portifolio_tatuadores/Tatuador_2.png', specialties: ['BLACKWORK', 'MAORI'] },
+        { name: 'CAMILA R.', role: 'Fine Line & Floral', img: '/assets/portifolio_tatuadores/Tatuadora_5.png', specialties: ['FLORAL'] },
+        { name: 'ANDRÉ V.', role: 'Oriental & Geek', img: '/assets/portifolio_tatuadores/Tatuador_4.png', specialties: ['ORIENTAL', 'GEEK'] }
     ]
 
     const days = [
-        { day: '1', active: true }, { day: '2', active: true }, { day: '3', active: true }, { day: '4', active: true },
-        { day: '5', active: true }, { day: '6', active: false }, { day: '7', active: true }, { day: '8', active: true },
-        { day: '9', active: true }, { day: '10', active: true }, { day: '11', active: true }, { day: '12', active: true },
-        { day: '13', active: false }, { day: '14', active: true, content: '•', isDot: true }, { day: '15', active: true },
+        { day: '1', active: false }, { day: '2', active: true }, { day: '3', active: true }, { day: '4', active: true },
+        { day: '5', active: true }, { day: '6', active: true }, { day: '7', active: true }, { day: '8', active: false },
+        { day: '9', active: true }, { day: '10', active: true }, { day: '11', active: true }, { day: '12', active: true, content: '12', isDot: false },
+        { day: '13', active: true }, { day: '14', active: true }, { day: '15', active: false }, { day: '16', active: true },
+        { day: '17', active: true }, { day: '18', active: true }, { day: '19', active: true }, { day: '20', active: true },
+        { day: '21', active: true }, { day: '22', active: false }, { day: '23', active: true }, { day: '24', active: true },
+        { day: '25', active: true }, { day: '26', active: true }, { day: '27', active: true }, { day: '28', active: true },
+        { day: '29', active: false }, { day: '30', active: true }, { day: '31', active: true }
     ]
 
-    const timeSlots = ['10:00 AM', '01:30 PM', '04:00 PM']
+    const timeSlots = [
+        { id: 'MANHÃ', label: 'MANHÃ', time: '6h às 12h', icon: 'light_mode' },
+        { id: 'TARDE', label: 'TARDE', time: '12h às 18h', icon: 'sunny' },
+        { id: 'NOITE', label: 'NOITE', time: '18h às 00h', icon: 'dark_mode' }
+    ]
 
     const showToast = (message, type = 'success') => {
         const id = Date.now()
@@ -53,9 +83,16 @@ const Booking = () => {
 
     const handleChange = (e) => {
         const { id, value, type, checked } = e.target;
+        const key = id.replace('form-', '');
+        let finalValue = type === 'checkbox' ? checked : value;
+        
+        if (key === 'phone') {
+            finalValue = formatPhone(value);
+        }
+
         setFormData(prev => ({
             ...prev,
-            [id.replace('form-', '')]: type === 'checkbox' ? checked : value
+            [key]: finalValue
         }));
     }
 
@@ -94,24 +131,24 @@ const Booking = () => {
                 clienteId = clienteResponse.data.id
             }
 
-            const formattedDate = `2024-10-${bookingState.day.padStart(2, '0')}`
-            let [hour, minutePeriod] = bookingState.time.split(':')
-            let [minute, period] = minutePeriod.split(' ')
-            let h = parseInt(hour)
-            if (period === 'PM' && h !== 12) h += 12
-            if (period === 'AM' && h === 12) h = 0
-            const dataHora = `${formattedDate}T${h.toString().padStart(2, '0')}:${minute}:00`
+            const formattedDate = `2026-03-${bookingState.day.padStart(2, '0')}`
+            let isoTime = '12:00:00'
+            if (bookingState.time === 'MANHÃ') isoTime = '09:00:00'
+            if (bookingState.time === 'TARDE') isoTime = '14:00:00'
+            if (bookingState.time === 'NOITE') isoTime = '19:00:00'
+
+            const dataHora = `${formattedDate}T${isoTime}`
 
             const novoAgendamento = {
                 cliente: { id: clienteId },
                 dataHora: dataHora,
-                servico: `${bookingState.style} with ${bookingState.artist}`,
+                servico: `${bookingState.style} com ${bookingState.artist}`,
                 descricao: formData.desc
             }
 
             await agendamentoService.create(novoAgendamento)
 
-            showToast('Booking Confirmed!', 'success')
+            showToast('Agendamento Confirmado!', 'success')
 
             setTimeout(() => {
                 setFormData({ name: '', phone: '', email: '', desc: '', terms: false })
@@ -141,10 +178,10 @@ const Booking = () => {
                 <aside className="booking-sidebar">
                     <div className="step-indicators">
                         {[
-                            { num: 1, label: 'Style Selection' },
-                            { num: 2, label: 'Choose Artist' },
-                            { num: 3, label: 'Date & Time' },
-                            { num: 4, label: 'Details' }
+                            { num: 1, label: 'ESTILO' },
+                            { num: 2, label: 'ARTISTA' },
+                            { num: 3, label: 'DATA & HORÁRIO' },
+                            { num: 4, label: 'SEUS DADOS' }
                         ].map((step) => {
                             let statusClass = '';
                             if (currentStep === step.num) statusClass = 'active';
@@ -159,10 +196,18 @@ const Booking = () => {
                     </div>
 
                     <div className="sidebar-panel">
-                        <h3><span className="material-symbols-outlined panel-icon">schedule</span> Opening Hours</h3>
-                        <div className="info-row"><span>Mon - Fri</span><span>11:00 - 20:00</span></div>
-                        <div className="info-row highlight"><span>Saturday</span><span>10:00 - 22:00</span></div>
-                        <div className="info-row"><span>Sunday</span><span>Closed</span></div>
+                        <h3><span className="material-symbols-outlined panel-icon">schedule</span> Horários</h3>
+                        <div className="info-row"><span>Segunda a Sexta</span><span>9h às 18h</span></div>
+                        <div className="info-row highlight"><span>Sábado</span><span>9h às 16h</span></div>
+                        <div className="info-row"><span>Domingo</span><span>Fechado</span></div>
+                    </div>
+
+                    <div className="sidebar-panel" style={{marginTop: '1.5rem'}}>
+                        <h3 style={{color: '#ff0000'}}><span className="material-symbols-outlined panel-icon">policy</span> Políticas</h3>
+                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>check</span> <span style={{textAlign: 'left'}}>Agendamento com 24h de antecedência</span></div>
+                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>check</span> <span style={{textAlign: 'left'}}>Sinal de 50% para confirmar</span></div>
+                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>check</span> <span style={{textAlign: 'left'}}>Cancelamento até 2h antes</span></div>
+                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>check</span> <span style={{textAlign: 'left'}}>Consulta inicial gratuita</span></div>
                     </div>
                 </aside>
 
@@ -172,24 +217,23 @@ const Booking = () => {
                     <section id="styles-section">
                         <div className="section-header">
                             <div>
-                                <h2>Choose Your Vibe</h2>
-                                <p>Select a style to filter our specialized artists.</p>
+                                <h2>ESCOLHA SEU ESTILO</h2>
+                                <p>Selecione o estilo de tatuagem para seu agendamento.</p>
                             </div>
-                            <span className="step-badge">Step 01 / 04</span>
+                            <span className="step-badge">ETAPA 01 / 04</span>
                         </div>
 
                         <div className="styles-grid">
                             {stylesOptions.map(style => (
                                 <div
                                     key={style.name}
-                                    onClick={() => setBookingState(prev => ({ ...prev, style: style.name }))}
+                                    onClick={() => setBookingState(prev => ({ ...prev, style: prev.style === style.name ? '' : style.name }))}
                                     className={`style-card ${bookingState.style === style.name ? 'selected' : ''}`}
                                 >
                                     <div className="style-card-overlay"></div>
                                     <img src={style.img} alt={style.name} />
                                     <div className="style-card-info">
                                         <h3>{style.name}</h3>
-                                        <span>{style.artists} Artists</span>
                                     </div>
                                     {bookingState.style === style.name && (
                                         <div className="style-checkmark">
@@ -205,28 +249,47 @@ const Booking = () => {
                     <section id="artists-section">
                         <div className="section-header">
                             <div>
-                                <h2>The Masters</h2>
-                                <p>Specialized in Blackwork and Fine Line.</p>
+                                <h2>NOSSOS ARTISTAS</h2>
+                                <p>Escolha o profissional para sua sessão.</p>
                             </div>
-                            <span className="step-badge">Step 02 / 04</span>
+                            <span className="step-badge">ETAPA 02 / 04</span>
                         </div>
 
                         <div className="artists-grid">
-                            {artistsOptions.map(artist => (
-                                <div
-                                    key={artist.name}
-                                    onClick={() => setBookingState(prev => ({ ...prev, artist: artist.name }))}
-                                    className={`artist-card ${bookingState.artist === artist.name ? 'selected' : ''}`}
-                                >
-                                    <div className="artist-avatar">
-                                        <img src={artist.img} alt={artist.name} />
+                            {[...artistsOptions].sort((a, b) => {
+                                if (!bookingState.style) return 0;
+                                const aRec = a.specialties.includes(bookingState.style);
+                                const bRec = b.specialties.includes(bookingState.style);
+                                if (aRec && !bRec) return -1;
+                                if (!aRec && bRec) return 1;
+                                return 0;
+                            }).map(artist => {
+                                const isRecommended = bookingState.style && artist.specialties.includes(bookingState.style);
+                                const isDimmed = bookingState.style && !isRecommended;
+                                const isSelected = bookingState.artist === artist.name;
+
+                                return (
+                                    <div
+                                        key={artist.name}
+                                        onClick={() => setBookingState(prev => ({ ...prev, artist: isSelected ? '' : artist.name }))}
+                                        className={`artist-card ${isSelected ? 'selected' : ''} ${isDimmed ? 'dimmed' : ''}`}
+                                    >
+                                        <div className="artist-avatar">
+                                            <img src={artist.img} alt={artist.name} />
+                                        </div>
+                                        <div className="artist-info">
+                                            <h4>{artist.name}</h4>
+                                            <p>{artist.role}</p>
+                                            {isRecommended && (
+                                                <span className="recommended-badge"><span className="material-symbols-outlined text-xs" style={{fontSize: '12px'}}>check</span> Recomendado</span>
+                                            )}
+                                            {isSelected && (
+                                                <span className="artist-selected-text">ARTISTA SELECIONADO</span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="artist-info">
-                                        <h4>{artist.name}</h4>
-                                        <p>{artist.role}</p>
-                                    </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     </section>
 
@@ -236,24 +299,24 @@ const Booking = () => {
                             {/* Date Selection */}
                             <div className="booking-calendar-wrap">
                                 <div className="section-header">
-                                    <h2>The Session</h2>
-                                    <span className="step-badge">Step 03</span>
+                                    <h2>A SESSÃO</h2>
+                                    <span className="step-badge">ETAPA 03</span>
                                 </div>
                                 <div className="calendar-panel">
                                     <div className="calendar-nav">
                                         <button><span className="material-symbols-outlined">chevron_left</span></button>
-                                        <span>October 2024</span>
+                                        <span>MARÇO DE 2026</span>
                                         <button><span className="material-symbols-outlined">chevron_right</span></button>
                                     </div>
                                     <div className="calendar-weekdays">
-                                        <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+                                        <span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span><span>DOM</span>
                                     </div>
                                     <div className="calendar-days">
                                         <div className="calendar-day empty">28</div><div className="calendar-day empty">29</div><div className="calendar-day empty">30</div><div className="calendar-day empty">31</div>
                                         {days.map((d, i) => (
                                             <div
                                                 key={i}
-                                                onClick={() => d.active && setBookingState(prev => ({ ...prev, day: d.day }))}
+                                                onClick={() => d.active && setBookingState(prev => ({ ...prev, day: prev.day === d.day ? '' : d.day }))}
                                                 className={`calendar-day ${!d.active ? 'disabled' : ''} ${bookingState.day === d.day ? 'selected' : ''}`}
                                             >
                                                 {d.isDot ? d.content : d.day}
@@ -261,15 +324,17 @@ const Booking = () => {
                                         ))}
                                     </div>
                                     <div className="time-slots-section">
-                                        <h4>Available Slots</h4>
+                                        <h4>HORÁRIO PREFERENCIAL</h4>
                                         <div className="time-periods-grid">
-                                            {timeSlots.map(time => (
+                                            {timeSlots.map(ts => (
                                                 <div
-                                                    key={time}
-                                                    onClick={() => setBookingState(prev => ({ ...prev, time }))}
-                                                    className={`time-period ${bookingState.time === time ? 'selected' : ''}`}
+                                                    key={ts.id}
+                                                    onClick={() => setBookingState(prev => ({ ...prev, time: prev.time === ts.id ? '' : ts.id }))}
+                                                    className={`time-period ${bookingState.time === ts.id ? 'selected' : ''}`}
                                                 >
-                                                    <span className="time-period-label">{time}</span>
+                                                    <span className="material-symbols-outlined">{ts.icon}</span>
+                                                    <span className="time-period-label">{ts.label}</span>
+                                                    <span className="time-period-hours">{ts.time}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -280,37 +345,37 @@ const Booking = () => {
                             {/* Form Section */}
                             <div className="booking-details-wrap">
                                 <div className="section-header">
-                                    <h2>Your Detail</h2>
-                                    <span className="step-badge">Step 04</span>
+                                    <h2>SEUS DADOS</h2>
+                                    <span className="step-badge">ETAPA 04</span>
                                 </div>
                                 <form className="form-section-booking" onSubmit={handleSubmit}>
                                     <div className="form-row">
                                         <div className="form-field">
-                                            <label>Full Name</label>
-                                            <input id="form-name" value={formData.name} onChange={handleChange} placeholder="John Doe" type="text" required />
+                                            <label>NOME COMPLETO</label>
+                                            <input id="form-name" value={formData.name} onChange={handleChange} placeholder="João da Silva" type="text" required />
                                         </div>
                                         <div className="form-field">
-                                            <label>Phone</label>
-                                            <input id="form-phone" value={formData.phone} onChange={handleChange} placeholder="+1 (555) 000-0000" type="tel" required />
+                                            <label>TELEFONE</label>
+                                            <input id="form-phone" value={formData.phone} onChange={handleChange} placeholder="(11) 99999-9999" type="tel" required />
                                         </div>
                                     </div>
                                     <div className="form-field">
-                                        <label>Email</label>
-                                        <input id="form-email" value={formData.email} onChange={handleChange} placeholder="hello@inkflow.com" type="email" required />
+                                        <label>EMAIL</label>
+                                        <input id="form-email" value={formData.email} onChange={handleChange} placeholder="nome@exemplo.com" type="email" required />
                                     </div>
                                     <div className="form-field">
-                                        <label>Project Description</label>
-                                        <textarea id="form-desc" value={formData.desc} onChange={handleChange} placeholder="Tell us about the size, placement, and your idea..." rows="4" required></textarea>
+                                        <label>DESCRIÇÃO DO PROJETO</label>
+                                        <textarea id="form-desc" value={formData.desc} onChange={handleChange} placeholder="Descreva sua ideia de tatuagem, tamanho aproximado e local no corpo..." rows="4" required></textarea>
                                     </div>
                                     <label className="form-terms">
                                         <input id="form-terms" checked={formData.terms} onChange={handleChange} type="checkbox" />
-                                        <span>I agree to the <a href="#">booking terms</a> and confirm I am 18+ years of age.</span>
+                                        <span>Concordo com os <a href="#">termos de agendamento</a> e confirmo que sou maior de 18 anos.</span>
                                     </label>
                                     <button disabled={isSubmitting} className="booking-submit-btn" type="submit">
                                         {isSubmitting ? (
-                                            <>PROCESSING...</>
+                                            <>PROCESSANDO...</>
                                         ) : (
-                                            <>Confirm Booking</>
+                                            <><span className="material-symbols-outlined">edit</span> CONFIRMAR AGENDAMENTO</>
                                         )}
                                     </button>
                                 </form>
