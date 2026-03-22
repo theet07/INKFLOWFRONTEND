@@ -23,6 +23,12 @@
     box-sizing: border-box;
 }
 
+*:focus, *:active, *:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
 body {
     font-family: 'Montserrat', sans-serif;
     background: var(--gradient-primary);
