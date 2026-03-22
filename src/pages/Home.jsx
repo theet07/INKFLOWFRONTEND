@@ -11,7 +11,7 @@ const WhatsAppSection = () => {
   const carouselImages = [
     '/assets/images/blackwork-tattoo.jpg',
     '/assets/images/watercolor-tattoo.jpg',
-    '/assets/images/messi-tattoo.jpg',
+    '/assets/images/Mexicana.webp',
     '/assets/images/mandala.jpg',
     '/assets/images/lobo geo.jpg',
     '/assets/images/flor.jpg'
