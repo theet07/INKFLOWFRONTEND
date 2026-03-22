@@ -228,15 +228,82 @@ const Home = () => {
 
   return (
     <div className="home">
-      <section className="hero">
-        <div className="hero-content">
-          <h1 style={{ color: '#D00000' }}>INK FLOW</h1>
-          <p>Transformando pele em arte desde 2025</p>
-          <div style={{ marginTop: '2rem' }}>
-            <Link to="/portfolio" className="btn">Ver Portfólio</Link>
-            <Link to="/agendamento" className="btn btn-outline" style={{ marginLeft: '1rem' }}>Agendar Sessão</Link>
+      <section className="hero-premium">
+        {/* Background Layer (OBSIDIAN GRADIENT & IMAGE) */}
+        <div className="hero-premium-bg">
+          <img 
+            className="hero-bg-img" 
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2HgrD_X_McERv3FG2Oa-bHweJLht4ptjIwL6G4jU1xO66ITOo9oaZt8aPtxVVyK1XOrwfxLQoA3Q2uUyZZ5kYp4AvyzSbnGl8G2xJMEfQkggbBF7tHN73HxgbJuzxtSKA5D4oNcQfaabu3oVB1yynKb0FAU_QR-19Pm3Xy7OV8FI1KtoUEstd-XuREPxn_rm2XTP-hOCMDe-E1mDiJ138xEPNdQLdfTmXXHRMX71d0RQLf558cR_V463SX8zXWZmGOJoxbMfiKz0" 
+            alt="Background" 
+          />
+          <div className="hero-bg-overlay"></div>
+        </div>
+
+        {/* Content Layer */}
+        <div className="hero-premium-content">
+          <div className="hero-premium-grid">
+            
+            {/* Left Side */}
+            <div className="hero-left">
+              <div className="hero-tag">
+                <span>Estética & Permanência</span>
+              </div>
+              
+              <h1 className="hero-title">
+                Transformando <br />
+                <span className="hero-title-highlight">pele em arte</span> <br />
+                desde 2025.
+              </h1>
+              
+              <p className="hero-description">
+                A excelência do traço encontra a profundidade da alma. Bem-vindo à nova era da tatuagem autoral em um ambiente de galeria privada.
+              </p>
+              
+              <div className="hero-actions">
+                <Link to="/agendamento" className="hero-btn-primary">
+                  Reservar Sessão
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>calendar_month</span>
+                </Link>
+                <Link to="/portfolio" className="hero-btn-secondary">
+                  Galeria
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>collections</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Side */}
+            <div className="hero-right">
+              <div className="hero-image-wrapper">
+                <div className="hero-glow"></div>
+                <div className="hero-image-container">
+                  <img 
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBT7RWi1KEETJnr5Jvu-SKqg9mIWn8mOV5isj4WNfVbUhUg__m6dr56bs-a9Z6zO-aKgqmVJ7_9i7TOL1f3Wq21_CjZNXtUj-LxkhkcJH84ALgRknZj7PQbGGyJv3eNkeksDLMBf3mXnKFvhIOlZ3SuEsHa5PzEZdfWqrqNUwyXx5k3B3k_Vp8Qb9R5qM9rsc8_uQ2SS-KdZxKne_Xh33ehxMM_eQEt2EHPy1b0Tn9Wx4m6YVRc4_rRZzS8Fi8W4TbmSf5P_atJGUA" 
+                    alt="Destaque Neo-Traditional" 
+                    className="hero-main-img" 
+                  />
+                  
+                  <div className="hero-floating-card">
+                    <p className="hero-floating-tag">Destaque do Mês</p>
+                    <h3 className="hero-floating-title">Neo-Traditional Noir</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
+        
+        {/* Scroll Indicator */}
+        <button 
+          className="hero-scroll-btn"
+          onClick={() => {
+            document.querySelector('.experience-section')?.scrollIntoView({ behavior: 'smooth' })
+          }}
+        >
+          <span>SCROLL</span>
+          <div className="hero-scroll-line"></div>
+        </button>
+
       </section>
 
       <section className="section" style={{ paddingTop: '12rem', paddingBottom: '12rem', display: 'flex', alignItems: 'center', minHeight: '100vh' }}>
