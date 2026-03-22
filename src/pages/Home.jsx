@@ -547,7 +547,7 @@ const Home = () => {
                 fontWeight: 'bold',
                 color: 'white',
                 marginBottom: '0.5rem'
-              }}>1.500<span style={{ color: 'var(--accent-red)' }}>+</span></div>
+              }}>1.200<span style={{ color: 'var(--accent-red)' }}>+</span></div>
               <p style={{
                 color: '#ccc',
                 fontSize: '0.9rem',
@@ -575,7 +575,7 @@ const Home = () => {
                 fontWeight: 'bold',
                 color: 'white',
                 marginBottom: '0.5rem'
-              }}>1.200<span style={{ color: 'var(--accent-red)' }}>+</span></div>
+              }}>1.500<span style={{ color: 'var(--accent-red)' }}>+</span></div>
               <p style={{
                 color: '#ccc',
                 fontSize: '0.9rem',
