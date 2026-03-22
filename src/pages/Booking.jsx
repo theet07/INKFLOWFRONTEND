@@ -373,7 +373,7 @@ const Booking = () => {
                                         <label>DESCRIÇÃO DO PROJETO</label>
                                         <textarea id="form-desc" value={formData.desc} onChange={handleChange} placeholder="Descreva sua ideia de tatuagem, tamanho aproximado e local no corpo..." rows="4" required></textarea>
                                     </div>
-                                    <label className="form-terms">
+                                    <label className="form-terms" onClick={(e) => { if (!formData.terms) { e.preventDefault(); setShowTerms(true); } }}>
                                         <input id="form-terms" checked={formData.terms} onChange={handleChange} type="checkbox" />
                                         <span>Concordo com os <a href="#" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowTerms(true); }}>termos de agendamento</a> e confirmo que sou maior de 18 anos.</span>
                                     </label>

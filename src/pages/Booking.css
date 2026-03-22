@@ -603,6 +603,8 @@
   height: 16px;
   margin-top: 2px;
   accent-color: var(--accent-red, #ff0000);
+  outline: none;
+  box-shadow: none;
 }
 
 .form-terms span {
