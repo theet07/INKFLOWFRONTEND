@@ -252,7 +252,7 @@ const Home = () => {
               <h1 className="hero-title">
                 Transformando <br />
                 <span className="hero-title-highlight">pele em arte</span> <br />
-                desde 2025.
+                desde 2015.
               </h1>
               
               <p className="hero-description">
