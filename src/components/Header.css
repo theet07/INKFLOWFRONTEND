@@ -1,8 +1,5 @@
 header {
-    background: linear-gradient(135deg, rgba(13, 13, 13, 0.4) 0%, rgba(26, 26, 26, 0.3) 50%, rgba(38, 38, 38, 0.2) 100%), url('/assets/images/lalala.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background: var(--primary-dark);
     padding: 1rem 0;
     position: fixed;
     width: 100%;
