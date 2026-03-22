@@ -5,10 +5,10 @@ import './Booking.css'
 
 const Booking = () => {
     const [bookingState, setBookingState] = useState({
-        style: 'BLACKWORK',
-        artist: 'LUCAS M.',
-        day: '12',
-        time: 'TARDE'
+        style: '',
+        artist: '',
+        day: '',
+        time: ''
     })
 
     const [formData, setFormData] = useState({
@@ -21,6 +21,7 @@ const Booking = () => {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [toasts, setToasts] = useState([])
+    const [showTerms, setShowTerms] = useState(false)
 
     useEffect(() => {
         const userData = localStorage.getItem('user')
@@ -70,9 +71,9 @@ const Booking = () => {
     ]
 
     const timeSlots = [
-        { id: 'MANHÃ', label: 'MANHÃ', time: '6h às 12h', icon: 'light_mode' },
-        { id: 'TARDE', label: 'TARDE', time: '12h às 18h', icon: 'sunny' },
-        { id: 'NOITE', label: 'NOITE', time: '18h às 00h', icon: 'dark_mode' }
+        { id: 'MANHÃ', label: 'MANHÃ', time: '6h às 12h', icon: 'light_mode', customSvg: false },
+        { id: 'TARDE', label: 'TARDE', time: '12h às 18h', icon: null, customSvg: true },
+        { id: 'NOITE', label: 'NOITE', time: '18h às 00h', icon: 'dark_mode', customSvg: false }
     ]
 
     const showToast = (message, type = 'success') => {
@@ -178,16 +179,13 @@ const Booking = () => {
                 <aside className="booking-sidebar">
                     <div className="step-indicators">
                         {[
-                            { num: 1, label: 'ESTILO' },
-                            { num: 2, label: 'ARTISTA' },
-                            { num: 3, label: 'DATA & HORÁRIO' },
-                            { num: 4, label: 'SEUS DADOS' }
+                            { num: 1, label: 'ESTILO', done: !!bookingState.style },
+                            { num: 2, label: 'ARTISTA', done: !!bookingState.artist },
+                            { num: 3, label: 'DATA & HORÁRIO', done: !!bookingState.day && !!bookingState.time },
+                            { num: 4, label: 'SEUS DADOS', done: !!formData.name && !!formData.phone && !!formData.email && !!formData.desc && formData.terms }
                         ].map((step) => {
-                            let statusClass = '';
-                            if (currentStep === step.num) statusClass = 'active';
-                            if (currentStep > step.num) statusClass = 'completed';
                             return (
-                                <div key={step.num} className={`step-indicator ${statusClass}`}>
+                                <div key={step.num} className={`step-indicator ${step.done ? 'completed' : ''}`}>
                                     <div className="step-number">{step.num}</div>
                                     <span className="step-label">{step.label}</span>
                                 </div>
@@ -332,7 +330,15 @@ const Booking = () => {
                                                     onClick={() => setBookingState(prev => ({ ...prev, time: prev.time === ts.id ? '' : ts.id }))}
                                                     className={`time-period ${bookingState.time === ts.id ? 'selected' : ''}`}
                                                 >
-                                                    <span className="material-symbols-outlined">{ts.icon}</span>
+                                                    {ts.customSvg ? (
+                                                        <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M21,12h-3c0-1.3-0.4-2.5-1.1-3.5l0.8-0.8c0.4-0.4,0.4-1,0-1.4s-1-0.4-1.4,0l-0.8,0.8c-0.7-0.5-1.6-0.9-2.5-1V5c0-0.6-0.4-1-1-1s-1,0.4-1,1v1.1c-0.9,0.2-1.7,0.5-2.5,1L7.7,6.3c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l0.8,0.8C6.4,9.5,6,10.7,6,12H3c-0.6,0-1,0.4-1,1s0.4,1,1,1h4.1h9.8H21c0.6,0,1-0.4,1-1S21.6,12,21,12z M8,12c0-2.2,1.8-4,4-4s4,1.8,4,4H8z"/>
+                                                            <path d="M15,15H9c-0.6,0-1,0.4-1,1s0.4,1,1,1h6c0.6,0,1-0.4,1-1S15.6,15,15,15z"/>
+                                                            <path d="M13,20h-2c-0.6,0-1-0.4-1-1s0.4-1,1-1h2c0.6,0,1,0.4,1,1S13.6,20,13,20z"/>
+                                                        </svg>
+                                                    ) : (
+                                                        <span className="material-symbols-outlined">{ts.icon}</span>
+                                                    )}
                                                     <span className="time-period-label">{ts.label}</span>
                                                     <span className="time-period-hours">{ts.time}</span>
                                                 </div>
@@ -369,7 +375,7 @@ const Booking = () => {
                                     </div>
                                     <label className="form-terms">
                                         <input id="form-terms" checked={formData.terms} onChange={handleChange} type="checkbox" />
-                                        <span>Concordo com os <a href="#">termos de agendamento</a> e confirmo que sou maior de 18 anos.</span>
+                                        <span>Concordo com os <a href="#" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowTerms(true); }}>termos de agendamento</a> e confirmo que sou maior de 18 anos.</span>
                                     </label>
                                     <button disabled={isSubmitting} className="booking-submit-btn" type="submit">
                                         {isSubmitting ? (
@@ -384,6 +390,48 @@ const Booking = () => {
                     </section>
                 </div>
             </div>
+
+            {/* Modal de Termos */}
+            {showTerms && (
+                <div className="terms-modal-overlay" onClick={() => setShowTerms(false)}>
+                    <div className="terms-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="terms-modal-header">
+                            <h2>TERMOS DE AGENDAMENTO</h2>
+                            <button className="terms-modal-close" onClick={() => setShowTerms(false)}>
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div className="terms-modal-body">
+                            <h3>1. Agendamento</h3>
+                            <p>O agendamento deve ser realizado com no mínimo <strong>24 horas de antecedência</strong>. Agendamentos feitos com menos de 24h estão sujeitos à disponibilidade do artista.</p>
+
+                            <h3>2. Confirmação</h3>
+                            <p>Para confirmar seu agendamento, é necessário o pagamento de um <strong>sinal de 50% do valor estimado</strong> da sessão. O sinal não é reembolsável em caso de não comparecimento sem aviso prévio.</p>
+
+                            <h3>3. Cancelamento</h3>
+                            <p>O cancelamento pode ser feito <strong>até 2 horas antes</strong> do horário agendado sem perda do sinal. Cancelamentos após esse prazo resultarão na perda do valor do sinal.</p>
+
+                            <h3>4. Atrasos</h3>
+                            <p>Toleramos um atraso máximo de <strong>15 minutos</strong>. Após esse período, o agendamento poderá ser cancelado e o sinal não será devolvido.</p>
+
+                            <h3>5. Consulta Inicial</h3>
+                            <p>A <strong>consulta inicial é gratuita</strong> e pode ser realizada presencialmente ou por meio dos nossos canais digitais para alinhar sua ideia com o artista.</p>
+
+                            <h3>6. Idade Mínima</h3>
+                            <p>É obrigatório ter <strong>18 anos ou mais</strong> para realizar uma tatuagem. Menores de idade não serão atendidos, mesmo com autorização dos responsáveis.</p>
+
+                            <h3>7. Cuidados Pós-Sessão</h3>
+                            <p>O estúdio fornecerá orientações de cuidados pós-tatuagem. O não cumprimento dessas orientações pode comprometer o resultado final, e o estúdio não se responsabiliza por danos causados por negligência do cliente.</p>
+
+                            <h3>8. Saúde</h3>
+                            <p>O cliente deve informar condições de saúde relevantes (alergias, doenças de pele, uso de medicamentos, etc.) antes da sessão. O estúdio se reserva o direito de recusar o atendimento caso julgue haver risco à saúde do cliente.</p>
+                        </div>
+                        <div className="terms-modal-footer">
+                            <button className="terms-accept-btn" onClick={() => { setShowTerms(false); setFormData(prev => ({ ...prev, terms: true })); }}>LI E ACEITO OS TERMOS</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Toasts */}
             {toasts.map(toast => (
