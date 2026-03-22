@@ -1,31 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { clienteService } from '../services/inkflowApi'
-import './Profile.css' // We import the custom scrollbar and animation CSS here
+import './Profile.css'
 
 const Toast = ({ message, icon, onExit }) => {
   const [isExiting, setIsExiting] = useState(false)
 
   useEffect(() => {
-    // Start exit animation after 2.7s
-    const exitTimer = setTimeout(() => {
-      setIsExiting(true)
-    }, 2700)
-    
-    // Actually remove the component after 3s total
-    const removeTimer = setTimeout(() => {
-      onExit()
-    }, 3000)
-
-    return () => {
-      clearTimeout(exitTimer)
-      clearTimeout(removeTimer)
-    }
+    const exitTimer = setTimeout(() => setIsExiting(true), 2700)
+    const removeTimer = setTimeout(() => onExit(), 3000)
+    return () => { clearTimeout(exitTimer); clearTimeout(removeTimer) }
   }, [onExit])
 
   return (
-    <div className={`flex items-center gap-3 px-6 py-4 bg-[#121212] border border-white/10 text-white font-bold tracking-widest uppercase text-[10px] rounded shadow-2xl ${isExiting ? 'toast-exit' : 'toast-enter'}`}>
-      <span className="material-symbols-outlined text-[#ff0000]">{icon}</span>
+    <div className={`p-toast ${isExiting ? 'toast-exit' : 'toast-enter'}`}>
+      <span className="material-symbols-outlined p-toast-icon">{icon}</span>
       <span>{message}</span>
     </div>
   )
@@ -35,96 +23,60 @@ const Profile = () => {
   const navigate = useNavigate()
   const user = JSON.parse(localStorage.getItem('user') || '{}')
   
-  // Custom states for the new design
   const [toasts, setToasts] = useState([])
   const [modal, setModal] = useState({ isOpen: false, title: '', content: null, isImage: false })
 
-  // Ensure this page is only accessible if logged in
   useEffect(() => {
-    if (!user.email) {
-      navigate('/login')
-    }
+    if (!user.email) navigate('/login')
   }, [user.email, navigate])
 
   if (!user.email) return null
 
-  // --- Helpers ---
   const showToast = (message, icon = 'info') => {
     const id = Date.now() + Math.random()
     setToasts(prev => [...prev, { id, message, icon }])
   }
 
-  const removeToast = (id) => {
-    setToasts(prev => prev.filter(t => t.id !== id))
-  }
+  const removeToast = (id) => setToasts(prev => prev.filter(t => t.id !== id))
+  const openModal = (title, content, isImage = false) => setModal({ isOpen: true, title, content, isImage })
+  const closeModal = () => setModal(prev => ({ ...prev, isOpen: false }))
 
-  const openModal = (title, content, isImage = false) => {
-    setModal({ isOpen: true, title, content, isImage })
-  }
-
-  const closeModal = () => {
-    // We add a slight delay to allow exit animations if we want, or just hide immediately.
-    setModal(prev => ({ ...prev, isOpen: false }))
-  }
-
-  // --- Handlers ---
   const handleAction = (action) => {
     switch(action) {
-      case 'edit_profile':
-        showToast('Abrindo editor de perfil...', 'edit')
-        break
-      case 'share':
+      case 'edit_profile': showToast('Abrindo editor de perfil...', 'edit'); break;
+      case 'share': 
         navigator.clipboard.writeText('inkflow.com/perfil/' + (user.nome?.replace(/\s+/g, '-').toLowerCase() || ''))
         showToast('Link da Galeria Copiado!', 'content_copy')
-        break
-      case 'notifications':
-        showToast('Você tem 0 novas notificações', 'notifications')
-        break
-      case 'settings':
-        showToast('Abrindo configurações...', 'settings')
-        break
-      case 'chat_marcus':
-        showToast('Abrindo chat com Marcus Vane...', 'chat')
-        break
-      case 'chat_elena':
-        showToast('Abrindo chat com Elena K...', 'chat')
-        break
+        break;
+      case 'chat_marcus': showToast('Abrindo chat com Marcus Vane...', 'chat'); break;
+      case 'chat_elena': showToast('Abrindo chat com Elena K...', 'chat'); break;
       case 'referral':
-        const code = "INK-ALEX-2024"
-        navigator.clipboard.writeText(code).then(() => {
-          showToast('Código de indicação copiado!', 'loyalty')
-        })
-        break
-      case 'logout':
-        localStorage.removeItem('user')
-        navigate('/login')
-        break
-      default:
-        break
+        navigator.clipboard.writeText("INK-ALEX-2024").then(() => showToast('Código de indicação copiado!', 'loyalty'))
+        break;
+      default: break;
     }
   }
 
-  // Modals Content Map
   const modalData = {
     'session_details': {
       title: 'Detalhes da Sessão',
       content: (
-        <div className="space-y-4">
-          <div className="p-4 bg-white/5 rounded-lg border border-[#ff0000]/20">
-            <h4 className="text-[#ff0000] font-bold uppercase tracking-widest text-xs mb-1">Projeto</h4>
-            <p className="text-white text-lg font-black">Conclusão de Braço (Parte 3)</p>
+        <div className="p-modal-stack">
+          <div className="p-modal-card border-red">
+            <h4>Projeto</h4>
+            <p>Conclusão de Braço (Parte 3)</p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-white/5 rounded-lg">
-              <span className="block text-slate-500 text-[10px] uppercase font-bold mb-1">Data & Hora</span>
-              <span className="text-white">24 Out, 2024<br/>14:00</span>
+          <div className="p-modal-grid">
+            <div className="p-modal-card">
+              <span>Data & Hora</span>
+              <strong>24 Out, 2024<br/>14:00</strong>
             </div>
-            <div className="p-4 bg-white/5 rounded-lg">
-              <span className="block text-slate-500 text-[10px] uppercase font-bold mb-1">Artista</span>
-              <span className="text-white">Marcus Vane</span>
+            <div className="p-modal-card">
+              <span>Artista</span>
+              <strong>Marcus Vane</strong>
             </div>
           </div>
-          <p className="text-xs text-slate-400 mt-4 italic">Por favor, chegue com 15 minutos de antecedência. Certifique-se de ter feito uma boa refeição e se mantenha hidratado.</p>
+          <p className="p-modal-note">Por favor, chegue com 15 minutos de antecedência. Certifique-se de ter feito uma boa refeição e se mantenha hidratado.</p>
         </div>
       )
     },
@@ -132,19 +84,13 @@ const Profile = () => {
       title: 'Solicitar Remarcação',
       content: (
         <>
-          <p className="mb-4 text-slate-300">Selecione um motivo para remarcar sua sessão com <strong>Elena K.</strong></p>
-          <select className="w-full bg-black border border-white/20 rounded p-3 text-white mb-4 outline-none focus:border-[#ff0000]">
+          <p className="p-modal-text">Selecione um motivo para remarcar sua sessão com <strong>Elena K.</strong></p>
+          <select className="p-modal-select">
             <option>Problemas de Saúde</option>
             <option>Conflito de Horário</option>
             <option>Preciso de mais tempo para me preparar</option>
           </select>
-          <button 
-            className="w-full bg-[#ff0000] text-white font-black uppercase text-xs tracking-widest px-6 py-3 rounded hover:bg-red-700 transition-all"
-            onClick={() => {
-              showToast('Solicitação enviada com sucesso!', 'check_circle')
-              closeModal()
-            }}
-          >
+          <button className="p-btn-primary" onClick={() => { showToast('Solicitação enviada com sucesso!', 'check_circle'); closeModal(); }}>
             Enviar Solicitação
           </button>
         </>
@@ -153,7 +99,7 @@ const Profile = () => {
     'guide_1': {
       title: 'Guia: Primeiras 24 Horas',
       content: (
-        <ul className="space-y-3 list-disc pl-5 text-slate-300">
+        <ul className="p-modal-list">
           <li>Deixe o curativo/plástico pelo tempo especificado pelo seu artista (geralmente 2-4 horas).</li>
           <li>Lave as mãos cuidadosamente antes de remover o curativo.</li>
           <li>Lave suavemente a tatuagem com água morna e sabonete antibacteriano sem fragrância. Não esfregue.</li>
@@ -166,8 +112,8 @@ const Profile = () => {
       title: 'Lavar & Proteger',
       content: (
         <>
-          <p className="mb-3 text-slate-300">Para os dias 2-14, siga esta rotina com cuidado:</p>
-          <ul className="space-y-3 list-disc pl-5 text-slate-300">
+          <p className="p-modal-text">Para os dias 2-14, siga esta rotina com cuidado:</p>
+          <ul className="p-modal-list">
             <li>Lave sua tatuagem 2-3 vezes ao dia usando mãos limpas e sabonete neutro e sem cheiro.</li>
             <li>Mude para uma loção sem fragrância após o dia 3. Aplique uma camada muito fina.</li>
             <li>A tatuagem vai começar a descamar e soltar casquinhas. <strong>NÃO CUTUQUE NEM COCE.</strong></li>
@@ -180,12 +126,12 @@ const Profile = () => {
       title: 'Cuidados a Longo Prazo',
       content: (
         <>
-          <p className="mb-3 text-slate-300">Como manter sua tinta vibrante por anos:</p>
-          <ul className="space-y-3 list-disc pl-5 text-slate-300">
+          <p className="p-modal-text">Como manter sua tinta vibrante por anos:</p>
+          <ul className="p-modal-list">
             <li>Sempre aplique protetor solar FPS 50+ quando expor sua tatuagem à luz solar direta.</li>
             <li>Mantenha a pele hidratada diariamente após o banho.</li>
             <li>Mantenha-se hidratado! Pele saudável significa tatuagens com aparência saudável.</li>
-            <li>Evite imersão prolongada (piscinas, mar) até que a tatuagem esteja 100% totalmente cicatrizada (geralmente 3-4 semanas).</li>
+            <li>Evite imersão prolongada (piscinas, mar) até que a tatuagem esteja 100% totalmente cicatrizada.</li>
           </ul>
         </>
       )
@@ -193,292 +139,209 @@ const Profile = () => {
   }
 
   return (
-    <div className="profile-page-root bg-[#000000] text-slate-100 font-display min-h-screen">
-      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+    <div className="profile-page">
+      <main className="profile-main">
         
-        <main className="flex-1 px-6 pt-28 pb-8 lg:px-20 max-w-[1400px] mx-auto w-full">
-          {/* Profile Header Section */}
-          <section className="mb-10 flex flex-col md:flex-row gap-8 items-center md:items-end">
-            <div className="relative">
-              <div className="size-32 md:size-40 rounded-full border-4 border-[#ff0000] overflow-hidden bg-[#1a1a1a] flex items-center justify-center text-5xl font-black">
-                {user.nome?.charAt(0)?.toUpperCase()}
-              </div>
-              <div className="absolute bottom-1 right-1 bg-[#ff0000] text-black size-8 rounded-full flex items-center justify-center border-4 border-black">
-                <span className="material-symbols-outlined text-sm font-bold">verified</span>
-              </div>
-            </div>
-            <div className="flex-1 text-center md:text-left">
-              <p className="text-[#ff0000] font-bold uppercase tracking-[0.2em] text-xs mb-2">Membro Desde 2024</p>
-              <h1 className="text-white text-4xl md:text-5xl font-black italic uppercase tracking-tighter leading-none mb-4">{user.nome || 'Visitante'}</h1>
-              <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                <button 
-                  className="bg-[#ff0000] text-white font-black uppercase text-xs tracking-widest px-6 py-3 rounded hover:bg-red-700 transition-all flex items-center gap-2" 
-                  onClick={() => handleAction('edit_profile')}
-                >
-                  <span className="material-symbols-outlined text-sm">edit</span> Editar Perfil
-                </button>
-                <button 
-                  className="bg-white/10 text-white font-black uppercase text-xs tracking-widest px-6 py-3 rounded hover:bg-white/20 transition-all" 
-                  onClick={() => handleAction('share')}
-                >
-                  Compartilhar Galeria
-                </button>
-              </div>
-            </div>
-            
-            {/* Stats Grid */}
-            <div className="flex gap-4 w-full md:w-auto">
-              <div className="flex-1 md:w-28 flex flex-col items-center justify-center p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors cursor-default">
-                <span className="text-3xl font-black text-[#ff0000]">3</span>
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Sessões</span>
-              </div>
-              <div className="flex-1 md:w-28 flex flex-col items-center justify-center p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors cursor-default">
-                <span className="text-3xl font-black text-[#ff0000]">2</span>
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Artistas</span>
-              </div>
-              <div className="flex-1 md:w-28 flex flex-col items-center justify-center p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors cursor-default">
-                <span className="text-3xl font-black text-[#ff0000]">12</span>
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Tattoos</span>
-              </div>
-            </div>
-          </section>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column: Upcoming Sessions */}
-            <div className="lg:col-span-2 space-y-8">
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-white text-xl font-black uppercase tracking-tight flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#ff0000]">calendar_today</span> Próximas Sessões
-                  </h3>
-                  <a className="text-[#ff0000] text-xs font-bold uppercase tracking-widest hover:underline cursor-pointer">Ver Todas</a>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Session Card 1 */}
-                  <div className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-[#ff0000]/50 transition-all">
-                    <div className="h-32 bg-cover bg-center" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuC9rOn7CCrNd8SAovoAv1ZigtDS0Od507CHUKiPbsxuTfYsJWM3If1GqWedZgpjgYYfhKdSjCQq7-87NdVTW59__Tq43b1BTl9vPrURsZbiJbZuKV2KU8pU7jguvyKnW89VI1_D0S_wtcHhYksnayKzrjdWj5Rkaj4IEO_eXiI62o3tg8lPSNmsSmmp0phPahBZlgnJ4BqhWZKcuXmZfERS-ITHWejaw8jiJa2IU33vNimIJEqZc0ncXPwGNNMVa0VPTMhQwTnWt44")' }}></div>
-                    <div className="p-5">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h4 className="text-white font-bold text-lg uppercase leading-tight">Conclusão de Braço</h4>
-                          <p className="text-slate-400 text-sm">com <span className="text-[#ff0000] font-semibold">Marcus Vane</span></p>
-                        </div>
-                        <div className="bg-[#ff0000] text-white text-[10px] font-black px-2 py-1 rounded">24 OUT</div>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs text-slate-400 font-medium mb-6">
-                        <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">schedule</span> 14:00</span>
-                        <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">hourglass_empty</span> 4 Horas</span>
-                      </div>
-                      <button 
-                        className="w-full py-2 border border-[#ff0000] text-[#ff0000] group-hover:bg-[#ff0000] group-hover:text-white transition-all text-xs font-black uppercase tracking-widest rounded"
-                        onClick={() => openModal(modalData['session_details'].title, modalData['session_details'].content)}
-                      >
-                        Detalhes da Sessão
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Session Card 2 */}
-                  <div className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-[#ff0000]/50 transition-all">
-                    <div className="h-32 bg-cover bg-center" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCcbv1GcOVz1nvrRNkIc02e--3wJSmFfT6n_5cb4cxcI7Zf_S0tiIqpkW9Fz2DKgY_R5gX4J8aOn3MVxNoyMz5X_coZy2CH3F7t3umRa9kRyZ1FhNDnNBXRG2lEh3G2C3B7IWR6NVAcWmKKrApQIuJQx8Xp9t8vHsmpS-KKMgTRMx8m-v9Otxs1shCvhiSiaiQ8AsAeXDsVnto_-Zie35a5vBnB2hE3dQ9I3VAFHMFPI-n0TyjfLXgfn82e2k7fYbfe1hgGwKy2lAU")' }}></div>
-                    <div className="p-5">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h4 className="text-white font-bold text-lg uppercase leading-tight">Ombro Neo-Trad</h4>
-                          <p className="text-slate-400 text-sm">com <span className="text-[#ff0000] font-semibold">Elena K.</span></p>
-                        </div>
-                        <div className="bg-white/10 text-slate-300 text-[10px] font-black px-2 py-1 rounded uppercase">12 NOV</div>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs text-slate-400 font-medium mb-6">
-                        <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">schedule</span> 10:30</span>
-                        <span className="flex items-center gap-1"><span className="material-symbols-outlined text-sm">hourglass_empty</span> 3 Horas</span>
-                      </div>
-                      <button 
-                        className="w-full py-2 bg-white/10 text-white text-xs font-black uppercase tracking-widest rounded transition-all group-hover:bg-transparent group-hover:border group-hover:border-white/20 group-hover:text-white/60"
-                        onClick={() => openModal(modalData['reschedule'].title, modalData['reschedule'].content)}
-                      >
-                        Remarcar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Recent Artwork Grid */}
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-white text-xl font-black uppercase tracking-tight flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#ff0000]">auto_awesome_motion</span> Minha Coleção
-                  </h3>
-                  <a className="text-[#ff0000] text-xs font-bold uppercase tracking-widest hover:underline cursor-pointer">Galeria Completa</a>
-                </div>
-                
-                <div className="flex flex-wrap gap-3 lg:gap-4">
-                  {[
-                    "https://lh3.googleusercontent.com/aida-public/AB6AXuCgpSHeNZxNCBjFuwnX1grKnlvGCEIFPHBleVd9QZTpx3vEIsiV1MGv-ASSulImMPB_zXvZXttJdMwh8uzDZM5ps4Yi2OQKO4PzxN2mauqxXuVCfb5Lbo0TdkltagkiKzSs9GAntw92Ly4rfEYalbLoTRRJRB5DZ9zDQwP03MzXhpjQ6tXso6S6ZM-iIRtz6buaYssdh4Erd3go-k_03GVuiriiT4IvN0uBahVN1exHgSmXGrwfdeCyI-cl1VHMgLTelVWGUJ3MHvw",
-                    "https://lh3.googleusercontent.com/aida-public/AB6AXuDYONo8UZd2SE6PPRGa7zoldUR4JzD0CgU8Qzk9Vn0VV8Jv5fUg7fQfEpXmQiNbD4OMsAFKOMwMAH__8UX4OEBBRWN_Nql_e3ahKim-oYdVZRsbTn6eChRhSxKgYrlTpifqua-DUZEE1I_9yvyo0w21ahzbD6QEid0qMBMjFPbsQUYv4DDlpuOz2Oygl_zvrpKkLGFkDGayGktYs05J6AtgUZ18pmnd_wsgDs_o0MCurIiOQLBErwCwBEoJVP3Aix2jwXf_OyoFdSo",
-                    "https://lh3.googleusercontent.com/aida-public/AB6AXuATT6xdFVuG_lgYyop6RighNb1AX46na3HdnXJcSHhK0hKQH-TI_yTEcoT3z1qOcnuSzqPLc9qtP2bhx7uSc8qVlFbykackNDQhggwbymURTcpsmYqp_P4nj83xLsmbRCDcdt-4ixMqZ5lRXPJrk61U1Kg6Z75Fpmzt8g0WK9_8JxghbG8HVUrCv77KZLi3aMbg9wTKJyll7I-DRtdmpxsjJCgG9kqcjA-DdtLvJhy2avvFN4--PoI0e5WyUxRApzFvXHM9DrVQtOk",
-                    "https://lh3.googleusercontent.com/aida-public/AB6AXuA-LLnq3e7wmZa8GGBC7AYSPNaNsyX-5sOJv0BLpjazg2f7K0EYywM4LzI4Keq6g6-Toh2o7Q1rr_oWgkoWE0Qj-1hdis3PTMyYrdrv22XO421cgYaUtBqivyMiTZiDwTA6CEF9hPFVU-ZYBGf0-W64yDAhcPJnx4q_hHLNcqlXaPXSRgXTufb_87ZV-FGT5fxVgULZCTaK12wnirBEq9juG-yIXC1C9TRnvKwkw5GQlmo_BX2fXWHwYntlxIFQfMQuU8HsrmZZC9U"
-                  ].map((src, i) => (
-                    <div 
-                      key={i}
-                      className="w-[140px] md:w-[160px] lg:w-[180px] xl:w-[200px] flex-shrink-0 aspect-[4/5] bg-white/5 rounded-xl overflow-hidden group relative cursor-pointer"
-                      onClick={() => openModal('Visualização', <img src={src} className="w-full h-auto rounded-lg mx-auto" style={{ maxHeight: '70vh', objectFit: 'contain' }} />, true)}
-                    >
-                      <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src={src} alt="Tattoo Gallery" />
-                      <div className="absolute inset-0 bg-[#ff0000]/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span className="material-symbols-outlined text-white">zoom_in</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Care Guides & Artists */}
-            <div className="space-y-8">
-              {/* Care Guides */}
-              <div className="bg-[#ff0000]/5 border border-[#ff0000]/20 rounded-2xl p-6">
-                <h3 className="text-white text-lg font-black uppercase tracking-tight mb-4 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#ff0000]">medical_services</span> Guias de Cuidados
-                </h3>
-                <div className="space-y-3">
-                  <div 
-                    className="p-4 bg-black/40 border border-white/5 rounded-xl flex items-center gap-4 group cursor-pointer hover:border-[#ff0000]/40 transition-all" 
-                    onClick={() => openModal(modalData['guide_1'].title, modalData['guide_1'].content)}
-                  >
-                    <div className="size-10 bg-[#ff0000]/10 rounded-lg flex items-center justify-center text-[#ff0000]">
-                      <span className="material-symbols-outlined">water_drop</span>
-                    </div>
-                    <div className="flex-1">
-                      <h5 className="text-white text-sm font-bold uppercase leading-none mb-1">Primeiras 24 Horas</h5>
-                      <p className="text-slate-400 text-[10px]">Lidando com plasma e plástico</p>
-                    </div>
-                    <span className="material-symbols-outlined text-slate-500 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                  </div>
-                  
-                  <div 
-                    className="p-4 bg-black/40 border border-white/5 rounded-xl flex items-center gap-4 group cursor-pointer hover:border-[#ff0000]/40 transition-all" 
-                    onClick={() => openModal(modalData['guide_2'].title, modalData['guide_2'].content)}
-                  >
-                    <div className="size-10 bg-[#ff0000]/10 rounded-lg flex items-center justify-center text-[#ff0000]">
-                      <span className="material-symbols-outlined">soap</span>
-                    </div>
-                    <div className="flex-1">
-                      <h5 className="text-white text-sm font-bold uppercase leading-none mb-1">Lavar & Proteger</h5>
-                      <p className="text-slate-400 text-[10px]">Tipos de sabonete e hidratação</p>
-                    </div>
-                    <span className="material-symbols-outlined text-slate-500 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                  </div>
-                  
-                  <div 
-                    className="p-4 bg-black/40 border border-white/5 rounded-xl flex items-center gap-4 group cursor-pointer hover:border-[#ff0000]/40 transition-all" 
-                    onClick={() => openModal(modalData['guide_3'].title, modalData['guide_3'].content)}
-                  >
-                    <div className="size-10 bg-[#ff0000]/10 rounded-lg flex items-center justify-center text-[#ff0000]">
-                      <span className="material-symbols-outlined">sunny</span>
-                    </div>
-                    <div className="flex-1">
-                      <h5 className="text-white text-sm font-bold uppercase leading-none mb-1">Cuidados a Longo Prazo</h5>
-                      <p className="text-slate-400 text-[10px]">Filtro solar e longevidade</p>
-                    </div>
-                    <span className="material-symbols-outlined text-slate-500 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* My Artists */}
-              <div>
-                <h3 className="text-white text-lg font-black uppercase tracking-tight mb-4 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#ff0000]">group</span> Meus Artistas
-                </h3>
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-4 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all cursor-pointer">
-                    <img className="size-12 rounded-full border border-[#ff0000]/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmL3UTPlHIjQKp4Po0YxsNjxzwgyB-NGNGUiaAQWorN-KbrVzk2YJCUq6guz-ZkwIM5PxM-kzJ0_AzT8lVjRPABv6gmOzUGCltq7_FlP7Z_qmlX6xkguEAcaT_IIwynvH5tx8fKU3bAfVgQhrYFA1Y5K0ZEuBP-VDT5iX5AO31QUlS3vn1VKOHuxwpVqDrBEaITfU1SfSxK-gvUkmtJDfqRwQyU3cjq8mfZygrIgL2JTQ_vbZoUPGgRZ4pGoQ5w7ksIbmpHmO1BOI" alt="Marcus Vane" />
-                    <div className="flex-1">
-                      <h5 className="text-white font-bold text-sm">Marcus Vane</h5>
-                      <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest">Especialista Blackwork</p>
-                    </div>
-                    <button 
-                      className="size-8 bg-white/5 rounded-full flex items-center justify-center text-slate-400 hover:text-[#ff0000] transition-colors" 
-                      onClick={(e) => { e.stopPropagation(); handleAction('chat_marcus') }}
-                    >
-                      <span className="material-symbols-outlined text-sm">chat_bubble</span>
-                    </button>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all cursor-pointer">
-                    <img className="size-12 rounded-full border border-[#ff0000]/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtF0jjQzt1mm59JECkf795K9PUwWO9bC9FSvCuRhThSluwdXxvRQzCoPlkcOFsgTBBUyOYHBHQctAPKPhTJ685MzPZPCdnAFHrq3uMdf4gRa14orLTAP27fbBXpnJ6srNtoraefd5-IfL6B1z9ebY_ZPi_trjKiQYq_wk4GtfamOq6IQ5_eUuszJDv3jU1QeTofjlPEfFdgzWeHw4kE80x50wIG3zTB3_yr3YZ8Zam23K0lyf_yvsTrvB8P9VYV58SU5t4dInh4R8" alt="Elena K." />
-                    <div className="flex-1">
-                      <h5 className="text-white font-bold text-sm">Elena K.</h5>
-                      <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest">Neo-Tradicional</p>
-                    </div>
-                    <button 
-                      className="size-8 bg-white/5 rounded-full flex items-center justify-center text-slate-400 hover:text-[#ff0000] transition-colors" 
-                      onClick={(e) => { e.stopPropagation(); handleAction('chat_elena') }}
-                    >
-                      <span className="material-symbols-outlined text-sm">chat_bubble</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Promo Card */}
-              <div className="relative overflow-hidden rounded-2xl bg-[#ff0000] p-6">
-                <div className="relative z-10">
-                  <h4 className="text-white text-2xl font-black italic uppercase leading-tight mb-2">Indique um Amigo</h4>
-                  <p className="text-white/80 text-sm font-medium mb-6">Ganhe 20% off na sua próxima sessão ao indicar outro entusiasta da tatuagem.</p>
-                  <button 
-                    className="bg-black text-white font-black uppercase text-[10px] tracking-widest px-6 py-3 rounded hover:bg-gray-900 transition-colors"
-                    onClick={() => handleAction('referral')}
-                  >
-                    Pegar Código de Indicação
-                  </button>
-                </div>
-                <div className="absolute -bottom-4 -right-4 opacity-10">
-                  <span className="material-symbols-outlined text-[120px] rotate-12">loyalty</span>
-                </div>
-              </div>
+        {/* Header */}
+        <section className="profile-header">
+          <div className="profile-avatar-wrap">
+            <div className="profile-avatar">{user.nome?.charAt(0)?.toUpperCase() || 'U'}</div>
+            <div className="profile-badge"><span className="material-symbols-outlined">verified</span></div>
+          </div>
+          
+          <div className="profile-info">
+            <span className="profile-member">Membro Desde 2024</span>
+            <h1 className="profile-name">{user.nome || 'Visitante'}</h1>
+            <div className="profile-actions">
+              <button className="p-btn-primary" onClick={() => handleAction('edit_profile')}>
+                <span className="material-symbols-outlined">edit</span> Editar Perfil
+              </button>
+              <button className="p-btn-secondary" onClick={() => handleAction('share')}>
+                Compartilhar Galeria
+              </button>
             </div>
           </div>
 
-        </main>
-      </div>
-
-      {/* ================= MODAL OVERLAY ================= */}
-      {modal.isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity duration-300"
-            onClick={closeModal}
-          ></div>
-          <div className={`relative z-10 w-full ${modal.isImage ? 'max-w-3xl' : 'max-w-lg'} rounded-2xl bg-[#121212] border border-white/10 p-6 shadow-2xl transform transition-transform scale-100 opacity-100 duration-300`}>
-            <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
-              <h3 className="text-xl font-black uppercase italic text-white">{modal.title}</h3>
-              <button 
-                className="text-slate-400 hover:text-[#ff0000] transition-colors size-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10"
-                onClick={closeModal}
-              >
-                <span className="material-symbols-outlined text-sm">close</span>
-              </button>
+          <div className="profile-stats">
+            <div className="stat-card">
+              <strong>3</strong>
+              <span>Sessões</span>
             </div>
-            <div className="text-slate-300 text-sm leading-relaxed custom-scrollbar max-h-[70vh] overflow-y-auto pr-2">
-               {modal.content}
+            <div className="stat-card">
+              <strong>2</strong>
+              <span>Artistas</span>
+            </div>
+            <div className="stat-card">
+              <strong>12</strong>
+              <span>Tattoos</span>
+            </div>
+          </div>
+        </section>
+
+        <div className="profile-body layout-grid">
+          {/* Left Column */}
+          <div className="profile-col-main">
+            
+            {/* Próximas Sessões */}
+            <div className="profile-section">
+              <div className="section-header">
+                <h3><span className="material-symbols-outlined">calendar_today</span> Próximas Sessões</h3>
+                <a onClick={() => {}}>Ver Todas</a>
+              </div>
+              
+              <div className="sessions-grid">
+                <div className="session-card">
+                  <div className="session-img" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuC9rOn7CCrNd8SAovoAv1ZigtDS0Od507CHUKiPbsxuTfYsJWM3If1GqWedZgpjgYYfhKdSjCQq7-87NdVTW59__Tq43b1BTl9vPrURsZbiJbZuKV2KU8pU7jguvyKnW89VI1_D0S_wtcHhYksnayKzrjdWj5Rkaj4IEO_eXiI62o3tg8lPSNmsSmmp0phPahBZlgnJ4BqhWZKcuXmZfERS-ITHWejaw8jiJa2IU33vNimIJEqZc0ncXPwGNNMVa0VPTMhQwTnWt44")' }}></div>
+                  <div className="session-content">
+                    <div className="session-top">
+                      <div>
+                        <h4>Conclusão de Braço</h4>
+                        <p>com <span>Marcus Vane</span></p>
+                      </div>
+                      <div className="session-date red">24 OUT</div>
+                    </div>
+                    <div className="session-meta">
+                      <span><span className="material-symbols-outlined">schedule</span> 14:00</span>
+                      <span><span className="material-symbols-outlined">hourglass_empty</span> 4 Horas</span>
+                    </div>
+                    <button className="p-btn-outline" onClick={() => openModal(modalData['session_details'].title, modalData['session_details'].content)}>Detalhes da Sessão</button>
+                  </div>
+                </div>
+
+                <div className="session-card">
+                  <div className="session-img" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCcbv1GcOVz1nvrRNkIc02e--3wJSmFfT6n_5cb4cxcI7Zf_S0tiIqpkW9Fz2DKgY_R5gX4J8aOn3MVxNoyMz5X_coZy2CH3F7t3umRa9kRyZ1FhNDnNBXRG2lEh3G2C3B7IWR6NVAcWmKKrApQIuJQx8Xp9t8vHsmpS-KKMgTRMx8m-v9Otxs1shCvhiSiaiQ8AsAeXDsVnto_-Zie35a5vBnB2hE3dQ9I3VAFHMFPI-n0TyjfLXgfn82e2k7fYbfe1hgGwKy2lAU")' }}></div>
+                  <div className="session-content">
+                    <div className="session-top">
+                      <div>
+                        <h4>Ombro Neo-Trad</h4>
+                        <p>com <span>Elena K.</span></p>
+                      </div>
+                      <div className="session-date gray">12 NOV</div>
+                    </div>
+                    <div className="session-meta">
+                      <span><span className="material-symbols-outlined">schedule</span> 10:30</span>
+                      <span><span className="material-symbols-outlined">hourglass_empty</span> 3 Horas</span>
+                    </div>
+                    <button className="p-btn-secondary" onClick={() => openModal(modalData['reschedule'].title, modalData['reschedule'].content)}>Remarcar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Minha Coleção */}
+            <div className="profile-section">
+              <div className="section-header">
+                <h3><span className="material-symbols-outlined">auto_awesome_motion</span> Minha Coleção</h3>
+                <a onClick={() => {}}>Galeria Completa</a>
+              </div>
+              <div className="gallery-layout">
+                {[
+                  "https://lh3.googleusercontent.com/aida-public/AB6AXuCgpSHeNZxNCBjFuwnX1grKnlvGCEIFPHBleVd9QZTpx3vEIsiV1MGv-ASSulImMPB_zXvZXttJdMwh8uzDZM5ps4Yi2OQKO4PzxN2mauqxXuVCfb5Lbo0TdkltagkiKzSs9GAntw92Ly4rfEYalbLoTRRJRB5DZ9zDQwP03MzXhpjQ6tXso6S6ZM-iIRtz6buaYssdh4Erd3go-k_03GVuiriiT4IvN0uBahVN1exHgSmXGrwfdeCyI-cl1VHMgLTelVWGUJ3MHvw",
+                  "https://lh3.googleusercontent.com/aida-public/AB6AXuDYONo8UZd2SE6PPRGa7zoldUR4JzD0CgU8Qzk9Vn0VV8Jv5fUg7fQfEpXmQiNbD4OMsAFKOMwMAH__8UX4OEBBRWN_Nql_e3ahKim-oYdVZRsbTn6eChRhSxKgYrlTpifqua-DUZEE1I_9yvyo0w21ahzbD6QEid0qMBMjFPbsQUYv4DDlpuOz2Oygl_zvrpKkLGFkDGayGktYs05J6AtgUZ18pmnd_wsgDs_o0MCurIiOQLBErwCwBEoJVP3Aix2jwXf_OyoFdSo",
+                  "https://lh3.googleusercontent.com/aida-public/AB6AXuATT6xdFVuG_lgYyop6RighNb1AX46na3HdnXJcSHhK0hKQH-TI_yTEcoT3z1qOcnuSzqPLc9qtP2bhx7uSc8qVlFbykackNDQhggwbymURTcpsmYqp_P4nj83xLsmbRCDcdt-4ixMqZ5lRXPJrk61U1Kg6Z75Fpmzt8g0WK9_8JxghbG8HVUrCv77KZLi3aMbg9wTKJyll7I-DRtdmpxsjJCgG9kqcjA-DdtLvJhy2avvFN4--PoI0e5WyUxRApzFvXHM9DrVQtOk",
+                  "https://lh3.googleusercontent.com/aida-public/AB6AXuA-LLnq3e7wmZa8GGBC7AYSPNaNsyX-5sOJv0BLpjazg2f7K0EYywM4LzI4Keq6g6-Toh2o7Q1rr_oWgkoWE0Qj-1hdis3PTMyYrdrv22XO421cgYaUtBqivyMiTZiDwTA6CEF9hPFVU-ZYBGf0-W64yDAhcPJnx4q_hHLNcqlXaPXSRgXTufb_87ZV-FGT5fxVgULZCTaK12wnirBEq9juG-yIXC1C9TRnvKwkw5GQlmo_BX2fXWHwYntlxIFQfMQuU8HsrmZZC9U"
+                ].map((src, i) => (
+                  <div key={i} className="gallery-item" onClick={() => openModal('Visualização', <img src={src} className="gallery-modal-img" />, true)}>
+                    <img src={src} alt="Tattoo Gallery" />
+                    <div className="gallery-overlay"><span className="material-symbols-outlined">zoom_in</span></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Right Column */}
+          <div className="profile-col-side">
+            
+            {/* Care Guides */}
+            <div className="care-guides-box">
+              <h3><span className="material-symbols-outlined">medical_services</span> Guias de Cuidados</h3>
+              <div className="guides-list">
+                <div className="guide-item" onClick={() => openModal(modalData['guide_1'].title, modalData['guide_1'].content)}>
+                  <div className="guide-icon"><span className="material-symbols-outlined">water_drop</span></div>
+                  <div className="guide-text">
+                    <h5>Primeiras 24 Horas</h5>
+                    <p>Lidando com plasma e plástico</p>
+                  </div>
+                  <span className="material-symbols-outlined guide-arrow">arrow_forward</span>
+                </div>
+                <div className="guide-item" onClick={() => openModal(modalData['guide_2'].title, modalData['guide_2'].content)}>
+                  <div className="guide-icon"><span className="material-symbols-outlined">soap</span></div>
+                  <div className="guide-text">
+                    <h5>Lavar & Proteger</h5>
+                    <p>Tipos de sabonete e hidratação</p>
+                  </div>
+                  <span className="material-symbols-outlined guide-arrow">arrow_forward</span>
+                </div>
+                <div className="guide-item" onClick={() => openModal(modalData['guide_3'].title, modalData['guide_3'].content)}>
+                  <div className="guide-icon"><span className="material-symbols-outlined">sunny</span></div>
+                  <div className="guide-text">
+                    <h5>Cuidados a Longo Prazo</h5>
+                    <p>Filtro solar e longevidade</p>
+                  </div>
+                  <span className="material-symbols-outlined guide-arrow">arrow_forward</span>
+                </div>
+              </div>
+            </div>
+
+            {/* My Artists */}
+            <div className="profile-section">
+              <div className="section-header">
+                <h3><span className="material-symbols-outlined">group</span> Meus Artistas</h3>
+              </div>
+              <div className="artists-list">
+                <div className="artist-item">
+                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmL3UTPlHIjQKp4Po0YxsNjxzwgyB-NGNGUiaAQWorN-KbrVzk2YJCUq6guz-ZkwIM5PxM-kzJ0_AzT8lVjRPABv6gmOzUGCltq7_FlP7Z_qmlX6xkguEAcaT_IIwynvH5tx8fKU3bAfVgQhrYFA1Y5K0ZEuBP-VDT5iX5AO31QUlS3vn1VKOHuxwpVqDrBEaITfU1SfSxK-gvUkmtJDfqRwQyU3cjq8mfZygrIgL2JTQ_vbZoUPGgRZ4pGoQ5w7ksIbmpHmO1BOI" alt="Marcus Vane" />
+                  <div className="artist-info">
+                    <h5>Marcus Vane</h5>
+                    <p>Especialista Blackwork</p>
+                  </div>
+                  <button onClick={() => handleAction('chat_marcus')}><span className="material-symbols-outlined">chat_bubble</span></button>
+                </div>
+                <div className="artist-item">
+                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtF0jjQzt1mm59JECkf795K9PUwWO9bC9FSvCuRhThSluwdXxvRQzCoPlkcOFsgTBBUyOYHBHQctAPKPhTJ685MzPZPCdnAFHrq3uMdf4gRa14orLTAP27fbBXpnJ6srNtoraefd5-IfL6B1z9ebY_ZPi_trjKiQYq_wk4GtfamOq6IQ5_eUuszJDv3jU1QeTofjlPEfFdgzWeHw4kE80x50wIG3zTB3_yr3YZ8Zam23K0lyf_yvsTrvB8P9VYV58SU5t4dInh4R8" alt="Elena K." />
+                  <div className="artist-info">
+                    <h5>Elena K.</h5>
+                    <p>Neo-Tradicional</p>
+                  </div>
+                  <button onClick={() => handleAction('chat_elena')}><span className="material-symbols-outlined">chat_bubble</span></button>
+                </div>
+              </div>
+            </div>
+
+            {/* Promo Card */}
+            <div className="promo-card">
+              <div className="promo-content">
+                <h4>Indique um Amigo</h4>
+                <p>Ganhe 20% off na sua próxima sessão ao indicar outro entusiasta da tatuagem.</p>
+                <button onClick={() => handleAction('referral')}>Pegar Código de Indicação</button>
+              </div>
+              <span className="material-symbols-outlined promo-icon">loyalty</span>
+            </div>
+
+          </div>
+        </div>
+      </main>
+
+      {/* Modals */}
+      {modal.isOpen && (
+        <div className="p-modal-overlay" onClick={closeModal}>
+          <div className={`p-modal ${modal.isImage ? 'image-modal' : ''}`} onClick={e => e.stopPropagation()}>
+            <div className="p-modal-header">
+              <h3>{modal.title}</h3>
+              <button onClick={closeModal}><span className="material-symbols-outlined">close</span></button>
+            </div>
+            <div className="p-modal-body custom-scrollbar">
+              {modal.content}
             </div>
           </div>
         </div>
       )}
 
-      {/* ================= TOAST CONTAINER ================= */}
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
-        {toasts.map(toast => (
-          <Toast 
-            key={toast.id} 
-            message={toast.message} 
-            icon={toast.icon} 
-            onExit={() => removeToast(toast.id)} 
-          />
-        ))}
+      {/* Toasts */}
+      <div className="p-toasts-container">
+        {toasts.map(toast => <Toast key={toast.id} {...toast} onExit={() => removeToast(toast.id)} />)}
       </div>
     </div>
   )

@@ -62,17 +62,12 @@ const Header = () => {
           <li><Link to="/agendamento" className={isActive('/agendamento')}>Agendamento</Link></li>
           <li><Link to="/contato" className={isActive('/contato')}>Contato</Link></li>
           {user ? (
-            <li className="flex items-center gap-4">
-              <Link to="/admin" className="text-white hover:text-[#ff0000] transition-colors flex items-center justify-center">
-                <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>settings</span>
-              </Link>
-              <Link to="/perfil" className="flex items-center justify-center">
-                <div 
-                  className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-[#ff0000] cursor-pointer flex items-center justify-center text-lg font-bold bg-[#1a1a1a] hover:scale-105 transition-transform text-white"
-                  style={{ width: '40px', height: '40px' }}
-                >
-                  {user.nome?.charAt(0)?.toUpperCase() || 'U'}
-                </div>
+            <li>
+              <Link to="/perfil" className={isActive('/perfil')}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="8" r="4"/>
+                  <path d="M12 14c-6 0-8 4-8 4v2h16v-2s-2-4-8-4z"/>
+                </svg>
               </Link>
             </li>
           ) : (

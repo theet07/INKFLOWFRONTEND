@@ -18,19 +18,21 @@ const Login = () => {
     e.preventDefault()
     
     try {
+      // Usando localStorage como banco de dados provisório (mock)
+      const storedUsers = JSON.parse(localStorage.getItem('mock_users') || '[]')
+
       if (isLogin) {
-        // TODO: Substituir por endpoint POST /api/clientes/login quando disponível no backend
-        const response = await clienteService.getAll()
-        const cliente = response.data.find(c => 
+        const cliente = storedUsers.find(c => 
           c.email === formData.email && c.password === formData.senha
         )
         
         if (cliente) {
           localStorage.setItem('user', JSON.stringify({
-            id: cliente.id,
+            id: cliente.id || Date.now(),
             email: cliente.email,
             nome: cliente.fullName || cliente.username,
-            isAdmin: cliente.isAdmin || false
+            isAdmin: cliente.isAdmin || false,
+            telefone: cliente.telefone || ''
           }))
           
           if (cliente.isAdmin) {
@@ -48,7 +50,15 @@ const Login = () => {
           return
         }
         
+        // Verifica se email já existe
+        const emailExiste = storedUsers.find(c => c.email === formData.email)
+        if (emailExiste) {
+          alert('Este email já está cadastrado!')
+          return
+        }
+        
         const novoCliente = {
+          id: Date.now(),
           username: formData.email.split('@')[0],
           email: formData.email,
           password: formData.senha,
@@ -56,23 +66,17 @@ const Login = () => {
           telefone: formData.telefone
         }
         
-        await clienteService.create(novoCliente)
+        // Salva mock
+        storedUsers.push(novoCliente)
+        localStorage.setItem('mock_users', JSON.stringify(storedUsers))
         
         alert('Cadastro realizado com sucesso! Faça login para continuar.')
         setIsLogin(true)
         setFormData({ email: '', senha: '', nome: '', telefone: '' })
       }
     } catch (error) {
-      console.error('Erro:', error)
-      if (isLogin) {
-        alert('Email ou senha incorretos.')
-      } else {
-        if (error.response?.status === 400 || error.response?.status === 409) {
-          alert('Email já cadastrado!')
-        } else {
-          alert(`Erro ao processar solicitação: ${error.response?.data?.message || error.message || 'Tente novamente.'}`)
-        }
-      }
+      console.error('Erro no login/cadastro:', error)
+      alert('Surgiu um erro no sistema provisório, tente novamente.')
     }
   }
 
