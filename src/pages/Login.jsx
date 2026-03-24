@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { clienteService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
 import './Login.css'
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://inkflowbackend-4w1g.onrender.com'
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
@@ -16,67 +17,52 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    try {
-      // Usando localStorage como banco de dados provisório (mock)
-      const storedUsers = JSON.parse(localStorage.getItem('mock_users') || '[]')
 
+    try {
       if (isLogin) {
-        const cliente = storedUsers.find(c => 
-          c.email === formData.email && c.password === formData.senha
-        )
-        
-        if (cliente) {
-          localStorage.setItem('user', JSON.stringify({
-            id: cliente.id || Date.now(),
-            email: cliente.email,
-            nome: cliente.fullName || cliente.username,
-            isAdmin: cliente.isAdmin || false,
-            telefone: cliente.telefone || ''
-          }))
-          
-          if (cliente.isAdmin) {
-            navigate('/admin')
-          } else {
-            navigate('/agendamento')
-          }
+        const response = await fetch(`${API_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.email, password: formData.senha })
+        })
+        const data = await response.json()
+
+        if (data.success) {
+          localStorage.setItem('token', data.token)
+          localStorage.setItem('user', JSON.stringify(data.user))
+          navigate(data.user.isAdmin ? '/admin' : '/agendamento')
         } else {
-          alert('Email ou senha incorretos!')
+          alert(data.message || 'Email ou senha incorretos!')
         }
       } else {
-        // Validação dos campos obrigatórios
         if (!formData.nome || !formData.email || !formData.senha) {
           alert('Por favor, preencha todos os campos obrigatórios.')
           return
         }
-        
-        // Verifica se email já existe
-        const emailExiste = storedUsers.find(c => c.email === formData.email)
-        if (emailExiste) {
-          alert('Este email já está cadastrado!')
-          return
+
+        const response = await fetch(`${API_URL}/api/clientes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: formData.email.split('@')[0],
+            email: formData.email,
+            password: formData.senha,
+            fullName: formData.nome,
+            telefone: formData.telefone
+          })
+        })
+
+        if (response.ok) {
+          alert('Cadastro realizado com sucesso! Faça login para continuar.')
+          setIsLogin(true)
+          setFormData({ email: '', senha: '', nome: '', telefone: '' })
+        } else {
+          alert('Erro ao cadastrar. Email já pode estar em uso.')
         }
-        
-        const novoCliente = {
-          id: Date.now(),
-          username: formData.email.split('@')[0],
-          email: formData.email,
-          password: formData.senha,
-          fullName: formData.nome,
-          telefone: formData.telefone
-        }
-        
-        // Salva mock
-        storedUsers.push(novoCliente)
-        localStorage.setItem('mock_users', JSON.stringify(storedUsers))
-        
-        alert('Cadastro realizado com sucesso! Faça login para continuar.')
-        setIsLogin(true)
-        setFormData({ email: '', senha: '', nome: '', telefone: '' })
       }
     } catch (error) {
-      console.error('Erro no login/cadastro:', error)
-      alert('Surgiu um erro no sistema provisório, tente novamente.')
+      console.error('Erro:', error)
+      alert('Erro ao conectar com o servidor.')
     }
   }
 
