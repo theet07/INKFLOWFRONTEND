@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { formatPhone } from '../utils/formatPhone'
 import './Login.css'
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://inkflowbackend-4w1g.onrender.com'
+const API_URL = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
+  : 'https://inkflowbackend-4w1g.onrender.com'
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
