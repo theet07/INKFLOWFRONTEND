@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Profile.css'
 
@@ -25,6 +25,18 @@ const Profile = () => {
   
   const [toasts, setToasts] = useState([])
   const [modal, setModal] = useState({ isOpen: false, title: '', content: null, isImage: false })
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const settingsRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (settingsRef.current && !settingsRef.current.contains(e.target)) {
+        setSettingsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   useEffect(() => {
     if (!user.email) navigate('/login')
@@ -52,6 +64,11 @@ const Profile = () => {
       case 'chat_elena': showToast('Abrindo chat com Elena K...', 'chat'); break;
       case 'referral':
         navigator.clipboard.writeText("INK-ALEX-2024").then(() => showToast('Código de indicação copiado!', 'loyalty'))
+        break;
+      case 'logout':
+        localStorage.removeItem('user')
+        localStorage.removeItem('token')
+        navigate('/login')
         break;
       default: break;
     }
@@ -159,6 +176,19 @@ const Profile = () => {
               <button className="p-btn-secondary" onClick={() => handleAction('share')}>
                 Compartilhar Galeria
               </button>
+              <div className="p-settings-wrap" ref={settingsRef}>
+                <button className="p-btn-settings" onClick={() => setSettingsOpen(prev => !prev)}>
+                  <span className="material-symbols-outlined">settings</span>
+                </button>
+                {settingsOpen && (
+                  <div className="p-settings-dropdown">
+                    <button onClick={() => handleAction('logout')}>
+                      <span className="material-symbols-outlined">logout</span>
+                      Sair da Conta
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

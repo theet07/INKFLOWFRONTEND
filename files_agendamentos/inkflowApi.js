@@ -7,30 +7,52 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  timeout: 10000, // 10 segundos — garante que o finally sempre seja chamado
 });
 
 // Serviços de Cliente
 export const clienteService = {
+  // Login de cliente
   login: (credentials) => api.post('/clientes/login', credentials),
+  
+  // Listar todos os clientes
   getAll: () => api.get('/clientes'),
+  
+  // Buscar cliente por ID
   getById: (id) => api.get(`/clientes/${id}`),
-  getByEmail: (email) => api.get(`/clientes/email/${encodeURIComponent(email)}`),
+  
+  // Criar novo cliente
   create: (cliente) => api.post('/clientes', cliente),
+  
+  // Atualizar cliente
   update: (id, cliente) => api.put(`/clientes/${id}`, cliente),
-  delete: (id) => api.delete(`/clientes/${id}`),
+  
+  // Deletar cliente
+  delete: (id) => api.delete(`/clientes/${id}`)
 };
 
 // Serviços de Agendamento
 export const agendamentoService = {
+  // Listar todos os agendamentos
   getAll: () => api.get('/agendamentos'),
+  
+  // Buscar agendamento por ID
   getById: (id) => api.get(`/agendamentos/${id}`),
+  
+  // Buscar por status
   getByStatus: (status) => api.get(`/agendamentos/status/${status}`),
+  
+  // Criar novo agendamento
   create: (agendamento) => api.post('/agendamentos', agendamento),
+  
+  // Atualizar agendamento
   update: (id, agendamento) => api.put(`/agendamentos/${id}`, agendamento),
-  delete: (id) => api.delete(`/agendamentos/${id}`),
+  
+  // Deletar agendamento
+  delete: (id) => api.delete(`/agendamentos/${id}`)
 };
 
+// Teste de conexão
 export const testConnection = () => api.get('/test');
 
 export default api;

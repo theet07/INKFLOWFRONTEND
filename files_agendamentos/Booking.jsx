@@ -101,15 +101,15 @@ const Booking = () => {
         e.preventDefault()
 
         if (!bookingState.style || !bookingState.artist || !bookingState.day || !bookingState.time) {
-            alert('Por favor, complete as etapas de Estilo, Artista, Data e Horário.');
+            alert("Por favor, complete as etapas de Estilo, Artista, Data e Horário.");
             return;
         }
         if (!formData.name || !formData.phone || !formData.email || !formData.desc) {
-            alert('Por favor, preencha todos os seus dados.');
+            alert("Por favor, preencha todos os seus dados.");
             return;
         }
         if (!formData.terms) {
-            alert('Você precisa aceitar os termos de agendamento para continuar.');
+            alert("Você precisa aceitar os termos de agendamento para continuar.");
             return;
         }
 
@@ -120,8 +120,10 @@ const Booking = () => {
             const user = JSON.parse(localStorage.getItem('user') || '{}')
 
             if (user && user.id) {
+                // Usuário já logado — usa o ID existente
                 clienteId = user.id
             } else {
+                // Usuário não logado — tenta criar; se email já existir, busca o cliente existente
                 try {
                     const novoCliente = {
                         username: formData.email.split('@')[0],
@@ -132,12 +134,14 @@ const Booking = () => {
                     const clienteResponse = await clienteService.create(novoCliente)
                     clienteId = clienteResponse.data.id
                 } catch (clienteError) {
+                    // Se o erro for de email duplicado (409 Conflict ou 400), tenta buscar pelo email
                     const status = clienteError.response?.status
                     if (status === 409 || status === 400) {
                         try {
                             const existingResponse = await clienteService.getByEmail(formData.email)
                             clienteId = existingResponse.data.id
                         } catch {
+                            // Backend não tem endpoint de busca por email — usa email como fallback de ID
                             throw new Error('Não foi possível identificar o cliente. Tente fazer login antes de agendar.')
                         }
                     } else {
@@ -173,10 +177,13 @@ const Booking = () => {
 
         } catch (error) {
             console.error('Erro ao criar agendamento:', error)
+
+            // Exibe a mensagem real do backend, se disponível
             const backendMsg = error.response?.data?.message || error.response?.data || error.message
             const userMsg = typeof backendMsg === 'string' && backendMsg.length < 200
                 ? backendMsg
                 : 'Erro ao confirmar agendamento. Tente novamente.'
+
             showToast(userMsg, 'error')
         } finally {
             setIsSubmitting(false)
@@ -454,7 +461,7 @@ const Booking = () => {
 
             {/* Toasts */}
             {toasts.map(toast => (
-                <div key={toast.id} className="booking-toast">
+                <div key={toast.id} className={`booking-toast booking-toast--${toast.type}`}>
                     {toast.message}
                 </div>
             ))}
