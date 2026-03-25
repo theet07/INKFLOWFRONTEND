@@ -10,7 +10,6 @@ const api = axios.create({
   timeout: 60000,
 });
 
-// Envia o token JWT automaticamente em todas as requisições
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) {
@@ -19,7 +18,6 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Serviços de Cliente
 export const clienteService = {
   login: (credentials) => api.post('/clientes/login', credentials),
   getAll: () => api.get('/clientes'),
@@ -30,14 +28,20 @@ export const clienteService = {
   delete: (id) => api.delete(`/clientes/${id}`),
 };
 
-// Serviços de Agendamento
 export const agendamentoService = {
   getAll: () => api.get('/agendamentos'),
   getById: (id) => api.get(`/agendamentos/${id}`),
+  getByCliente: (clienteId) => api.get(`/agendamentos/cliente/${clienteId}`),
   getByStatus: (status) => api.get(`/agendamentos/status/${status}`),
   create: (agendamento) => api.post('/agendamentos', agendamento),
   update: (id, agendamento) => api.put(`/agendamentos/${id}`, agendamento),
+  updateStatus: (id, data) => api.patch(`/agendamentos/${id}/status`, data),
   delete: (id) => api.delete(`/agendamentos/${id}`),
+};
+
+export const artistaService = {
+  getAll: () => api.get('/artistas'),
+  getById: (id) => api.get(`/artistas/${id}`),
 };
 
 export const testConnection = () => api.get('/test');

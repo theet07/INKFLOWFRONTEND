@@ -1,16 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { agendamentoService } from '../services/inkflowApi'
 import './Profile.css'
 
 const Toast = ({ message, icon, onExit }) => {
   const [isExiting, setIsExiting] = useState(false)
-
   useEffect(() => {
     const exitTimer = setTimeout(() => setIsExiting(true), 2700)
     const removeTimer = setTimeout(() => onExit(), 3000)
     return () => { clearTimeout(exitTimer); clearTimeout(removeTimer) }
   }, [onExit])
-
   return (
     <div className={`p-toast ${isExiting ? 'toast-exit' : 'toast-enter'}`}>
       <span className="material-symbols-outlined p-toast-icon">{icon}</span>
@@ -19,100 +18,127 @@ const Toast = ({ message, icon, onExit }) => {
   )
 }
 
+const StarRating = ({ value, onChange }) => (
+  <div style={{ display: 'flex', gap: '4px', margin: '8px 0' }}>
+    {[1,2,3,4,5].map(star => (
+      <span
+        key={star}
+        className="material-symbols-outlined"
+        onClick={() => onChange(star)}
+        style={{ cursor: 'pointer', color: star <= value ? '#ff0000' : 'rgba(255,255,255,0.3)', fontSize: '1.5rem' }}
+      >star</span>
+    ))}
+  </div>
+)
+
+const formatDate = (dataHora) => {
+  if (!dataHora) return ''
+  const d = new Date(dataHora)
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase().replace('.', '')
+}
+
+const formatTime = (dataHora) => {
+  if (!dataHora) return ''
+  const d = new Date(dataHora)
+  return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+}
+
 const Profile = () => {
   const navigate = useNavigate()
   const user = JSON.parse(localStorage.getItem('user') || '{}')
-  
+
   const [toasts, setToasts] = useState([])
   const [modal, setModal] = useState({ isOpen: false, title: '', content: null, isImage: false })
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [agendamentos, setAgendamentos] = useState([])
+  const [loadingAg, setLoadingAg] = useState(true)
   const settingsRef = useRef(null)
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (settingsRef.current && !settingsRef.current.contains(e.target)) {
-        setSettingsOpen(false)
-      }
+      if (settingsRef.current && !settingsRef.current.contains(e.target)) setSettingsOpen(false)
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   useEffect(() => {
-    if (!user.email) navigate('/login')
-  }, [user.email, navigate])
+    if (!user.email) { navigate('/login'); return }
+    if (user.id) {
+      agendamentoService.getByCliente(user.id)
+        .then(res => setAgendamentos(res.data))
+        .catch(() => setAgendamentos([]))
+        .finally(() => setLoadingAg(false))
+    } else {
+      setLoadingAg(false)
+    }
+  }, [user.id])
 
   if (!user.email) return null
+
+  const proximas = agendamentos.filter(a => a.status === 'AGENDADO' || a.status === 'CONFIRMADO' || a.status === 'EM_ANDAMENTO')
+  const colecao = agendamentos.filter(a => a.status === 'REALIZADO')
+  const artistasUnicos = agendamentos
+    .filter(a => a.artista)
+    .reduce((acc, a) => {
+      if (!acc.find(x => x.id === a.artista.id)) acc.push(a.artista)
+      return acc
+    }, [])
 
   const showToast = (message, icon = 'info') => {
     const id = Date.now() + Math.random()
     setToasts(prev => [...prev, { id, message, icon }])
   }
-
   const removeToast = (id) => setToasts(prev => prev.filter(t => t.id !== id))
   const openModal = (title, content, isImage = false) => setModal({ isOpen: true, title, content, isImage })
   const closeModal = () => setModal(prev => ({ ...prev, isOpen: false }))
 
   const handleAction = (action) => {
     switch(action) {
-      case 'edit_profile': showToast('Abrindo editor de perfil...', 'edit'); break;
-      case 'share': 
+      case 'edit_profile': showToast('Abrindo editor de perfil...', 'edit'); break
+      case 'share':
         navigator.clipboard.writeText('inkflow.com/perfil/' + (user.nome?.replace(/\s+/g, '-').toLowerCase() || ''))
         showToast('Link da Galeria Copiado!', 'content_copy')
-        break;
-      case 'chat_marcus': showToast('Abrindo chat com Marcus Vane...', 'chat'); break;
-      case 'chat_elena': showToast('Abrindo chat com Elena K...', 'chat'); break;
+        break
       case 'referral':
-        navigator.clipboard.writeText("INK-ALEX-2024").then(() => showToast('Código de indicação copiado!', 'loyalty'))
-        break;
+        navigator.clipboard.writeText('INK-' + (user.nome?.split(' ')[0]?.toUpperCase() || 'USER') + '-2024')
+          .then(() => showToast('Código de indicação copiado!', 'loyalty'))
+        break
       case 'logout':
         localStorage.removeItem('user')
         localStorage.removeItem('token')
         navigate('/login')
-        break;
-      default: break;
+        break
+      default: break
     }
   }
 
+  const handleUpdateStatus = async (agendamentoId, status, avaliacao, observacoes) => {
+    try {
+      await agendamentoService.updateStatus(agendamentoId, { status, avaliacao, observacoes })
+      const res = await agendamentoService.getByCliente(user.id)
+      setAgendamentos(res.data)
+      showToast('Sessão atualizada com sucesso!', 'check_circle')
+      closeModal()
+    } catch {
+      showToast('Erro ao atualizar sessão.', 'error')
+    }
+  }
+
+  const openSessionModal = (ag) => {
+    let avaliacao = ag.avaliacao || 0
+    let observacoes = ag.observacoes || ''
+
+    const content = (
+      <SessionModalContent
+        ag={ag}
+        onUpdate={(status, av, obs) => handleUpdateStatus(ag.id, status, av, obs)}
+      />
+    )
+    openModal('Detalhes da Sessão', content)
+  }
+
   const modalData = {
-    'session_details': {
-      title: 'Detalhes da Sessão',
-      content: (
-        <div className="p-modal-stack">
-          <div className="p-modal-card border-red">
-            <h4>Projeto</h4>
-            <p>Conclusão de Braço (Parte 3)</p>
-          </div>
-          <div className="p-modal-grid">
-            <div className="p-modal-card">
-              <span>Data & Hora</span>
-              <strong>24 Out, 2024<br/>14:00</strong>
-            </div>
-            <div className="p-modal-card">
-              <span>Artista</span>
-              <strong>Marcus Vane</strong>
-            </div>
-          </div>
-          <p className="p-modal-note">Por favor, chegue com 15 minutos de antecedência. Certifique-se de ter feito uma boa refeição e se mantenha hidratado.</p>
-        </div>
-      )
-    },
-    'reschedule': {
-      title: 'Solicitar Remarcação',
-      content: (
-        <>
-          <p className="p-modal-text">Selecione um motivo para remarcar sua sessão com <strong>Elena K.</strong></p>
-          <select className="p-modal-select">
-            <option>Problemas de Saúde</option>
-            <option>Conflito de Horário</option>
-            <option>Preciso de mais tempo para me preparar</option>
-          </select>
-          <button className="p-btn-primary" onClick={() => { showToast('Solicitação enviada com sucesso!', 'check_circle'); closeModal(); }}>
-            Enviar Solicitação
-          </button>
-        </>
-      )
-    },
     'guide_1': {
       title: 'Guia: Primeiras 24 Horas',
       content: (
@@ -158,17 +184,17 @@ const Profile = () => {
   return (
     <div className="profile-page">
       <main className="profile-main">
-        
+
         {/* Header */}
         <section className="profile-header">
           <div className="profile-avatar-wrap">
-            <div className="profile-avatar">{user.nome?.charAt(0)?.toUpperCase() || 'U'}</div>
+            <div className="profile-avatar">{user.nome?.charAt(0)?.toUpperCase() || user.fullName?.charAt(0)?.toUpperCase() || 'U'}</div>
             <div className="profile-badge"><span className="material-symbols-outlined">verified</span></div>
           </div>
-          
+
           <div className="profile-info">
-            <span className="profile-member">Membro Desde 2024</span>
-            <h1 className="profile-name">{user.nome || 'Visitante'}</h1>
+            <span className="profile-member">Membro Desde {new Date(user.createdAt || Date.now()).getFullYear()}</span>
+            <h1 className="profile-name">{user.nome || user.fullName || 'Visitante'}</h1>
             <div className="profile-actions">
               <button className="p-btn-primary" onClick={() => handleAction('edit_profile')}>
                 <span className="material-symbols-outlined">edit</span> Editar Perfil
@@ -194,15 +220,15 @@ const Profile = () => {
 
           <div className="profile-stats">
             <div className="stat-card">
-              <strong>3</strong>
+              <strong>{agendamentos.length}</strong>
               <span>Sessões</span>
             </div>
             <div className="stat-card">
-              <strong>2</strong>
+              <strong>{artistasUnicos.length}</strong>
               <span>Artistas</span>
             </div>
             <div className="stat-card">
-              <strong>12</strong>
+              <strong>{colecao.length}</strong>
               <span>Tattoos</span>
             </div>
           </div>
@@ -211,51 +237,46 @@ const Profile = () => {
         <div className="profile-body layout-grid">
           {/* Left Column */}
           <div className="profile-col-main">
-            
+
             {/* Próximas Sessões */}
             <div className="profile-section">
               <div className="section-header">
                 <h3><span className="material-symbols-outlined">calendar_today</span> Próximas Sessões</h3>
                 <a onClick={() => {}}>Ver Todas</a>
               </div>
-              
-              <div className="sessions-grid">
-                <div className="session-card">
-                  <div className="session-img" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuC9rOn7CCrNd8SAovoAv1ZigtDS0Od507CHUKiPbsxuTfYsJWM3If1GqWedZgpjgYYfhKdSjCQq7-87NdVTW59__Tq43b1BTl9vPrURsZbiJbZuKV2KU8pU7jguvyKnW89VI1_D0S_wtcHhYksnayKzrjdWj5Rkaj4IEO_eXiI62o3tg8lPSNmsSmmp0phPahBZlgnJ4BqhWZKcuXmZfERS-ITHWejaw8jiJa2IU33vNimIJEqZc0ncXPwGNNMVa0VPTMhQwTnWt44")' }}></div>
-                  <div className="session-content">
-                    <div className="session-top">
-                      <div>
-                        <h4>Conclusão de Braço</h4>
-                        <p>com <span>Marcus Vane</span></p>
-                      </div>
-                      <div className="session-date red">24 OUT</div>
-                    </div>
-                    <div className="session-meta">
-                      <span><span className="material-symbols-outlined">schedule</span> 14:00</span>
-                      <span><span className="material-symbols-outlined">hourglass_empty</span> 4 Horas</span>
-                    </div>
-                    <button className="p-btn-outline" onClick={() => openModal(modalData['session_details'].title, modalData['session_details'].content)}>Detalhes da Sessão</button>
-                  </div>
-                </div>
 
-                <div className="session-card">
-                  <div className="session-img" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCcbv1GcOVz1nvrRNkIc02e--3wJSmFfT6n_5cb4cxcI7Zf_S0tiIqpkW9Fz2DKgY_R5gX4J8aOn3MVxNoyMz5X_coZy2CH3F7t3umRa9kRyZ1FhNDnNBXRG2lEh3G2C3B7IWR6NVAcWmKKrApQIuJQx8Xp9t8vHsmpS-KKMgTRMx8m-v9Otxs1shCvhiSiaiQ8AsAeXDsVnto_-Zie35a5vBnB2hE3dQ9I3VAFHMFPI-n0TyjfLXgfn82e2k7fYbfe1hgGwKy2lAU")' }}></div>
-                  <div className="session-content">
-                    <div className="session-top">
-                      <div>
-                        <h4>Ombro Neo-Trad</h4>
-                        <p>com <span>Elena K.</span></p>
-                      </div>
-                      <div className="session-date gray">12 NOV</div>
-                    </div>
-                    <div className="session-meta">
-                      <span><span className="material-symbols-outlined">schedule</span> 10:30</span>
-                      <span><span className="material-symbols-outlined">hourglass_empty</span> 3 Horas</span>
-                    </div>
-                    <button className="p-btn-secondary" onClick={() => openModal(modalData['reschedule'].title, modalData['reschedule'].content)}>Remarcar</button>
-                  </div>
+              {loadingAg ? (
+                <p style={{ color: 'rgba(255,255,255,0.4)', padding: '1rem 0' }}>Carregando...</p>
+              ) : proximas.length === 0 ? (
+                <div style={{ color: 'rgba(255,255,255,0.4)', padding: '2rem 0', textAlign: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>calendar_today</span>
+                  Nenhuma sessão agendada ainda.
                 </div>
-              </div>
+              ) : (
+                <div className="sessions-grid">
+                  {proximas.map(ag => (
+                    <div key={ag.id} className="session-card">
+                      <div className="session-img" style={{ backgroundImage: 'url("/assets/portifolio_novo/Rosto.webp")', backgroundSize: 'cover' }}></div>
+                      <div className="session-content">
+                        <div className="session-top">
+                          <div>
+                            <h4>{ag.servico || 'Tatuagem'}</h4>
+                            <p>com <span>{ag.artista?.nome || 'Artista'}</span></p>
+                          </div>
+                          <div className={`session-date ${ag.status === 'AGENDADO' ? 'red' : 'gray'}`}>
+                            {formatDate(ag.dataHora)}
+                          </div>
+                        </div>
+                        <div className="session-meta">
+                          <span><span className="material-symbols-outlined">schedule</span> {formatTime(ag.dataHora)}</span>
+                          <span><span className="material-symbols-outlined">info</span> {ag.status}</span>
+                        </div>
+                        <button className="p-btn-outline" onClick={() => openSessionModal(ag)}>Detalhes da Sessão</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Minha Coleção */}
@@ -264,80 +285,82 @@ const Profile = () => {
                 <h3><span className="material-symbols-outlined">auto_awesome_motion</span> Minha Coleção</h3>
                 <a onClick={() => {}}>Galeria Completa</a>
               </div>
-              <div className="gallery-layout">
-                {[
-                  "https://lh3.googleusercontent.com/aida-public/AB6AXuCgpSHeNZxNCBjFuwnX1grKnlvGCEIFPHBleVd9QZTpx3vEIsiV1MGv-ASSulImMPB_zXvZXttJdMwh8uzDZM5ps4Yi2OQKO4PzxN2mauqxXuVCfb5Lbo0TdkltagkiKzSs9GAntw92Ly4rfEYalbLoTRRJRB5DZ9zDQwP03MzXhpjQ6tXso6S6ZM-iIRtz6buaYssdh4Erd3go-k_03GVuiriiT4IvN0uBahVN1exHgSmXGrwfdeCyI-cl1VHMgLTelVWGUJ3MHvw",
-                  "https://lh3.googleusercontent.com/aida-public/AB6AXuDYONo8UZd2SE6PPRGa7zoldUR4JzD0CgU8Qzk9Vn0VV8Jv5fUg7fQfEpXmQiNbD4OMsAFKOMwMAH__8UX4OEBBRWN_Nql_e3ahKim-oYdVZRsbTn6eChRhSxKgYrlTpifqua-DUZEE1I_9yvyo0w21ahzbD6QEid0qMBMjFPbsQUYv4DDlpuOz2Oygl_zvrpKkLGFkDGayGktYs05J6AtgUZ18pmnd_wsgDs_o0MCurIiOQLBErwCwBEoJVP3Aix2jwXf_OyoFdSo",
-                  "https://lh3.googleusercontent.com/aida-public/AB6AXuATT6xdFVuG_lgYyop6RighNb1AX46na3HdnXJcSHhK0hKQH-TI_yTEcoT3z1qOcnuSzqPLc9qtP2bhx7uSc8qVlFbykackNDQhggwbymURTcpsmYqp_P4nj83xLsmbRCDcdt-4ixMqZ5lRXPJrk61U1Kg6Z75Fpmzt8g0WK9_8JxghbG8HVUrCv77KZLi3aMbg9wTKJyll7I-DRtdmpxsjJCgG9kqcjA-DdtLvJhy2avvFN4--PoI0e5WyUxRApzFvXHM9DrVQtOk",
-                  "https://lh3.googleusercontent.com/aida-public/AB6AXuA-LLnq3e7wmZa8GGBC7AYSPNaNsyX-5sOJv0BLpjazg2f7K0EYywM4LzI4Keq6g6-Toh2o7Q1rr_oWgkoWE0Qj-1hdis3PTMyYrdrv22XO421cgYaUtBqivyMiTZiDwTA6CEF9hPFVU-ZYBGf0-W64yDAhcPJnx4q_hHLNcqlXaPXSRgXTufb_87ZV-FGT5fxVgULZCTaK12wnirBEq9juG-yIXC1C9TRnvKwkw5GQlmo_BX2fXWHwYntlxIFQfMQuU8HsrmZZC9U"
-                ].map((src, i) => (
-                  <div key={i} className="gallery-item" onClick={() => openModal('Visualização', <img src={src} className="gallery-modal-img" />, true)}>
-                    <img src={src} alt="Tattoo Gallery" />
-                    <div className="gallery-overlay"><span className="material-symbols-outlined">zoom_in</span></div>
-                  </div>
-                ))}
-              </div>
+
+              {colecao.length === 0 ? (
+                <div style={{ color: 'rgba(255,255,255,0.4)', padding: '2rem 0', textAlign: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>photo_library</span>
+                  Suas tattoos realizadas aparecerão aqui.
+                </div>
+              ) : (
+                <div className="gallery-layout">
+                  {colecao.map((ag, i) => (
+                    <div key={ag.id} className="gallery-item" onClick={() => openModal('Visualização', <div style={{padding:'2rem',textAlign:'center',color:'rgba(255,255,255,0.6)'}}>{ag.servico} — {formatDate(ag.dataHora)}</div>)}>
+                      <div style={{ width: '100%', height: '100%', background: 'rgba(255,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.3)' }}>ink_pen</span>
+                      </div>
+                      <div className="gallery-overlay"><span className="material-symbols-outlined">zoom_in</span></div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
           </div>
 
           {/* Right Column */}
           <div className="profile-col-side">
-            
+
             {/* Care Guides */}
             <div className="care-guides-box">
               <h3><span className="material-symbols-outlined">medical_services</span> Guias de Cuidados</h3>
               <div className="guides-list">
                 <div className="guide-item" onClick={() => openModal(modalData['guide_1'].title, modalData['guide_1'].content)}>
                   <div className="guide-icon"><span className="material-symbols-outlined">water_drop</span></div>
-                  <div className="guide-text">
-                    <h5>Primeiras 24 Horas</h5>
-                    <p>Lidando com plasma e plástico</p>
-                  </div>
+                  <div className="guide-text"><h5>Primeiras 24 Horas</h5><p>Lidando com plasma e plástico</p></div>
                   <span className="material-symbols-outlined guide-arrow">arrow_forward</span>
                 </div>
                 <div className="guide-item" onClick={() => openModal(modalData['guide_2'].title, modalData['guide_2'].content)}>
                   <div className="guide-icon"><span className="material-symbols-outlined">soap</span></div>
-                  <div className="guide-text">
-                    <h5>Lavar & Proteger</h5>
-                    <p>Tipos de sabonete e hidratação</p>
-                  </div>
+                  <div className="guide-text"><h5>Lavar & Proteger</h5><p>Tipos de sabonete e hidratação</p></div>
                   <span className="material-symbols-outlined guide-arrow">arrow_forward</span>
                 </div>
                 <div className="guide-item" onClick={() => openModal(modalData['guide_3'].title, modalData['guide_3'].content)}>
                   <div className="guide-icon"><span className="material-symbols-outlined">sunny</span></div>
-                  <div className="guide-text">
-                    <h5>Cuidados a Longo Prazo</h5>
-                    <p>Filtro solar e longevidade</p>
-                  </div>
+                  <div className="guide-text"><h5>Cuidados a Longo Prazo</h5><p>Filtro solar e longevidade</p></div>
                   <span className="material-symbols-outlined guide-arrow">arrow_forward</span>
                 </div>
               </div>
             </div>
 
-            {/* My Artists */}
+            {/* Meus Artistas */}
             <div className="profile-section">
               <div className="section-header">
                 <h3><span className="material-symbols-outlined">group</span> Meus Artistas</h3>
               </div>
-              <div className="artists-list">
-                <div className="artist-item">
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmL3UTPlHIjQKp4Po0YxsNjxzwgyB-NGNGUiaAQWorN-KbrVzk2YJCUq6guz-ZkwIM5PxM-kzJ0_AzT8lVjRPABv6gmOzUGCltq7_FlP7Z_qmlX6xkguEAcaT_IIwynvH5tx8fKU3bAfVgQhrYFA1Y5K0ZEuBP-VDT5iX5AO31QUlS3vn1VKOHuxwpVqDrBEaITfU1SfSxK-gvUkmtJDfqRwQyU3cjq8mfZygrIgL2JTQ_vbZoUPGgRZ4pGoQ5w7ksIbmpHmO1BOI" alt="Marcus Vane" />
-                  <div className="artist-info">
-                    <h5>Marcus Vane</h5>
-                    <p>Especialista Blackwork</p>
-                  </div>
-                  <button onClick={() => handleAction('chat_marcus')}><span className="material-symbols-outlined">chat_bubble</span></button>
+              {artistasUnicos.length === 0 ? (
+                <div style={{ color: 'rgba(255,255,255,0.4)', padding: '1rem 0', textAlign: 'center', fontSize: '0.85rem' }}>
+                  Os artistas das suas sessões aparecerão aqui.
                 </div>
-                <div className="artist-item">
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtF0jjQzt1mm59JECkf795K9PUwWO9bC9FSvCuRhThSluwdXxvRQzCoPlkcOFsgTBBUyOYHBHQctAPKPhTJ685MzPZPCdnAFHrq3uMdf4gRa14orLTAP27fbBXpnJ6srNtoraefd5-IfL6B1z9ebY_ZPi_trjKiQYq_wk4GtfamOq6IQ5_eUuszJDv3jU1QeTofjlPEfFdgzWeHw4kE80x50wIG3zTB3_yr3YZ8Zam23K0lyf_yvsTrvB8P9VYV58SU5t4dInh4R8" alt="Elena K." />
-                  <div className="artist-info">
-                    <h5>Elena K.</h5>
-                    <p>Neo-Tradicional</p>
-                  </div>
-                  <button onClick={() => handleAction('chat_elena')}><span className="material-symbols-outlined">chat_bubble</span></button>
+              ) : (
+                <div className="artists-list">
+                  {artistasUnicos.map(artista => (
+                    <div key={artista.id} className="artist-item">
+                      <img
+                        src={artista.fotoUrl || '/assets/portifolio_tatuadores/Tatuador_1.png'}
+                        alt={artista.nome}
+                        onError={e => { e.target.style.display = 'none' }}
+                      />
+                      <div className="artist-info">
+                        <h5>{artista.nome}</h5>
+                        <p>{artista.role}</p>
+                      </div>
+                      <button onClick={() => showToast(`Chat com ${artista.nome} em breve!`, 'chat')}>
+                        <span className="material-symbols-outlined">chat_bubble</span>
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Promo Card */}
@@ -373,6 +396,99 @@ const Profile = () => {
       <div className="p-toasts-container">
         {toasts.map(toast => <Toast key={toast.id} {...toast} onExit={() => removeToast(toast.id)} />)}
       </div>
+    </div>
+  )
+}
+
+const SessionModalContent = ({ ag, onUpdate }) => {
+  const [avaliacao, setAvaliacao] = useState(ag.avaliacao || 0)
+  const [observacoes, setObservacoes] = useState(ag.observacoes || '')
+  const [loading, setLoading] = useState(false)
+
+  const handleUpdate = async (status) => {
+    setLoading(true)
+    await onUpdate(status, avaliacao, observacoes)
+    setLoading(false)
+  }
+
+  const statusLabel = {
+    'AGENDADO': 'Agendada',
+    'CONFIRMADO': 'Confirmada',
+    'EM_ANDAMENTO': 'Em Andamento',
+    'REALIZADO': 'Realizada',
+    'CANCELADO': 'Cancelada',
+  }
+
+  return (
+    <div className="p-modal-stack">
+      <div className="p-modal-card border-red">
+        <h4>Serviço</h4>
+        <p>{ag.servico || 'Tatuagem'}</p>
+      </div>
+      <div className="p-modal-grid">
+        <div className="p-modal-card">
+          <span>Data & Hora</span>
+          <strong>{new Date(ag.dataHora).toLocaleDateString('pt-BR')}<br/>{new Date(ag.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</strong>
+        </div>
+        <div className="p-modal-card">
+          <span>Artista</span>
+          <strong>{ag.artista?.nome || '—'}</strong>
+        </div>
+      </div>
+      <div className="p-modal-card">
+        <span>Status</span>
+        <strong style={{ color: '#ff0000' }}>{statusLabel[ag.status] || ag.status}</strong>
+      </div>
+      {(ag.valorPago != null || ag.valorPendente != null) && (
+        <div className="p-modal-grid">
+          {ag.valorPago != null && <div className="p-modal-card"><span>Valor Pago</span><strong>R$ {ag.valorPago.toFixed(2)}</strong></div>}
+          {ag.valorPendente != null && <div className="p-modal-card"><span>Valor Pendente</span><strong>R$ {ag.valorPendente.toFixed(2)}</strong></div>}
+        </div>
+      )}
+
+      <div className="p-modal-card">
+        <span>Observações</span>
+        <textarea
+          value={observacoes}
+          onChange={e => setObservacoes(e.target.value)}
+          placeholder="Adicione anotações sobre a sessão..."
+          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '6px', padding: '8px', marginTop: '6px', resize: 'vertical', minHeight: '80px' }}
+        />
+      </div>
+
+      {ag.status === 'AGENDADO' || ag.status === 'CONFIRMADO' ? (
+        <>
+          <p className="p-modal-note">Por favor, chegue com 15 minutos de antecedência.</p>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <button
+              className="p-btn-primary"
+              disabled={loading}
+              onClick={() => handleUpdate('REALIZADO')}
+              style={{ flex: 1 }}
+            >
+              Marcar como Realizada
+            </button>
+            <button
+              className="p-btn-secondary"
+              disabled={loading}
+              onClick={() => handleUpdate('CANCELADO')}
+              style={{ flex: 1 }}
+            >
+              Cancelar Sessão
+            </button>
+          </div>
+        </>
+      ) : ag.status === 'REALIZADO' ? (
+        <>
+          <div className="p-modal-card">
+            <span>Avaliação do Artista</span>
+            <StarRating value={avaliacao} onChange={setAvaliacao} />
+          </div>
+          <button className="p-btn-primary" disabled={loading} onClick={() => handleUpdate('REALIZADO')}>
+            Salvar Avaliação
+          </button>
+        </>
+      ) : null}
     </div>
   )
 }
