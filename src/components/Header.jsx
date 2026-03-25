@@ -11,8 +11,26 @@ const Header = () => {
 
   useEffect(() => {
     const userData = localStorage.getItem('user')
-    if (userData) {
-      setUser(JSON.parse(userData))
+    const token = localStorage.getItem('token')
+
+    if (userData && token) {
+      try {
+        // Verifica se o token JWT está expirado
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        if (payload.exp * 1000 < Date.now()) {
+          localStorage.removeItem('user')
+          localStorage.removeItem('token')
+          setUser(null)
+        } else {
+          setUser(JSON.parse(userData))
+        }
+      } catch {
+        localStorage.removeItem('user')
+        localStorage.removeItem('token')
+        setUser(null)
+      }
+    } else {
+      setUser(null)
     }
   }, [location])
 
