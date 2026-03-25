@@ -193,7 +193,7 @@ nav {
 /* Notificacoes */
 .notif-wrap {
     position: fixed;
-    top: 0;
+    top: 0.5rem;
     right: 1.5rem;
     height: 80px;
     display: flex;
@@ -215,6 +215,10 @@ nav {
     border-radius: 50%;
     transition: all 0.3s ease;
     padding: 0;
+}
+
+.notif-btn span {
+    font-size: 1.2rem;
 }
 
 .notif-btn:hover {
