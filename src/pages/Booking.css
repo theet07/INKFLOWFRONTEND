@@ -778,7 +778,8 @@
 .booking-toast {
   position: fixed;
   bottom: 2rem;
-  right: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
   background: #10b981;
   color: #fff;
   padding: 1rem 2rem;
@@ -794,12 +795,11 @@
 
 @keyframes toastSlideUp {
   from {
-    transform: translateY(100%);
+    transform: translateX(-50%) translateY(100%);
     opacity: 0;
   }
-
   to {
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
     opacity: 1;
   }
 }
