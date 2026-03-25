@@ -140,8 +140,6 @@ nav {
     color: var(--accent-red);
 }
 
-
-
 .mobile-menu-toggle {
     display: none;
     background: none;
@@ -192,7 +190,17 @@ nav {
     }
 }
 
-/* Notificações */
+/* Notificacoes */
+.notif-wrap {
+    position: fixed;
+    top: 0;
+    right: 1.5rem;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    z-index: 1002;
+}
+
 .notif-btn {
     position: relative;
     background: none;
@@ -211,7 +219,6 @@ nav {
 
 .notif-btn:hover {
     color: var(--accent-red);
-    background: rgba(208, 0, 0, 0.1);
 }
 
 .notif-badge {

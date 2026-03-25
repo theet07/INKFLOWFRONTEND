@@ -111,31 +111,6 @@ const Header = () => {
           <li><Link to="/contato" className={isActive('/contato')}>Contato</Link></li>
           {user ? (
             <>
-            <li ref={notifRef} style={{ position: 'relative' }}>
-              <button className="notif-btn" onClick={() => setNotifOpen(prev => !prev)}>
-                <span className="material-symbols-outlined" style={{ fontSize: '1.3rem' }}>notifications</span>
-                {agendamentos.length > 0 && (
-                  <span className="notif-badge">{agendamentos.length}</span>
-                )}
-              </button>
-              {notifOpen && (
-                <div className="notif-dropdown">
-                  <div className="notif-header">Agendamentos Recentes</div>
-                  {agendamentos.length === 0 ? (
-                    <div className="notif-empty">Nenhum agendamento ainda.</div>
-                  ) : (
-                    agendamentos.map(ag => (
-                      <div key={ag.id} className="notif-item" onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>
-                        <div className="notif-item-title">{ag.servico || 'Tatuagem'}</div>
-                        <div className="notif-item-sub">{ag.artista?.nome || 'Artista'} · {formatDate(ag.dataHora)}</div>
-                        <span className="notif-item-status" style={{ color: statusColor[ag.status] || '#fff' }}>{ag.status}</span>
-                      </div>
-                    ))
-                  )}
-                  <div className="notif-footer" onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>Ver todos no perfil →</div>
-                </div>
-              )}
-            </li>
             <li>
               <Link to="/perfil" className={isActive('/perfil')}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -160,6 +135,30 @@ const Header = () => {
             ☰
           </button>
         </div>
+        {user && (
+          <div className="notif-wrap" ref={notifRef}>
+            <button className="notif-btn" onClick={() => setNotifOpen(prev => !prev)}>
+              <span className="material-symbols-outlined">notifications</span>
+            </button>
+            {notifOpen && (
+              <div className="notif-dropdown">
+                <div className="notif-header">Agendamentos Recentes</div>
+                {agendamentos.length === 0 ? (
+                  <div className="notif-empty">Nenhum agendamento ainda.</div>
+                ) : (
+                  agendamentos.map(ag => (
+                    <div key={ag.id} className="notif-item" onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>
+                      <div className="notif-item-title">{ag.servico || 'Tatuagem'}</div>
+                      <div className="notif-item-sub">{ag.artista?.nome || 'Artista'} · {formatDate(ag.dataHora)}</div>
+                      <span className="notif-item-status" style={{ color: statusColor[ag.status] || '#fff' }}>{ag.status}</span>
+                    </div>
+                  ))
+                )}
+                <div className="notif-footer" onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>Ver todos no perfil →</div>
+              </div>
+            )}
+          </div>
+        )}
       </nav>
     </header>
   )
