@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { agendamentoService, clienteService, artistaService } from '../services/inkflowApi'
+import { agendamentoService, clienteService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
 import './Booking.css'
 
@@ -22,7 +22,6 @@ const Booking = () => {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [toasts, setToasts] = useState([])
     const [showTerms, setShowTerms] = useState(false)
-    const [artistas, setArtistas] = useState([])
 
     useEffect(() => {
         const userData = localStorage.getItem('user')
@@ -41,7 +40,6 @@ const Booking = () => {
                 console.error(e)
             }
         }
-        artistaService.getAll().then(res => setArtistas(res.data)).catch(() => {})
     }, [])
 
     const stylesOptions = [
@@ -53,13 +51,13 @@ const Booking = () => {
         { name: 'FLORAL', img: '/assets/portifolio_novo/Tattoo-Cobra-Floral.webp' }
     ]
 
-    const artistsOptions = artistas.map(a => ({
-        id: a.id,
-        name: a.nome,
-        role: a.role,
-        img: a.fotoUrl,
-        specialties: a.especialidades ? a.especialidades.split(',') : []
-    }))
+    const artistsOptions = [
+        { id: 1002, name: 'LUCAS M.', role: 'Especialista Realismo', img: '/assets/portifolio_tatuadores/Tatuador_1.png', specialties: ['REALISTA'] },
+        { id: 1003, name: 'LILLY K.', role: 'Realismo & Fine Line', img: '/assets/portifolio_tatuadores/Tatuadora_3.png', specialties: ['REALISTA'] },
+        { id: 1004, name: 'RAFAEL S.', role: 'Blackwork & Ornamental', img: '/assets/portifolio_tatuadores/Tatuador_2.png', specialties: ['BLACKWORK', 'MAORI'] },
+        { id: 1005, name: 'CAMILA R.', role: 'Fine Line & Floral', img: '/assets/portifolio_tatuadores/Tatuadora_5.png', specialties: ['FLORAL'] },
+        { id: 1006, name: 'ANDRÉ V.', role: 'Oriental & Geek', img: '/assets/portifolio_tatuadores/Tatuador_4.png', specialties: ['ORIENTAL', 'GEEK'] }
+    ]
 
     const days = [
         { day: '1', active: false }, { day: '2', active: true }, { day: '3', active: true }, { day: '4', active: true },
