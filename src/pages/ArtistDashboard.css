@@ -234,6 +234,10 @@
   flex-direction: column;
   gap: 0;
   justify-content: flex-start;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  align-items: stretch;
 }
 
 .ad-nav-item {
@@ -305,11 +309,12 @@
 }
 
 .ad-status-text {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: white;
   text-transform: uppercase;
   font-family: var(--ad-font-headline);
+  white-space: nowrap;
 }
 
 /* Sidebar Backdrop */
