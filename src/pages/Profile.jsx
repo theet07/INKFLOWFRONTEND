@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { agendamentoService } from '../services/inkflowApi'
+import { agendamentoService, clienteService } from '../services/inkflowApi'
 import './Profile.css'
 
 const Toast = ({ message, icon, onExit }) => {
@@ -52,6 +52,7 @@ const Profile = () => {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [agendamentos, setAgendamentos] = useState([])
   const [loadingAg, setLoadingAg] = useState(true)
+  const [editProfile, setEditProfile] = useState({ isOpen: false, nome: '', telefone: '', saving: false })
   const settingsRef = useRef(null)
 
   useEffect(() => {
@@ -95,7 +96,9 @@ const Profile = () => {
 
   const handleAction = (action) => {
     switch(action) {
-      case 'edit_profile': showToast('Abrindo editor de perfil...', 'edit'); break
+      case 'edit_profile':
+        setEditProfile({ isOpen: true, nome: user.nome || user.fullName || '', telefone: user.telefone || '', saving: false })
+        break
       case 'share':
         navigator.clipboard.writeText('inkflow.com/perfil/' + (user.nome?.replace(/\s+/g, '-').toLowerCase() || ''))
         showToast('Link da Galeria Copiado!', 'content_copy')
@@ -113,15 +116,39 @@ const Profile = () => {
     }
   }
 
+  const handleSaveProfile = async () => {
+    setEditProfile(prev => ({ ...prev, saving: true }))
+    try {
+      if (user.id) {
+        await clienteService.update(user.id, {
+          ...user,
+          nome: editProfile.nome,
+          fullName: editProfile.nome,
+          telefone: editProfile.telefone,
+        })
+      }
+      const updatedUser = { ...user, nome: editProfile.nome, fullName: editProfile.nome, telefone: editProfile.telefone }
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+      setEditProfile(prev => ({ ...prev, isOpen: false }))
+      showToast('Perfil atualizado com sucesso!', 'check_circle')
+      setTimeout(() => window.location.reload(), 500)
+    } catch {
+      showToast('Erro ao atualizar perfil.', 'error')
+      setEditProfile(prev => ({ ...prev, saving: false }))
+    }
+  }
+
   const handleUpdateStatus = async (agendamentoId, status, avaliacao, observacoes) => {
     try {
       await agendamentoService.updateStatus(agendamentoId, { status, avaliacao, observacoes })
       const res = await agendamentoService.getByCliente(user.id)
       setAgendamentos(res.data)
-      showToast('Sessão atualizada com sucesso!', 'check_circle')
+      const msg = status === 'REALIZADO' ? 'Sessão marcada como realizada!' : status === 'CANCELADO' ? 'Sessão cancelada.' : 'Sessão atualizada!'
+      showToast(msg, status === 'CANCELADO' ? 'cancel' : 'check_circle')
       closeModal()
-    } catch {
-      showToast('Erro ao atualizar sessão.', 'error')
+    } catch (err) {
+      console.error('Erro ao atualizar status:', err)
+      showToast('Erro ao atualizar sessão. Verifique sua conexão.', 'error')
     }
   }
 
@@ -260,8 +287,8 @@ const Profile = () => {
                       <div className="session-content">
                         <div className="session-top">
                           <div>
-                            <h4>{ag.servico || 'Tatuagem'}</h4>
-                            <p>com <span>{ag.artista?.nome || 'Artista'}</span></p>
+                            <h4>{(ag.servico || 'Tatuagem').replace(/\s+com\s+.+$/i, '')}</h4>
+                            <p>com <span>{ag.artista?.nome || (ag.servico?.match(/com\s+(.+)$/i)?.[1]) || 'Artista'}</span></p>
                           </div>
                           <div className={`session-date ${ag.status === 'AGENDADO' ? 'red' : 'gray'}`}>
                             {formatDate(ag.dataHora)}
@@ -392,6 +419,59 @@ const Profile = () => {
         </div>
       )}
 
+      {/* Edit Profile Modal */}
+      {editProfile.isOpen && (
+        <div className="p-modal-overlay" onClick={() => setEditProfile(prev => ({ ...prev, isOpen: false }))}>
+          <div className="p-modal" onClick={e => e.stopPropagation()}>
+            <div className="p-modal-header">
+              <h3>Editar Perfil</h3>
+              <button onClick={() => setEditProfile(prev => ({ ...prev, isOpen: false }))}><span className="material-symbols-outlined">close</span></button>
+            </div>
+            <div className="p-modal-body custom-scrollbar">
+              <div className="p-modal-stack">
+                <div className="p-modal-card">
+                  <span>Nome</span>
+                  <input
+                    type="text"
+                    value={editProfile.nome}
+                    onChange={e => setEditProfile(prev => ({ ...prev, nome: e.target.value }))}
+                    placeholder="Seu nome"
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '6px', padding: '10px', marginTop: '6px', fontSize: '1rem' }}
+                  />
+                </div>
+                <div className="p-modal-card">
+                  <span>Telefone</span>
+                  <input
+                    type="tel"
+                    value={editProfile.telefone}
+                    onChange={e => setEditProfile(prev => ({ ...prev, telefone: e.target.value }))}
+                    placeholder="(99) 99999-9999"
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '6px', padding: '10px', marginTop: '6px', fontSize: '1rem' }}
+                  />
+                </div>
+                <div className="p-modal-card">
+                  <span>Email</span>
+                  <input
+                    type="email"
+                    value={user.email || ''}
+                    disabled
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', borderRadius: '6px', padding: '10px', marginTop: '6px', fontSize: '1rem', cursor: 'not-allowed' }}
+                  />
+                </div>
+                <button
+                  className="p-btn-primary"
+                  disabled={editProfile.saving}
+                  onClick={handleSaveProfile}
+                  style={{ width: '100%', marginTop: '0.5rem' }}
+                >
+                  {editProfile.saving ? 'Salvando...' : 'Salvar Alterações'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toasts */}
       <div className="p-toasts-container">
         {toasts.map(toast => <Toast key={toast.id} {...toast} onExit={() => removeToast(toast.id)} />)}
@@ -423,7 +503,7 @@ const SessionModalContent = ({ ag, onUpdate }) => {
     <div className="p-modal-stack">
       <div className="p-modal-card border-red">
         <h4>Serviço</h4>
-        <p>{ag.servico || 'Tatuagem'}</p>
+        <p>{(ag.servico || 'Tatuagem').replace(/\s+com\s+.+$/i, '')}{ag.artista?.nome ? ` com ${ag.artista.nome}` : ''}</p>
       </div>
       <div className="p-modal-grid">
         <div className="p-modal-card">

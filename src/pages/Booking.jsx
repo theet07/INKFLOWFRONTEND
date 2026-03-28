@@ -160,7 +160,7 @@ const Booking = () => {
                 cliente: { id: clienteId },
                 artista: artistaSelecionado ? { id: artistaSelecionado.id } : null,
                 dataHora: dataHora,
-                servico: bookingState.style,
+                servico: artistaSelecionado ? `${bookingState.style} com ${artistaSelecionado.name}` : bookingState.style,
                 descricao: formData.desc
             }
 
