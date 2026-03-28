@@ -13,6 +13,7 @@ import Login from './pages/Login'
 import Booking from './pages/Booking'
 import AdminDashboard from './pages/AdminDashboard'
 import Profile from './pages/Profile'
+import ArtistDashboard from './pages/ArtistDashboard'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -27,11 +28,13 @@ function ScrollToTop() {
 function AppContent() {
   const location = useLocation()
   const isLoginPage = location.pathname === '/login'
+  const isArtistDashboard = location.pathname === '/artist-dashboard'
+  const hideShell = isLoginPage || isArtistDashboard
 
   return (
     <div className="App">
       <ScrollToTop />
-      {!isLoginPage && <Header />}
+      {!hideShell && <Header />}
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -43,10 +46,11 @@ function AppContent() {
           <Route path="/agendamento" element={<Booking />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/perfil" element={<Profile />} />
+          <Route path="/artist-dashboard" element={<ArtistDashboard />} />
         </Routes>
       </main>
-      {!isLoginPage && <Footer />}
-      {!isLoginPage && <Chatbot />}
+      {!hideShell && <Footer />}
+      {!hideShell && <Chatbot />}
 
     </div>
   )

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>INKFLOW | Artist Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-fixed": "#ff7576",
+                        "surface-container-lowest": "#000000",
+                        "surface-container": "#1a1919",
+                        "background": "#0e0e0e",
+                        "surface-container-low": "#131313",
+                        "outline": "#767575",
+                        "outline-variant": "#484847",
+                        "surface-container-highest": "#262626",
+                        "primary": "#ff8d8c",
+                        "surface-bright": "#2c2c2c",
+                        "primary-container": "#ff7576",
+                        "on-surface-variant": "#adaaaa",
+                        "surface-container-high": "#201f1f",
+                        "on-primary": "#640010",
+                        "primary-dim": "#ff7072",
+                        "on-primary-fixed": "#000000",
+                        "surface": "#0e0e0e",
+                        "surface-variant": "#262626",
+                        "on-surface": "#ffffff",
+                    },
+                    fontFamily: {
+                        "headline": ["Epilogue", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0e0e0e; }
+        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #e63946; }
+
+        /* Custom Animations */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .toast-animate { animation: slideUpFade 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary selection:text-on-primary overflow-x-hidden">
+
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full h-16 flex items-center justify-between px-4 md:px-6 bg-[#131313] border-b border-white/10 z-50">
+        <div class="flex items-center gap-4">
+            <!-- Mobile Menu Toggle -->
+            <button id="mobile-menu-btn" class="md:hidden text-white p-1 hover:bg-white/10 rounded transition-colors">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <span class="text-2xl font-black tracking-tighter text-[#e63946] uppercase font-headline">INKFLOW</span>
+        </div>
+        <div class="flex items-center gap-4 md:gap-6">
+            <button class="text-[#adaaaa] hover:text-white transition-colors duration-200 active:opacity-80 scale-95 transition-all">
+                <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <p class="text-xs font-bold font-headline uppercase tracking-widest text-white">Elias Thorne</p>
+                    <p class="text-[10px] text-on-surface-variant uppercase">Senior Artist</p>
+                </div>
+                <button class="text-[#adaaaa] hover:text-white transition-colors duration-200 active:opacity-80 scale-95 transition-all">
+                    <span class="material-symbols-outlined text-3xl" data-icon="account_circle">account_circle</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- SideNavBar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-64 flex flex-col pt-20 pb-6 bg-[#131313] border-r border-white/5 z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shadow-[40px_0_40px_rgba(230,57,70,0.06)]">
+        <div class="px-6 mb-8">
+            <h2 class="text-xl font-black text-[#e63946] font-headline">INKFLOW</h2>
+            <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-headline">Artist Studio</p>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <a class="flex items-center gap-4 px-6 py-4 text-white border-l-4 border-[#e63946] bg-gradient-to-r from-[#e63946]/10 to-transparent font-headline text-sm font-bold uppercase tracking-widest transition-all translate-x-1" href="#">
+                <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
+            </a>
+            <a class="flex items-center gap-4 px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] font-headline text-sm font-bold uppercase tracking-widest transition-all duration-300" href="#">
+                <span class="material-symbols-outlined">potted_plant</span><span>Requests</span>
+            </a>
+            <a class="flex items-center gap-4 px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] font-headline text-sm font-bold uppercase tracking-widest transition-all duration-300" href="#">
+                <span class="material-symbols-outlined">calendar_today</span><span>Schedule</span>
+            </a>
+            <a class="flex items-center gap-4 px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] font-headline text-sm font-bold uppercase tracking-widest transition-all duration-300" href="#">
+                <span class="material-symbols-outlined">brush</span><span>Portfolio</span>
+            </a>
+            <a class="flex items-center gap-4 px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] font-headline text-sm font-bold uppercase tracking-widest transition-all duration-300" href="#">
+                <span class="material-symbols-outlined">settings</span><span>Settings</span>
+            </a>
+        </nav>
+        <div class="px-6 mt-auto">
+            <div class="p-4 bg-surface-container-highest rounded-lg border border-white/5">
+                <p class="text-[10px] text-on-surface-variant uppercase tracking-widest mb-2 font-headline">Studio Status</p>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    <span class="text-xs font-bold text-white uppercase font-headline">Accepting Books</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Sidebar Mobile Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 z-30 opacity-0 pointer-events-none transition-opacity duration-300 md:hidden"></div>
+
+    <!-- Main Content -->
+    <main class="md:pl-64 pt-16 min-h-screen bg-surface">
+        <div class="p-6 md:p-10 max-w-7xl mx-auto space-y-12">
+            
+            <!-- Header Section -->
+            <section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                <div class="space-y-2">
+                    <span class="text-primary font-headline text-xs font-bold uppercase tracking-[0.3em]">Overview</span>
+                    <h1 class="text-4xl md:text-6xl font-black font-headline tracking-tighter uppercase leading-none">The Atelier <br/><span class="text-on-surface-variant/20">Control Center</span></h1>
+                </div>
+                <div class="flex gap-4 w-full md:w-auto">
+                    <button class="js-new-session-btn bg-gradient-to-br from-primary to-primary-dim text-on-primary px-6 py-3 rounded-sm font-headline font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-90 transition-opacity w-full md:w-auto">
+                        <span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+                        New Session
+                    </button>
+                </div>
+            </section>
+
+            <!-- Summary Bento Grid -->
+            <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Large Highlight Card -->
+                <div class="md:col-span-2 relative overflow-hidden group bg-surface-container-highest p-8 h-48 flex flex-col justify-between">
+                    <div class="absolute inset-0 opacity-40 group-hover:scale-105 transition-transform duration-700">
+                        <img class="w-full h-full object-cover grayscale" data-alt="close up of detailed black ink tattoo art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcwMBoogvZI_cuzbWkJsJ-H3csKEkUzGPrTnBccbSByv9y0lN_JIf4HjArRRW1PQAT-pZgiG_ER61m0fY6Wxa5ueTP2zOCTYvsvcR4gWVxWrbyWahDzJK9FDiAN-8e5xzBBbk1VvX1UL3-AEDiZSwcZLR2y08Aa-O9kpnmRfDiWYOpH0X_yLWvrt27XW52E0qko1GBvirlrW1w9e6IuOchdJQVsaG8NkpqqsAkhJxbmVGh50QOQd-aWTWQLR_AYuQFIK-bUbPFvV8"/>
+                        <div class="absolute inset-0 bg-gradient-to-t from-surface-container-highest via-surface-container-highest/60 to-transparent"></div>
+                    </div>
+                    <div class="relative z-10 flex justify-between items-start">
+                        <span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-on-surface-variant">Pending Requests</span>
+                        <span class="material-symbols-outlined text-primary" data-icon="pending_actions">pending_actions</span>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-6xl font-black font-headline tracking-tighter">14</h3>
+                        <p class="text-xs text-primary font-bold uppercase tracking-widest">+3 since yesterday</p>
+                    </div>
+                </div>
+
+                <!-- Regular Card 1 -->
+                <div class="bg-surface-container-highest p-8 flex flex-col justify-between border-l-2 border-primary/20">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-on-surface-variant">Confirmed</span>
+                        <span class="material-symbols-outlined text-on-surface-variant" data-icon="event_available">event_available</span>
+                    </div>
+                    <div>
+                        <h3 class="text-4xl font-black font-headline tracking-tighter">28</h3>
+                        <p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Active Schedule</p>
+                    </div>
+                </div>
+
+                <!-- Regular Card 2 -->
+                <div class="bg-surface-container-highest p-8 flex flex-col justify-between border-l-2 border-primary/20">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-on-surface-variant">Monthly</span>
+                        <span class="material-symbols-outlined text-on-surface-variant" data-icon="check_circle">check_circle</span>
+                    </div>
+                    <div>
+                        <h3 class="text-4xl font-black font-headline tracking-tighter">42</h3>
+                        <p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Completed Sits</p>
+                    </div>
+                </div>
+
+                <!-- Rating Card -->
+                <div class="md:col-span-4 bg-surface-container-low p-6 flex flex-col md:flex-row items-center justify-between gap-6 border-y border-white/5">
+                    <div class="flex items-center gap-6">
+                        <div class="text-5xl font-black font-headline text-primary">4.9</div>
+                        <div>
+                            <div class="flex text-primary gap-1">
+                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span class="material-symbols-outlined">star_half</span>
+                            </div>
+                            <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-headline font-bold">Average Artist Rating</p>
+                        </div>
+                    </div>
+                    <div class="h-12 w-px bg-white/10 hidden md:block"></div>
+                    <div class="flex gap-8 overflow-x-auto pb-2 w-full md:w-auto">
+                        <div class="shrink-0">
+                            <p class="text-lg font-bold font-headline leading-none">128</p>
+                            <p class="text-[9px] text-on-surface-variant uppercase">Total Reviews</p>
+                        </div>
+                        <div class="shrink-0">
+                            <p class="text-lg font-bold font-headline leading-none">98%</p>
+                            <p class="text-[9px] text-on-surface-variant uppercase">Satisfaction</p>
+                        </div>
+                        <div class="shrink-0">
+                            <p class="text-lg font-bold font-headline leading-none">12</p>
+                            <p class="text-[9px] text-on-surface-variant uppercase">Design Saves</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Upcoming Appointments Timeline -->
+            <section class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-black font-headline tracking-tighter uppercase italic">Today's Agenda</h2>
+                    <button class="js-action-btn text-[10px] font-bold uppercase tracking-widest text-primary hover:underline" data-action="View Full Schedule">View Full Schedule</button>
+                </div>
+                <div class="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 no-scrollbar">
+                    
+                    <!-- Timeline Item 1 -->
+                    <div class="flex-none w-80 bg-surface-container-highest p-5 flex items-start gap-4 hover:bg-surface-bright transition-colors duration-300 cursor-pointer js-action-btn" data-action="View Session: Marcus Vane">
+                        <div class="text-center shrink-0">
+                            <p class="text-xl font-black font-headline leading-none">10:00</p>
+                            <p class="text-[9px] text-primary uppercase font-bold">AM</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-primary/30">
+                            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLosEgOfR996MZgw8U40BofUpn5KmZd5naxciO1RxsHR_EnzwT9NxoVrqfldIO5CBJi9nAotFwGLfkbQKBe-ifK7qc2f-88gxEVtCgHr_Rx9FeqN0w_qeP-bA-WJPVY__nTU1V5Q_hO1WrCOqq-l33NlOEJvz-iTexOUR4pX-ARSc9hxbC-LbfSriA0u4p8SEVYemwo62nnSIAndFsax6XhZ64mQ-ZJzdWBw3tyZKS60V_DLkfItMXy5fQGfA1V4dCZHvCyWZYC9g"/>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold font-headline uppercase leading-tight">Marcus Vane</p>
+                            <p class="text-[10px] text-on-surface-variant uppercase mb-2">Realism Sleeve • 4h</p>
+                            <span class="px-2 py-0.5 bg-primary/10 text-primary text-[9px] font-bold uppercase rounded-full">Confirmed</span>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 2 -->
+                    <div class="flex-none w-80 bg-surface-container-highest p-5 flex items-start gap-4 hover:bg-surface-bright transition-colors duration-300 cursor-pointer js-action-btn" data-action="View Session: Sienna Cole">
+                        <div class="text-center shrink-0">
+                            <p class="text-xl font-black font-headline leading-none">02:30</p>
+                            <p class="text-[9px] text-primary uppercase font-bold">PM</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-white/10">
+                            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAB5HUmNuLmwR2Q5kTDgXK6m2d6gDTreEbbJ02ge0NklbvHeBYork9Eg7JwoWmwvVyG1AhQluK96NtLJxpdia0oGVjuheGbQlL-g01FlKMMft3gVSSsUHjNQ-9k42MSa5tzDz0imYshpNFe32mgmjBdNMJst4W71E9OzHfC96FzCiZePItU_ssYb4p_0FghTr61H7EijQTsIJprIJUk2r4gyhVKBIQ8OXKMDJ3sMGQOtWcN3-qwUMTeyB6mucWk9tuMEDGBT324INQ"/>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold font-headline uppercase leading-tight">Sienna Cole</p>
+                            <p class="text-[10px] text-on-surface-variant uppercase mb-2">Fine Line Script • 1.5h</p>
+                            <span class="px-2 py-0.5 bg-primary/10 text-primary text-[9px] font-bold uppercase rounded-full">Confirmed</span>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 3 -->
+                    <div class="flex-none w-80 bg-surface-container-highest p-5 flex items-start gap-4 hover:bg-surface-bright transition-colors duration-300 cursor-pointer js-action-btn" data-action="View Session: Julian Reed">
+                        <div class="text-center shrink-0">
+                            <p class="text-xl font-black font-headline leading-none">05:00</p>
+                            <p class="text-[9px] text-primary uppercase font-bold">PM</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-white/10">
+                            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwZ1MWlsX9D3Qxd_3FulhGvtW-RnWLa2Pnyf5haq39djNgEvfw-wbpLYlyUf6LOgZkdcrMAY3nBDgpVKKm9MclPMUVCUhTn-7q0dVNVOaMaWs5reSfkUqOMTh2wpRcaiu3fYWFxxrvvD75t32jHlc9t_mLGUYpJsHoNn5WclQwPskE6BPOLCJc9bpwn7rvmLk4cQla3TJUm2hr-aWvi6qUMEFI2rI3saLyr-sU-g8nehl_u9_C33_6xJsgKkU4srwrfTurTNsFSXc"/>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold font-headline uppercase leading-tight">Julian Reed</p>
+                            <p class="text-[10px] text-on-surface-variant uppercase mb-2">Traditional Flash • 2h</p>
+                            <span class="px-2 py-0.5 bg-primary/10 text-primary text-[9px] font-bold uppercase rounded-full">Confirmed</span>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Requests Table Section -->
+            <section class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-black font-headline tracking-tighter uppercase italic">Recent Inquiries</h2>
+                    <div class="flex gap-2">
+                        <button class="js-action-btn px-3 py-1 bg-surface-container-highest text-[10px] font-bold uppercase text-on-surface-variant border border-white/5 hover:text-white transition-colors" data-action="Opened Filter Options">Filter</button>
+                        <button class="js-action-btn px-3 py-1 bg-surface-container-highest text-[10px] font-bold uppercase text-on-surface-variant border border-white/5 hover:text-white transition-colors" data-action="Exporting Table Data...">Export</button>
+                    </div>
+                </div>
+                <div class="bg-surface-container-low overflow-x-auto rounded-lg">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr class="border-b border-white/10 bg-surface-container">
+                                <th class="p-4 text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Client</th>
+                                <th class="p-4 text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Session</th>
+                                <th class="p-4 text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Style / Area</th>
+                                <th class="p-4 text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant text-center">Status</th>
+                                <th class="p-4 text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            
+                            <!-- Table Row 1 -->
+                            <tr class="hover:bg-surface-bright transition-colors cursor-pointer group js-table-row" data-client="Elena Rossi">
+                                <td class="p-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-sm bg-surface-container-highest overflow-hidden shrink-0">
+                                            <img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvysmsMMs6kAZAOLzyGlpnw8IOhEFDjT_dPp2TyzQiqqoBOROzsujR855nm483E0zxN3dMOIeUGi0JQtVjZVDoUdBcGLGOSKlIObX59qF87AngqouHea8WGgOtwfRCSiLGIs38zKZVipjspHVvgTleAPy-RNa-DuNngtVm7NclXS4s2h4mNAX53Vd6mAh3YUJmbsaJsCRDBtpkmWfbSq6_wUKN8-6u6Xs3iz-vaKpi6MfSYgLlDVUt6nG4xtgJMNEzQt3FgOhIOyo"/>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-bold font-headline uppercase leading-none client-name">Elena Rossi</p>
+                                            <p class="text-[10px] text-on-surface-variant">elenar@example.com</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-4">
+                                    <p class="text-sm font-bold font-headline leading-none">OCT 24</p>
+                                    <p class="text-[10px] text-on-surface-variant uppercase">11:00 AM</p>
+                                </td>
+                                <td class="p-4">
+                                    <p class="text-sm font-bold font-headline uppercase leading-none">Neo-Traditional</p>
+                                    <p class="text-[10px] text-on-surface-variant uppercase">Outer Forearm</p>
+                                </td>
+                                <td class="p-4 text-center">
+                                    <span class="inline-block px-3 py-1 bg-yellow-500/10 text-yellow-500 text-[9px] font-bold uppercase rounded-full">Pending</span>
+                                </td>
+                                <td class="p-4 text-right">
+                                    <div class="flex justify-end gap-2 opacity-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                        <button class="js-action-btn w-8 h-8 rounded-sm bg-green-500/20 text-green-500 hover:bg-green-500 hover:text-white transition-all flex items-center justify-center" data-action="Accept">
+                                            <span class="material-symbols-outlined text-sm">check</span>
+                                        </button>
+                                        <button class="js-action-btn w-8 h-8 rounded-sm bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center" data-action="Decline">
+                                            <span class="material-symbols-outlined text-sm">close</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Table Row 2 -->
+                            <tr class="hover:bg-surface-bright transition-colors cursor-pointer group js-table-row" data-client="Dominic Thorne">
+                                <td class="p-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-sm bg-surface-container-highest overflow-hidden shrink-0">
+                                            <img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUowRouJ5D9txEpmNUYLG6kgtuZ66V1-OadOkYSFUjkrMB7Uy6c7WNe1vzPS1e9idl8uxNuMCMRlKhieV0Bf0wZEEHJQwqAf3H02QWZB1ZiNUMRHtr-eJdxcFp98bP0pkqOxVQB3fNndPhcjRFTI3Q_BUSf43wej6Db3skRWievLJwYKkDw3pOGc3UcPRy_IVicQwym-I5EtLxIw3Fhp4j7rGR2nhMlmYT-JTE9AoUIsgklRaohB7AuWpO_lZkowatTH4259-Faew"/>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-bold font-headline uppercase leading-none client-name">Dominic Thorne</p>
+                                            <p class="text-[10px] text-on-surface-variant">dom.t@web.me</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-4">
+                                    <p class="text-sm font-bold font-headline leading-none">OCT 26</p>
+                                    <p class="text-[10px] text-on-surface-variant uppercase">03:00 PM</p>
+                                </td>
+                                <td class="p-4">
+                                    <p class="text-sm font-bold font-headline uppercase leading-none">Blackwork Geometry</p>
+                                    <p class="text-[10px] text-on-surface-variant uppercase">Shoulder Blade</p>
+                                </td>
+                                <td class="p-4 text-center">
+                                    <span class="inline-block px-3 py-1 bg-green-500/10 text-green-500 text-[9px] font-bold uppercase rounded-full">Confirmed</span>
+                                </td>
+                                <td class="p-4 text-right">
+                                    <button class="js-action-btn text-on-surface-variant hover:text-white p-2" data-action="More Options: Dominic">
+                                        <span class="material-symbols-outlined">more_vert</span>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Table Row 3 (Restored Clara West) -->
+                            <tr class="hover:bg-surface-bright transition-colors cursor-pointer group js-table-row" data-client="Clara West">
+                                <td class="p-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-sm bg-surface-container-highest overflow-hidden shrink-0">
+                                            <img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr-p8KaFfH1vT_YIsETVkeJXtrDyk9lEN8J0G5jqAsF29wvE_8mUFUo48YhNdr9bdLmr1IPmjT3fTbaxd_k7OpM5TtCi_T1JJKqYnXwKjpLC7D4tX5bixZC-Y9RPjL7uRnT8oo7hflIizyEu5yseLs96UxZJluqP2GG_dbysSPKAPKTvgw17TwhL3RwWrntPfUX0Nu5YxLcgNapWANedJWQysJ-MeJD73EsCycve82jZxfrzJs7h6DwMGQvbK9YC-c01uWy57KucY"/>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-bold font-headline uppercase leading-none client-name">Clara West</p>
+                                            <p class="text-[10px] text-on-surface-variant">clara.w@inkmail.com</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-4">
+                                    <p class="text-sm font-bold font-headline leading-none">OCT 28</p>
+                                    <p class="text-[10px] text-on-surface-variant uppercase">01:00 PM</p>
+                                </td>
+                                <td class="p-4">
+                                    <p class="text-sm font-bold font-headline uppercase leading-none">Lettering</p>
+                                    <p class="text-[10px] text-on-surface-variant uppercase">Ribcage</p>
+                                </td>
+                                <td class="p-4 text-center">
+                                    <span class="inline-block px-3 py-1 bg-red-500/10 text-red-500 text-[9px] font-bold uppercase rounded-full">Canceled</span>
+                                </td>
+                                <td class="p-4 text-right">
+                                    <button class="js-action-btn text-on-surface-variant hover:text-white p-2" data-action="More Options: Clara">
+                                        <span class="material-symbols-outlined">more_vert</span>
+                                    </button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Side Drawer (Hidden by default, slides in from right) -->
+    <div class="fixed inset-0 z-[60] flex justify-end pointer-events-none">
+        <!-- Drawer Backdrop -->
+        <div id="drawer-backdrop" class="absolute inset-0 bg-surface/80 backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-none hidden"></div>
+        
+        <!-- Drawer Panel -->
+        <div id="drawer-panel" class="w-full max-w-md bg-surface-container-high h-full shadow-[-40px_0_60px_rgba(0,0,0,0.8)] border-l border-white/5 flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out pointer-events-auto">
+            
+            <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em] text-primary">Inquiry Details</span>
+                    <h2 id="drawer-title" class="text-2xl font-black font-headline tracking-tighter uppercase">Client Name</h2>
+                </div>
+                <button id="close-drawer-btn" class="text-on-surface-variant hover:text-primary hover:bg-white/5 rounded-full p-2 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-6 space-y-8 no-scrollbar">
+                <!-- Reference Image Section -->
+                <div class="space-y-3">
+                    <p class="text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Reference Art</p>
+                    <div class="aspect-video bg-surface-container-lowest overflow-hidden group rounded-sm border border-white/5">
+                        <img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmN4GiqG1UKG5wb0rE-gwsBmNGJ_kALhiQlNaEdO-u3LfH3Cb5Cxeru88n43_CJWBz8P7xrp3GF7zpmjbVHG7mTN6KM4CJJ26O_Dt8TICmOOeGQMrWprSVLZXz4lFwui3vZH_AACVRpHbJg_pk-tXOTK2lvxDY07K-tpndiA78LpnTtLsCC1pZvlQuQbebRX-5Cw0KbU5bebeKc3UugAepm-LpIeFIckrLpx_KUuusPc9M_jMQzQcaEymXsrzldTrXIMGDjlQNjhs"/>
+                    </div>
+                </div>
+                
+                <!-- Specs Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-4 bg-surface-container-lowest border border-white/5 rounded-sm">
+                        <p class="text-[9px] text-on-surface-variant uppercase mb-1">Estimated Size</p>
+                        <p class="text-sm font-bold font-headline uppercase">15cm x 10cm</p>
+                    </div>
+                    <div class="p-4 bg-surface-container-lowest border border-white/5 rounded-sm">
+                        <p class="text-[9px] text-on-surface-variant uppercase mb-1">Region</p>
+                        <p class="text-sm font-bold font-headline uppercase">Outer Forearm</p>
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="space-y-3">
+                    <p class="text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant">Request Description</p>
+                    <p class="text-sm text-on-surface leading-relaxed font-light bg-surface-container-lowest p-4 rounded-sm border border-white/5">
+                        "Looking for a neo-traditional piece featuring a raven and some dark peonies. I'd like the linework to be quite bold but with soft color blending in the petals. This is my first larger piece on my arm, so I'm open to adjustments on the composition to fit the forearm flow."
+                    </p>
+                </div>
+                
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 bg-surface-container-lowest border border-white/5 text-[10px] uppercase font-bold text-primary rounded-sm">First-time client</span>
+                    <span class="px-3 py-1 bg-surface-container-lowest border border-white/5 text-[10px] uppercase font-bold text-on-surface-variant rounded-sm">Colorwork</span>
+                    <span class="px-3 py-1 bg-surface-container-lowest border border-white/5 text-[10px] uppercase font-bold text-on-surface-variant rounded-sm">Custom Design</span>
+                </div>
+            </div>
+            
+            <!-- Bottom Actions -->
+            <div class="p-6 border-t border-white/10 grid grid-cols-2 gap-4 bg-surface-container-high">
+                <button class="js-drawer-action py-4 border border-outline-variant/30 text-[10px] font-headline font-bold uppercase tracking-[0.2em] hover:bg-white/5 transition-colors rounded-sm text-white" data-action="Declined">
+                    Decline Request
+                </button>
+                <button class="js-drawer-action py-4 bg-gradient-to-br from-primary to-primary-dim text-on-primary text-[10px] font-headline font-bold uppercase tracking-[0.2em] hover:opacity-90 transition-opacity rounded-sm shadow-lg" data-action="Accepted">
+                    Accept &amp; Book
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button (Mobile Only) - Restored and Wired -->
+    <button class="js-new-session-btn md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center z-50 active:scale-95 transition-transform">
+        <span class="material-symbols-outlined">add</span>
+    </button>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 md:right-10 md:bottom-10 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // === Toast Notification System ===
+        function showToast(message, isError = false) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = isError ? 'bg-red-500' : 'bg-surface-container-highest';
+            const textColor = isError ? 'text-white' : 'text-primary';
+            const border = isError ? '' : 'border border-white/10';
+            
+            toast.className = `flex items-center gap-3 px-6 py-4 rounded-sm shadow-2xl toast-animate pointer-events-auto ${bgColor} ${border}`;
+            toast.innerHTML = `
+                <span class="material-symbols-outlined ${textColor}">${isError ? 'error' : 'check_circle'}</span>
+                <span class="text-xs font-headline font-bold uppercase tracking-widest text-white">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // === Mobile Sidebar Toggle ===
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+            function toggleSidebar() {
+                const isOpen = !sidebar.classList.contains('-translate-x-full');
+                if (isOpen) {
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarBackdrop.classList.add('opacity-0', 'pointer-events-none');
+                } else {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebarBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+                }
+            }
+
+            mobileBtn.addEventListener('click', toggleSidebar);
+            sidebarBackdrop.addEventListener('click', toggleSidebar);
+
+            // === Side Drawer Logic ===
+            const drawerPanel = document.getElementById('drawer-panel');
+            const drawerBackdrop = document.getElementById('drawer-backdrop');
+            const closeDrawerBtn = document.getElementById('close-drawer-btn');
+            const drawerTitle = document.getElementById('drawer-title');
+
+            function openDrawer(clientName) {
+                drawerTitle.textContent = clientName;
+                
+                drawerBackdrop.classList.remove('hidden');
+                setTimeout(() => {
+                    drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+                    drawerBackdrop.classList.add('opacity-100', 'pointer-events-auto');
+                    drawerPanel.classList.remove('translate-x-full');
+                }, 10);
+                
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeDrawer() {
+                drawerPanel.classList.add('translate-x-full');
+                
+                drawerBackdrop.classList.remove('opacity-100', 'pointer-events-auto');
+                drawerBackdrop.classList.add('opacity-0', 'pointer-events-none');
+                
+                setTimeout(() => {
+                    drawerBackdrop.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }, 300);
+            }
+
+            closeDrawerBtn.addEventListener('click', closeDrawer);
+            drawerBackdrop.addEventListener('click', closeDrawer);
+
+            // Open drawer when clicking a table row
+            document.querySelectorAll('.js-table-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    // Prevent drawer opening if a button inside the row was clicked
+                    if(e.target.closest('button')) return;
+                    
+                    const clientName = row.getAttribute('data-client');
+                    openDrawer(clientName);
+                });
+            });
+
+            // === Action Buttons (Generic / Small buttons) ===
+            document.querySelectorAll('.js-action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevents the row click event
+                    const action = btn.getAttribute('data-action');
+                    
+                    // Specific logic for Accept/Decline in table
+                    const row = btn.closest('tr');
+                    if(row && (action === 'Decline' || action === 'Accept')) {
+                        const clientName = row.getAttribute('data-client');
+                        if(action === 'Decline') {
+                            showToast(`Request from ${clientName} declined.`, true);
+                        } else {
+                            showToast(`Request from ${clientName} accepted!`);
+                        }
+                    } else {
+                        // General action toast (Export, Filter, View Schedule)
+                        showToast(`${action}`);
+                    }
+                });
+            });
+
+            // === New Session Buttons (Header & FAB) ===
+            document.querySelectorAll('.js-new-session-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showToast('Opening New Session Form...');
+                });
+            });
+
+            // === Drawer Big Actions (Accept/Decline inside Drawer) ===
+            document.querySelectorAll('.js-drawer-action').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const action = btn.getAttribute('data-action');
+                    const clientName = drawerTitle.textContent;
+                    
+                    if(action === 'Declined') {
+                        showToast(`Request from ${clientName} declined.`, true);
+                    } else {
+                        showToast(`Successfully booked ${clientName}!`);
+                    }
+                    closeDrawer();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

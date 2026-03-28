@@ -22,6 +22,15 @@ const Login = () => {
 
     try {
       if (isLogin) {
+        // Login hardcoded para tatuador
+        if (formData.email === 'tatuador@inkflow.com' && formData.senha === '123456') {
+          localStorage.setItem('userType', 'artist')
+          localStorage.setItem('token', 'artist-demo-token')
+          localStorage.setItem('user', JSON.stringify({ nome: 'Elias Thorne', email: formData.email, isArtist: true }))
+          navigate('/artist-dashboard')
+          return
+        }
+
         const response = await fetch(`${API_URL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -203,6 +212,32 @@ const Login = () => {
                 </button>
                 
               </form>
+
+              {isLogin && (
+                <div style={{ textAlign: 'center', marginTop: '1.2rem' }}>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setFormData({ ...formData, email: 'tatuador@inkflow.com', senha: '123456' })
+                    }}
+                    style={{
+                      color: '#e63946',
+                      fontSize: '0.85rem',
+                      textDecoration: 'none',
+                      fontWeight: '600',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      transition: 'opacity 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.target.style.opacity = '0.8'}
+                    onMouseLeave={(e) => e.target.style.opacity = '1'}
+                  >
+                    🎨 É tatuador? Acesse aqui
+                  </a>
+                </div>
+              )}
               
               {!isLogin && (
                 <div className="signup-link">
