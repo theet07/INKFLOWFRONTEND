@@ -9,6 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
+  const [isArtistLogin, setIsArtistLogin] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     senha: '',
@@ -219,7 +220,13 @@ const Login = () => {
                     href="#"
                     onClick={(e) => {
                       e.preventDefault()
-                      setFormData({ ...formData, email: 'tatuador@inkflow.com', senha: '123456' })
+                      if (isArtistLogin) {
+                        setIsArtistLogin(false)
+                        setFormData({ ...formData, email: '', senha: '' })
+                      } else {
+                        setIsArtistLogin(true)
+                        setFormData({ ...formData, email: 'tatuador@inkflow.com', senha: '123456' })
+                      }
                     }}
                     style={{
                       color: '#e63946',
@@ -228,13 +235,16 @@ const Login = () => {
                       fontWeight: '600',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.4rem',
+                      gap: '0.5rem',
                       transition: 'opacity 0.2s',
                     }}
-                    onMouseEnter={(e) => e.target.style.opacity = '0.8'}
-                    onMouseLeave={(e) => e.target.style.opacity = '1'}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                   >
-                    🎨 É tatuador? Acesse aqui
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e63946" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M2 12h5l3-9 4 18 3-9h5" />
+                    </svg>
+                    {isArtistLogin ? 'Voltar para login de cliente' : 'Acessar como tatuador'}
                   </a>
                 </div>
               )}
