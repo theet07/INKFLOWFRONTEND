@@ -503,7 +503,7 @@ const SessionModalContent = ({ ag, onUpdate }) => {
     <div className="p-modal-stack">
       <div className="p-modal-card border-red">
         <h4>Serviço</h4>
-        <p>{(ag.servico || 'Tatuagem').replace(/\s+com\s+.+$/i, '')}{ag.artista?.nome ? ` com ${ag.artista.nome}` : ''}</p>
+        <p>{(ag.servico || 'Tatuagem').replace(/\s+com\s+.+$/i, '')}</p>
       </div>
       <div className="p-modal-grid">
         <div className="p-modal-card">
@@ -512,7 +512,7 @@ const SessionModalContent = ({ ag, onUpdate }) => {
         </div>
         <div className="p-modal-card">
           <span>Artista</span>
-          <strong>{ag.artista?.nome || '—'}</strong>
+          <strong>{ag.artista?.nome || (ag.servico?.match(/com\s+(.+)$/i)?.[1]) || '—'}</strong>
         </div>
       </div>
       <div className="p-modal-card">
