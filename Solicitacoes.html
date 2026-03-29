@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>INKFLOW | Solicitações</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface": "#ffffff",
+              "background": "#0e0e0e",
+              "surface-bright": "#2c2c2c",
+              "surface-container-highest": "#262626",
+              "surface-variant": "#262626",
+              "primary": "#ff8d8c",
+              "primary-fixed": "#ff7576",
+              "on-surface-variant": "#adaaaa",
+              "outline-variant": "#484847",
+              "primary-dim": "#ff7072",
+              "error": "#ff7351",
+              "surface-container-low": "#131313",
+              "surface-container": "#1a1919",
+              "surface-container-high": "#201f1f",
+              "surface": "#0e0e0e",
+            },
+            fontFamily: {
+              "headline": ["Epilogue"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Epilogue', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* Toast Animation */
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate { animation: slideUp 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary selection:text-black overflow-hidden flex flex-col h-screen">
+
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full h-16 flex items-center justify-between px-6 bg-[#131313] border-b border-white/5 z-50">
+        <div class="flex items-center gap-8">
+            <span class="text-2xl font-black tracking-tighter text-[#e63946] uppercase font-['Epilogue']">INKFLOW</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <button class="text-[#adaaaa] hover:text-white transition-all scale-95 active:opacity-80">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <button class="text-[#adaaaa] hover:text-white transition-all scale-95 active:opacity-80">
+                <span class="material-symbols-outlined">account_circle</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- SideNavBar (Desktop) -->
+    <aside class="hidden md:flex fixed left-0 top-0 h-full w-64 flex flex-col pt-20 pb-6 bg-[#131313] border-r border-white/5 z-40 shadow-[40px_0_40px_rgba(230,57,70,0.06)]">
+        <div class="px-6 mb-8">
+            <h2 class="text-xl font-black text-[#e63946] font-['Epilogue']">INKFLOW</h2>
+            <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa] font-['Epilogue']">Artist Studio</p>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <a class="flex items-center gap-4 px-6 py-3 text-[#adaaaa] font-['Epilogue'] text-sm font-bold uppercase tracking-widest hover:bg-[#262626] transition-all duration-300" href="#">
+                <span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+            <a class="flex items-center gap-4 px-6 py-3 text-white border-l-4 border-[#e63946] bg-gradient-to-r from-[#e63946]/10 to-transparent font-['Epilogue'] text-sm font-bold uppercase tracking-widest transition-all duration-300" href="#">
+                <span class="material-symbols-outlined">potted_plant</span> Requests
+            </a>
+            <a class="flex items-center gap-4 px-6 py-3 text-[#adaaaa] font-['Epilogue'] text-sm font-bold uppercase tracking-widest hover:bg-[#262626] transition-all duration-300" href="#">
+                <span class="material-symbols-outlined">calendar_today</span> Schedule
+            </a>
+            <a class="flex items-center gap-4 px-6 py-3 text-[#adaaaa] font-['Epilogue'] text-sm font-bold uppercase tracking-widest hover:bg-[#262626] transition-all duration-300" href="#">
+                <span class="material-symbols-outlined">brush</span> Portfolio
+            </a>
+            <a class="flex items-center gap-4 px-6 py-3 text-[#adaaaa] font-['Epilogue'] text-sm font-bold uppercase tracking-widest hover:bg-[#262626] transition-all duration-300" href="#">
+                <span class="material-symbols-outlined">settings</span> Settings
+            </a>
+        </nav>
+        <div class="px-6 pt-6 border-t border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-surface-container-highest rounded-full overflow-hidden border border-white/10">
+                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjoi_NrHIVi1cgRL02iBx8fXyVcgH3ZQjYTpySNn4qQINY1xXrSczsT3MNBMYoaZ3p2PyO5NZY_bwSvsQ5CCgSBKUGuPvH38z2RMPp6ihcJcBa4mwJkXGcdR2N7JWfTn7fikywIgI5AYHimTZBAUXJ41bndNyAkzhxu2KTvQPkgSIMumT6UcxV9O6VSfwxPK4e9cqAQRMMqzHuAd7xlX3SCptDi7xIhdKKn6XG4urfRxnVOFPhn5RDHEuPzTLC0728iosMR6eO-JA"/>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-on-surface">Alex Mercer</p>
+                    <p class="text-[10px] text-on-surface-variant">Artist Profile</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Canvas -->
+    <main class="md:pl-64 pt-16 h-screen flex flex-col">
+        <div class="flex-1 p-6 overflow-y-auto no-scrollbar relative pb-24 md:pb-6">
+            
+            <!-- Page Header & Filters -->
+            <div class="mb-10 max-w-7xl mx-auto">
+                <h1 class="text-4xl font-black tracking-tight text-on-surface font-headline uppercase mb-6">Solicitações</h1>
+                <div id="filters-container" class="flex flex-wrap items-center gap-2 pb-2 border-b border-outline-variant/10">
+                    <button class="js-filter px-6 py-2 bg-primary/10 text-primary border-b-2 border-primary font-label text-xs font-bold uppercase tracking-widest transition-all" data-filter="all">Todos</button>
+                    <button class="js-filter px-6 py-2 text-on-surface-variant hover:text-white border-b-2 border-transparent font-label text-xs font-bold uppercase tracking-widest transition-all" data-filter="pendente">Pendente</button>
+                    <button class="js-filter px-6 py-2 text-on-surface-variant hover:text-white border-b-2 border-transparent font-label text-xs font-bold uppercase tracking-widest transition-all" data-filter="confirmado">Confirmado</button>
+                    <button class="js-filter px-6 py-2 text-on-surface-variant hover:text-white border-b-2 border-transparent font-label text-xs font-bold uppercase tracking-widest transition-all" data-filter="cancelado">Cancelado</button>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="bg-surface-container-low overflow-x-auto max-w-7xl mx-auto rounded-lg">
+                <table class="w-full text-left border-separate border-spacing-0 min-w-[700px]">
+                    <thead>
+                        <tr class="bg-surface-container-high/50">
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant font-label">Cliente</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant font-label">Data e Hora</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant font-label">Tipo de Tattoo</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant font-label">Região</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant font-label">Status</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant font-label text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-white/5">
+                        
+                        <!-- Row 1: Pendente -->
+                        <tr class="js-row hover:bg-surface-bright transition-colors cursor-pointer group" data-status="pendente">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg overflow-hidden border border-white/5 shrink-0">
+                                        <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZmY1JVWwwDdgPXWpV4BYCumkOL5NaNb4TWuYe5ERwtpHvZaIlMsK30oRFLWRcmGa415b-YS31r0BkutvAUs0ZVjevXtFQfoK4Yrw9cFmW6WslS1MNDuF5NEfOSFFFYq67-Q02LGP4UapkjoA1KdH4mfXAiBlPSEfhD0XPNzyzfrtOBf-DjFgpn2QAvvXFcyWZxM8Qw1Kl_fb24b5RegjeQqkwpIOIGGMfbNWhJnWyzhwqfExYQGj04VUzHRDy1j4SWFx3aFOHhbo"/>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm js-client-name">Mariana Silva</p>
+                                        <p class="text-[10px] text-on-surface-variant font-medium">@mari_art</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4"><p class="text-sm">24 Out, 2023</p><p class="text-[10px] text-on-surface-variant">14:30</p></td>
+                            <td class="px-6 py-4"><span class="text-xs font-medium px-2 py-1 bg-surface-container-highest border border-white/5 rounded whitespace-nowrap">Blackwork Geometric</span></td>
+                            <td class="px-6 py-4 text-sm text-on-surface-variant">Antebraço Direito</td>
+                            <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-yellow-500/10 text-yellow-500">PENDENTE</span></td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex justify-end gap-2 opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                    <button class="js-action-btn w-8 h-8 flex items-center justify-center rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all" data-action="accept"><span class="material-symbols-outlined text-sm">check</span></button>
+                                    <button class="js-action-btn w-8 h-8 flex items-center justify-center rounded-lg bg-error/10 text-error hover:bg-error hover:text-white transition-all" data-action="decline"><span class="material-symbols-outlined text-sm">close</span></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2: Confirmado -->
+                        <tr class="js-row hover:bg-surface-bright transition-colors cursor-pointer group" data-status="confirmado">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg overflow-hidden border border-white/5 shrink-0">
+                                        <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBpiQdOdevxRaj1fzoEHKXv5de-nvDd3sQIvzY4euKSfEXCwrAHGtQv2n-dm_zp8_0GbsQGfRWepYRMPpWHluvsql9r1eEvl-uuSC2SGpXKBjcjMhdic3xoh4WHN31Gbvdm27BxGMu1UGE3UdA3JGYe03zsKk9MbkPgszwFBl9AobPF1vDTkrVtquGKTB1ymWXkJZ7MZoQeth7cVM6jz-rlI92AMWVrLw5Z7VSizzs9d0gMwfvth1wqDtJDwLIP8B48CqQuGoG6Ok"/>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm js-client-name">Ricardo Mendes</p>
+                                        <p class="text-[10px] text-on-surface-variant font-medium">@rick_tattoo</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4"><p class="text-sm">25 Out, 2023</p><p class="text-[10px] text-on-surface-variant">10:00</p></td>
+                            <td class="px-6 py-4"><span class="text-xs font-medium px-2 py-1 bg-surface-container-highest border border-white/5 rounded whitespace-nowrap">Realismo</span></td>
+                            <td class="px-6 py-4 text-sm text-on-surface-variant">Costas</td>
+                            <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-green-500/10 text-green-500">CONFIRMADO</span></td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex justify-end gap-2 opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                    <button class="js-action-btn w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-highest text-on-surface-variant hover:text-white transition-all" data-action="options"><span class="material-symbols-outlined text-sm">more_vert</span></button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 3: Cancelado -->
+                        <tr class="js-row hover:bg-surface-bright transition-colors cursor-pointer group" data-status="cancelado">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg overflow-hidden border border-white/5 shrink-0">
+                                        <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2EWVgd1KciAtFFSRES0ekHmpRspk8pac-H4LQ9oVeCqsA1-hdqI7vSu3-SYsVHpT1Ux_01dzmLo5iSRKQYEqJMqYJNvWETZq8rMi6IGCfjFwLSubav9p0hy5j_9mlK5wVJe_7hT7IeZQr68tNNIBqUAhWuwxzpPcwVagbZIeuxrlaWZkkhNIwOX8CAImGjGDRH54axZwwidDJYccBRnqj6LaM9Se9i0fiIam0oh53VTmZtPAZAma8AFBdbbuaIbdWDApHW-CiWEY"/>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm js-client-name">Fernanda Costa</p>
+                                        <p class="text-[10px] text-on-surface-variant font-medium">@nanda_c</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4"><p class="text-sm">26 Out, 2023</p><p class="text-[10px] text-on-surface-variant">18:00</p></td>
+                            <td class="px-6 py-4"><span class="text-xs font-medium px-2 py-1 bg-surface-container-highest border border-white/5 rounded whitespace-nowrap">Fine Line</span></td>
+                            <td class="px-6 py-4 text-sm text-on-surface-variant">Costelas</td>
+                            <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-error/10 text-error">CANCELADO</span></td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex justify-end gap-2 opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                    <button class="js-action-btn w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-highest text-on-surface-variant hover:text-white transition-all" data-action="options"><span class="material-symbols-outlined text-sm">more_vert</span></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Drawer Backdrop -->
+    <div id="drawer-backdrop" class="fixed inset-0 bg-black/60 z-[55] hidden opacity-0 transition-opacity duration-300"></div>
+
+    <!-- Detail Drawer -->
+    <aside id="detail-drawer" class="fixed right-0 top-16 bottom-0 w-full md:w-[480px] bg-surface-container-high/95 backdrop-blur-xl border-l border-white/10 z-[60] shadow-[0_0_50px_rgba(0,0,0,0.5)] transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-6 md:p-8 overflow-y-auto no-scrollbar flex-1 pb-24 md:pb-8">
+            <!-- Drawer Header -->
+            <div class="flex justify-between items-start mb-8">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-xl overflow-hidden border-2 border-primary/20 p-0.5 shrink-0">
+                        <img class="w-full h-full object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALjP5C_VoOFNDzZZ5U1gZXVpT4VmTFvdCTd_x7EHP0bI2bivR1qhNsXTqERWrRuz9B6w0XDGNb6kGafNLtGH_Z088wofDyCauei2MCuRFd1vb66NzKHJS6rWol3jbIcbwVuzqHy46mj5U-VPrXn6EAnJmkTe2k6UK5uaaGRZJAjhS4BXE0YBGbDddOKmXb6rjeozj3-NMvO86MgY5DdQ3Wmnl9dQbiZFrM9Z4gQsP8_OzbUnlX7oRyQJPM95GOw5zrl22Uo-VD0O8"/>
+                    </div>
+                    <div>
+                        <h3 id="drawer-client-name" class="text-2xl font-black font-headline uppercase text-on-surface leading-none mb-2">Mariana Silva</h3>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded">First-timer</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#cda4ff] bg-[#cda4ff]/10 px-2 py-0.5 rounded">Colorwork</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="close-drawer-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors text-on-surface-variant hover:text-white shrink-0">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Tattoo Details -->
+            <div class="space-y-8">
+                <section>
+                    <h4 class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-4">Referência e Descrição</h4>
+                    <div class="aspect-square w-full rounded-xl overflow-hidden bg-surface-container-lowest border border-white/5 mb-4 group relative">
+                        <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGylAVG9dB3gVfnI_Du5xI_UbukzL5e3APUjuEHq4nMm7L1Je5uL6Qq_fFMYlSnO4dbhUxYeurVmydQ07r7yL7R59qPllkT50ojSN2mrAjzQl1H1l-D2nTnhSynhmVJAjI2TrcMWJcdASDfD-qBslhLmFDU42406qd2S3RrRHtJp9IXtWWFT3rkir-BZLE9KS5CTihO4Xq1NY4d6UwH1qWqrUtKzBphNIB2nKfmMx2wq5DkZ2QNOK3FcNzwZXrjYvojM48Zkhchck"/>
+                    </div>
+                    <p class="text-sm leading-relaxed text-on-surface-variant p-4 bg-surface-container-lowest rounded-lg border border-white/5">
+                        "Gostaria de uma mariposa em estilo Fine Line com elementos geométricos (círculos e linhas finas) ao redor. O local seria o antebraço direito, cobrindo uma pequena cicatriz."
+                    </p>
+                </section>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-4 bg-surface-container-highest rounded-lg border border-white/5">
+                        <h5 class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Tamanho</h5>
+                        <p class="text-lg font-black font-headline text-on-surface">15x10cm</p>
+                    </div>
+                    <div class="p-4 bg-surface-container-highest rounded-lg border border-white/5">
+                        <h5 class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Região</h5>
+                        <p class="text-lg font-black font-headline text-on-surface">Antebraço</p>
+                    </div>
+                </div>
+
+                <section>
+                    <h4 class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-4">Informações do Agendamento</h4>
+                    <div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg border border-white/5">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary">calendar_today</span>
+                            <div>
+                                <p class="text-sm font-bold">24 de Outubro, 2023</p>
+                                <p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Terça-feira</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold">14:30</p>
+                            <p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Horário</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Drawer Footer Actions -->
+        <div class="p-6 border-t border-white/10 bg-surface-container-highest flex gap-4 pb-24 md:pb-6">
+            <button id="drawer-btn-decline" class="flex-1 py-4 text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant border border-outline-variant/30 hover:bg-error hover:text-white hover:border-error transition-all rounded-lg">
+                Recusar
+            </button>
+            <button id="drawer-btn-accept" class="flex-[2] py-4 text-xs font-bold uppercase tracking-[0.2em] text-on-primary bg-gradient-to-r from-primary to-primary-dim hover:scale-[1.02] active:scale-95 transition-all rounded-lg shadow-[0_10px_20px_-10px_rgba(255,141,140,0.4)]">
+                Aceitar &amp; Cotar
+            </button>
+        </div>
+    </aside>
+
+    <!-- BottomNavBar (Mobile) -->
+    <nav class="md:hidden fixed bottom-0 w-full h-16 bg-[#131313] flex items-center justify-around px-4 z-[70] border-t border-white/5">
+        <button class="flex flex-col items-center gap-1 text-[#adaaaa] hover:text-white transition-all">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Home</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-[#e63946] transition-all">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">potted_plant</span>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Reqs</span>
+        </button>
+        <div class="relative -top-6">
+            <button class="w-14 h-14 bg-gradient-to-br from-primary to-primary-dim rounded-full flex items-center justify-center shadow-lg shadow-primary/20 text-on-primary active:scale-95 transition-transform" onclick="showToast('Abrir Novo Agendamento', 'add')">
+                <span class="material-symbols-outlined text-3xl">add</span>
+            </button>
+        </div>
+        <button class="flex flex-col items-center gap-1 text-[#adaaaa] hover:text-white transition-all">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Agenda</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-[#adaaaa] hover:text-white transition-all">
+            <span class="material-symbols-outlined">brush</span>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Art</span>
+        </button>
+    </nav>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. Toast Notification System ---
+            function showToast(message, icon = 'check_circle', isError = false) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                
+                const bgColor = isError ? 'bg-error' : 'bg-surface-container-highest';
+                const textColor = isError ? 'text-white' : 'text-primary';
+                const border = isError ? '' : 'border border-white/10';
+                
+                toast.className = `flex items-center gap-3 px-6 py-4 rounded-lg shadow-2xl toast-animate pointer-events-auto ${bgColor} ${border}`;
+                toast.innerHTML = `
+                    <span class="material-symbols-outlined ${textColor}">${icon}</span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-white">${message}</span>
+                `;
+                
+                container.appendChild(toast);
+                
+                // Auto remove after 3s
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(10px)';
+                    toast.style.transition = 'all 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // --- 2. Side Drawer Logic ---
+            const drawer = document.getElementById('detail-drawer');
+            const backdrop = document.getElementById('drawer-backdrop');
+            const closeBtn = document.getElementById('close-drawer-btn');
+            const clientNameDisplay = document.getElementById('drawer-client-name');
+            let currentClient = "";
+
+            function openDrawer(clientName) {
+                currentClient = clientName;
+                clientNameDisplay.textContent = clientName;
+                
+                backdrop.classList.remove('hidden');
+                // Small delay to allow display:block to apply before animating opacity
+                setTimeout(() => {
+                    backdrop.classList.remove('opacity-0');
+                    drawer.classList.remove('translate-x-full');
+                }, 10);
+            }
+
+            function closeDrawer() {
+                drawer.classList.add('translate-x-full');
+                backdrop.classList.add('opacity-0');
+                setTimeout(() => {
+                    backdrop.classList.add('hidden');
+                }, 300); // Wait for transition
+            }
+
+            closeBtn.addEventListener('click', closeDrawer);
+            backdrop.addEventListener('click', closeDrawer);
+
+            // Open drawer on table row click
+            document.querySelectorAll('.js-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    // Prevent opening if clicked on action buttons inside the row
+                    if (e.target.closest('.js-action-btn')) return;
+                    
+                    const name = row.querySelector('.js-client-name').textContent;
+                    openDrawer(name);
+                });
+            });
+
+            // Drawer Action Buttons
+            document.getElementById('drawer-btn-accept').addEventListener('click', () => {
+                showToast(`Solicitação de ${currentClient} Aceita!`, 'check_circle');
+                closeDrawer();
+            });
+
+            document.getElementById('drawer-btn-decline').addEventListener('click', () => {
+                showToast(`Solicitação de ${currentClient} Recusada.`, 'cancel', true);
+                closeDrawer();
+            });
+
+            // --- 3. Table Inline Actions ---
+            document.querySelectorAll('.js-action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Stop row click
+                    const action = btn.getAttribute('data-action');
+                    const row = btn.closest('tr');
+                    const name = row.querySelector('.js-client-name').textContent;
+
+                    if (action === 'accept') {
+                        showToast(`Solicitação de ${name} confirmada!`, 'check_circle');
+                        row.setAttribute('data-status', 'confirmado');
+                    } else if (action === 'decline') {
+                        showToast(`Solicitação de ${name} recusada.`, 'cancel', true);
+                        row.setAttribute('data-status', 'cancelado');
+                    } else if (action === 'options') {
+                        showToast(`Abrindo opções para ${name}`, 'more_vert');
+                    }
+                });
+            });
+
+            // --- 4. Filtering Logic ---
+            const filterBtns = document.querySelectorAll('.js-filter');
+            const rows = document.querySelectorAll('.js-row');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Reset styling on all buttons
+                    filterBtns.forEach(b => {
+                        b.classList.remove('bg-primary/10', 'text-primary', 'border-primary');
+                        b.classList.add('text-on-surface-variant', 'border-transparent');
+                    });
+
+                    // Set active styling
+                    btn.classList.remove('text-on-surface-variant', 'border-transparent');
+                    btn.classList.add('bg-primary/10', 'text-primary', 'border-primary');
+
+                    const filterValue = btn.getAttribute('data-filter');
+
+                    // Filter rows
+                    rows.forEach(row => {
+                        if (filterValue === 'all') {
+                            row.style.display = '';
+                        } else {
+                            if (row.getAttribute('data-status') === filterValue) {
+                                row.style.display = '';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
