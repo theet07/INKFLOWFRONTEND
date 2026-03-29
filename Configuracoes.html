@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>INKFLOW | Settings</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800;900&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface": "#ffffff",
+              "background": "#0e0e0e",
+              "surface-bright": "#2c2c2c",
+              "surface-container-highest": "#262626",
+              "surface-variant": "#262626",
+              "primary": "#ff8d8c",
+              "primary-fixed": "#ff7576",
+              "on-surface-variant": "#adaaaa",
+              "surface-dim": "#0e0e0e",
+              "outline-variant": "#484847",
+              "primary-dim": "#ff7072",
+              "outline": "#767575",
+              "surface-container-low": "#131313",
+              "surface-container": "#1a1919",
+              "surface-container-lowest": "#000000",
+              "surface": "#0e0e0e",
+              "surface-container-high": "#201f1f",
+            },
+            fontFamily: {
+              "headline": ["Epilogue"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0e0e0e; }
+        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff8d8c; }
+
+        /* Toast Animation */
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate { animation: slideUp 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary selection:text-black overflow-x-hidden">
+    
+    <!-- TopAppBar -->
+    <header class="fixed top-0 w-full h-16 flex items-center justify-between px-6 bg-[#131313] z-50 border-b border-white/5">
+        <div class="flex items-center gap-4">
+            <span class="text-2xl font-black tracking-tighter text-[#e63946] uppercase font-headline">INKFLOW</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4">
+                <button class="text-[#adaaaa] hover:text-white transition-all scale-95 active:opacity-80">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <button class="text-[#adaaaa] hover:text-white transition-all scale-95 active:opacity-80">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- SideNavBar (Desktop) -->
+    <aside class="hidden md:flex fixed left-0 top-0 h-full w-64 flex flex-col pt-20 pb-6 bg-[#131313] border-r border-white/5 shadow-[40px_0_40px_rgba(230,57,70,0.06)] z-40">
+        <div class="px-6 mb-10">
+            <h1 class="text-xl font-black text-[#e63946] font-headline">INKFLOW</h1>
+            <p class="text-[10px] text-on-surface-variant font-headline uppercase tracking-[0.2em] mt-1">Artist Studio</p>
+        </div>
+        <nav class="flex-1 px-2 space-y-1">
+            <a class="flex items-center gap-4 px-4 py-3 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-headline text-sm font-bold uppercase tracking-widest" href="#">
+                <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-headline text-sm font-bold uppercase tracking-widest" href="#">
+                <span class="material-symbols-outlined">potted_plant</span><span>Requests</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-headline text-sm font-bold uppercase tracking-widest" href="#">
+                <span class="material-symbols-outlined">calendar_today</span><span>Schedule</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-headline text-sm font-bold uppercase tracking-widest" href="#">
+                <span class="material-symbols-outlined">brush</span><span>Portfolio</span>
+            </a>
+            <a class="flex items-center gap-4 px-4 py-3 text-white border-l-4 border-[#e63946] bg-gradient-to-r from-[#e63946]/10 to-transparent transition-all duration-300 font-headline text-sm font-bold uppercase tracking-widest" href="#">
+                <span class="material-symbols-outlined">settings</span><span>Settings</span>
+            </a>
+        </nav>
+        <div class="px-6 mt-auto">
+            <div class="flex items-center gap-3 p-3 bg-surface-container rounded-lg">
+                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
+                    <img id="sidebar-avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAz-6v-BE-jwJzj3z-TuGWVHIJ7hVZrSub5PjqT6kRbTtGnPQyJx2V13Zizg0kO2kqZB2kyzWwZOVweWfNaQaw0QLZlrRFp9Dr6bhVFiY0hGouJmRCW8Jv_f4abmnzXUr-MkVB0GXDG4eZ7ivukkgVa66MBS76dkPJH0Jy-POa0uH6ka2MqvFwDqUTUaObjUaU1rvoUtVSlDUJvBYEbzN_MRAUV2yYE6_oUtGWSyNOp_lxnM6-DUSmBQOMK7L3W526umyhxmCURhYI"/>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-on-surface">Alex Void</p>
+                    <p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Pro Artist</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Canvas -->
+    <main class="md:pl-64 pt-24 pb-24 md:pb-20 px-6 min-h-screen">
+        <form id="settings-form" class="max-w-6xl mx-auto">
+            
+            <!-- Page Header -->
+            <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <p class="text-primary font-headline text-xs font-bold uppercase tracking-[0.3em] mb-2">Studio Control</p>
+                    <h2 class="text-5xl font-black font-headline tracking-tighter uppercase">Configurações</h2>
+                </div>
+                <!-- Status do Estúdio Toggle -->
+                <div class="bg-surface-container-low p-6 rounded-lg border border-white/5 flex items-center gap-6 shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
+                    <div>
+                        <p class="text-xs text-on-surface-variant font-bold uppercase tracking-widest mb-1">Status do Estúdio</p>
+                        <p id="status-text" class="text-xl font-bold font-headline text-primary uppercase transition-colors">Aceitando Agendamentos</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer group">
+                        <input id="status-toggle" type="checkbox" checked class="sr-only peer"/>
+                        <div class="w-16 h-8 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-1 after:bg-on-surface-variant peer-checked:after:bg-primary after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary/20"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Settings Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Left Column: Artist Profile -->
+                <section class="lg:col-span-7 space-y-8">
+                    <div class="bg-surface-container-low p-8 rounded-lg">
+                        <div class="flex items-center gap-2 mb-8">
+                            <span class="material-symbols-outlined text-primary">person</span>
+                            <h3 class="text-lg font-bold font-headline uppercase tracking-widest">Perfil do Artista</h3>
+                        </div>
+                        <div class="space-y-8">
+                            
+                            <!-- Avatar Upload -->
+                            <div class="flex items-center gap-8">
+                                <label for="avatar-upload" class="relative group cursor-pointer">
+                                    <div class="w-32 h-32 rounded-lg bg-surface-container-highest flex items-center justify-center overflow-hidden border-2 border-dashed border-outline-variant group-hover:border-primary transition-colors">
+                                        <img id="main-avatar" class="w-full h-full object-cover opacity-80 group-hover:opacity-40 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsb9piO97rJv4Q2QNp7ZOaxehjex-WSnQJBOp5OmtVKdJNAH0tKRjzPlaIvrSAj1DOulBt-Vfn-bv2MPGYBrSc5Fj4z0CWAhr5LbY5uz6WlgkIKc2y6jm9PajFvhNcackvnBws0eNUj18AiQfzWXI1zzVfP-gSkmLqZD3ZrHlJyK5tSieAtkKJiZHX0Sn7lgwMM2HqY6qgL0V_lDjK3m8pw6upFQ4f4iS4ZoG9BGsxnt0IGVEJxHzW6lJFJW2Evm27GIS7xYqjwaM"/>
+                                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span class="material-symbols-outlined text-primary text-3xl">upload</span>
+                                        </div>
+                                    </div>
+                                    <input type="file" id="avatar-upload" accept="image/*" class="hidden">
+                                </label>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold mb-2">Foto de Perfil</p>
+                                    <p class="text-xs text-on-surface-variant mb-4">PNG, JPG ou WEBP. Max 2MB.</p>
+                                    <button type="button" onclick="document.getElementById('avatar-upload').click()" class="bg-surface-container-highest px-4 py-2 rounded text-xs font-bold uppercase tracking-widest border border-white/5 hover:bg-surface-bright transition-colors">Alterar Imagem</button>
+                                </div>
+                            </div>
+
+                            <!-- Form Fields -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Nome Artístico</label>
+                                    <input required class="w-full bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary rounded-sm p-4 text-sm font-medium outline-none" type="text" value="Alex Void"/>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">E-mail Público</label>
+                                    <input required class="w-full bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary rounded-sm p-4 text-sm font-medium outline-none" type="email" value="alex@inkflow.art"/>
+                                </div>
+                                <div class="md:col-span-2 space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Bio / Descrição</label>
+                                    <textarea required class="w-full bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary rounded-sm p-4 text-sm font-medium resize-none outline-none custom-scrollbar" rows="4">Especialista em Blackwork e Surrealismo. 8 anos de experiência transformando ideias em arte permanente na pele. Atendimento exclusivo em estúdio privado.</textarea>
+                                </div>
+                                <div class="md:col-span-2 space-y-2">
+                                    <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Tags de Especialidade</label>
+                                    <div id="tags-container" class="flex flex-wrap gap-2 pt-2">
+                                        <span class="tag bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all">
+                                            Blackwork <span class="material-symbols-outlined text-[14px] cursor-pointer hover:text-white remove-tag">close</span>
+                                        </span>
+                                        <span class="tag bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all">
+                                            Surrealismo <span class="material-symbols-outlined text-[14px] cursor-pointer hover:text-white remove-tag">close</span>
+                                        </span>
+                                        <span class="tag bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all">
+                                            Geométrico <span class="material-symbols-outlined text-[14px] cursor-pointer hover:text-white remove-tag">close</span>
+                                        </span>
+                                        <button type="button" id="btn-add-tag" class="bg-surface-container-highest text-on-surface-variant px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/10 hover:border-primary/50 hover:text-white transition-colors">
+                                            + Adicionar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notificações Section -->
+                    <div class="bg-surface-container-low p-8 rounded-lg">
+                        <div class="flex items-center gap-2 mb-8">
+                            <span class="material-symbols-outlined text-primary">notifications_active</span>
+                            <h3 class="text-lg font-bold font-headline uppercase tracking-widest">Notificações</h3>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded">
+                                <div>
+                                    <p class="text-sm font-bold">Alertas por E-mail</p>
+                                    <p class="text-xs text-on-surface-variant">Receba resumos diários e novos pedidos.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked class="sr-only peer"/>
+                                    <div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary/20"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded">
+                                <div>
+                                    <p class="text-sm font-bold">Push Notifications</p>
+                                    <p class="text-xs text-on-surface-variant">Alertas no navegador e celular.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" checked class="sr-only peer"/>
+                                    <div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary/20"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded">
+                                <div>
+                                    <p class="text-sm font-bold">Desktop Audio</p>
+                                    <p class="text-xs text-on-surface-variant">Sinal sonoro para novas mensagens.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" class="sr-only peer"/>
+                                    <div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary/20"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Column: Availability -->
+                <section class="lg:col-span-5 space-y-8">
+                    <div class="bg-surface-container-low p-8 rounded-lg" id="availability-container">
+                        <div class="flex items-center gap-2 mb-8">
+                            <span class="material-symbols-outlined text-primary">schedule</span>
+                            <h3 class="text-lg font-bold font-headline uppercase tracking-widest">Disponibilidade</h3>
+                        </div>
+                        <div class="space-y-4">
+                            
+                            <!-- Day Row Template -->
+                            <div class="day-row grid grid-cols-4 items-center gap-4 py-3 border-b border-white/5">
+                                <span class="day-label text-xs font-bold uppercase tracking-widest transition-colors">Seg</span>
+                                <div class="col-span-2 flex items-center gap-2 time-inputs transition-opacity">
+                                    <input class="w-16 bg-surface-container-lowest border-none rounded text-xs text-center p-2 outline-none focus:ring-1 focus:ring-primary" type="text" value="10:00"/>
+                                    <span class="text-on-surface-variant text-xs">-</span>
+                                    <input class="w-16 bg-surface-container-lowest border-none rounded text-xs text-center p-2 outline-none focus:ring-1 focus:ring-primary" type="text" value="18:00"/>
+                                </div>
+                                <div class="col-span-2 paused-text hidden">
+                                    <input class="w-full bg-surface-container-lowest border-none rounded text-[10px] text-on-surface-variant text-center p-2 font-bold tracking-widest outline-none" disabled type="text" value="PAUSADO"/>
+                                </div>
+                                <div class="flex justify-end">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer day-toggle"/>
+                                        <div class="w-10 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary/20"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Day Row -->
+                            <div class="day-row grid grid-cols-4 items-center gap-4 py-3 border-b border-white/5">
+                                <span class="day-label text-xs font-bold uppercase tracking-widest transition-colors">Ter</span>
+                                <div class="col-span-2 flex items-center gap-2 time-inputs transition-opacity">
+                                    <input class="w-16 bg-surface-container-lowest border-none rounded text-xs text-center p-2 outline-none focus:ring-1 focus:ring-primary" type="text" value="10:00"/>
+                                    <span class="text-on-surface-variant text-xs">-</span>
+                                    <input class="w-16 bg-surface-container-lowest border-none rounded text-xs text-center p-2 outline-none focus:ring-1 focus:ring-primary" type="text" value="18:00"/>
+                                </div>
+                                <div class="col-span-2 paused-text hidden">
+                                    <input class="w-full bg-surface-container-lowest border-none rounded text-[10px] text-on-surface-variant text-center p-2 font-bold tracking-widest outline-none" disabled type="text" value="PAUSADO"/>
+                                </div>
+                                <div class="flex justify-end">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer day-toggle"/>
+                                        <div class="w-10 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary/20"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Day Row -->
+                            <div class="day-row grid grid-cols-4 items-center gap-4 py-3 border-b border-white/5">
+                                <span class="day-label text-xs font-bold uppercase tracking-widest transition-colors">Qua</span>
+                                <div class="col-span-2 flex items-center gap-2 time-inputs transition-opacity">
+                                    <input class="w-16 bg-surface-container-lowest border-none rounded text-xs text-center p-2 outline-none focus:ring-1 focus:ring-primary" type="text" value="10:00"/>
+                                    <span class="text-on-surface-variant text-xs">-</span>
+                                    <input class="w-16 bg-surface-container-lowest border-none rounded text-xs text-center p-2 outline-none focus:ring-1 focus:ring-primary" type="text" value="18:00"/>
+                                </div>
+                                <div class="col-span-2 paused-text hidden">
+                                    <input class="w-full bg-surface-container-lowest border-none rounded text-[10px] text-on-surface-variant text-center p-2 font-bold tracking-widest outline-none" disabled type="text" value="PAUSADO"/>
+                                </div>
+                                <div class="flex justify-end">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer day-toggle"/>
+                                        <div class="w-10 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary/20"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Day Row (Default Paused) -->
+                            <div class="day-row grid grid-cols-4 items-center gap-4 py-3 border-b border-white/5">
+                                <span class="day-label text-xs font-bold uppercase tracking-widest text-primary transition-colors">Qui</span>
+                                <div class="col-span-2 flex items-center gap-2 time-inputs transition-opacity hidden">
+                                    <input class="w-16 bg-surface-container-lowest border-none rounded text-xs text-center p-2 outline-none focus:ring-1 focus:ring-primary" type="text" value="10:00"/>
+                                    <span class="text-on-surface-variant text-xs">-</span>
+                                    <input class="w-16 bg-surface-container-lowest border-none rounded text-xs text-center p-2 outline-none focus:ring-1 focus:ring-primary" type="text" value="18:00"/>
+                                </div>
+                                <div class="col-span-2 paused-text">
+                                    <input class="w-full bg-surface-container-lowest border-none rounded text-[10px] text-on-surface-variant text-center p-2 font-bold tracking-widest outline-none" disabled type="text" value="PAUSADO"/>
+                                </div>
+                                <div class="flex justify-end">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer day-toggle"/>
+                                        <div class="w-10 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary/20"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Day Row -->
+                            <div class="day-row grid grid-cols-4 items-center gap-4 py-3 border-b border-white/5">
+                                <span class="day-label text-xs font-bold uppercase tracking-widest transition-colors">Sex</span>
+                                <div class="col-span-2 flex items-center gap-2 time-inputs transition-opacity">
+                                    <input class="w-16 bg-surface-container-lowest border-none rounded text-xs text-center p-2 outline-none focus:ring-1 focus:ring-primary" type="text" value="10:00"/>
+                                    <span class="text-on-surface-variant text-xs">-</span>
+                                    <input class="w-16 bg-surface-container-lowest border-none rounded text-xs text-center p-2 outline-none focus:ring-1 focus:ring-primary" type="text" value="22:00"/>
+                                </div>
+                                <div class="col-span-2 paused-text hidden">
+                                    <input class="w-full bg-surface-container-lowest border-none rounded text-[10px] text-on-surface-variant text-center p-2 font-bold tracking-widest outline-none" disabled type="text" value="PAUSADO"/>
+                                </div>
+                                <div class="flex justify-end">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer day-toggle"/>
+                                        <div class="w-10 h-5 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface-variant after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary/20"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                            <div class="flex gap-3">
+                                <span class="material-symbols-outlined text-primary text-sm">info</span>
+                                <p class="text-[10px] text-on-surface-variant leading-relaxed">As alterações no horário semanal não afetam agendamentos já confirmados, apenas novas solicitações.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Assets Bento Item -->
+                    <div class="bg-[#131313] relative overflow-hidden group rounded-lg h-48 border border-white/5 cursor-pointer" onclick="showToast('Abrindo gerenciador de galeria...')">
+                        <img class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiOPlnuw0EiTf19Kk2sGebpOT-L3mhUXcquQCO2PGsYLT-d5knirK8hD3aeFl9AtV_UvaYen96VeqQVmimX7O72j2MGaxCAZqUC6QfUZveFkYnNeRQ3NWcJfBR88RHFqatHYWqQ5CByYFKD1fqMPVOfTE5ovPKJHPDjo2pBc_Tv34V3vOn3Ks-Sa-vsDUmIU14N2TAyz7mw2uS_mJ2w7xAKzSCx41Ctn-wsDyYXkd70S2_7cyKNLtC0-JIMb4frXd_eRIsBPRR5OU"/>
+                        <div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-6">
+                            <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-1">Studio Preview</p>
+                            <h4 class="text-xl font-black font-headline uppercase">Galeria do Estúdio</h4>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="mt-12 flex items-center justify-end gap-4 border-t border-white/5 pt-8">
+                <button type="button" id="btn-discard" class="px-8 py-3 text-sm font-bold uppercase tracking-widest text-on-surface-variant hover:text-white transition-colors">Descartar</button>
+                <button type="submit" id="btn-save" class="px-10 py-3 bg-gradient-to-r from-primary to-primary-dim text-black rounded-sm text-sm font-bold uppercase tracking-[0.15em] shadow-[0_10px_30px_rgba(230,57,70,0.3)] hover:scale-105 active:scale-95 transition-all">Salvar Alterações</button>
+            </div>
+
+        </form>
+    </main>
+
+    <!-- BottomNavBar (Mobile Only) -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-[#131313] flex justify-around items-center h-16 border-t border-white/5 z-50">
+        <button class="flex flex-col items-center gap-1 text-[#adaaaa] hover:text-white transition-colors">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[8px] font-bold uppercase">Home</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-[#adaaaa] hover:text-white transition-colors">
+            <span class="material-symbols-outlined">potted_plant</span>
+            <span class="text-[8px] font-bold uppercase">Requests</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-[#adaaaa] hover:text-white transition-colors">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <span class="text-[8px] font-bold uppercase">Schedule</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-[#e63946]">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+            <span class="text-[8px] font-bold uppercase">Settings</span>
+        </button>
+    </nav>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-24 md:bottom-10 right-6 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- Javascript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Toast Notification System
+            function showToast(message, icon = 'check_circle', isAlert = false) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                
+                const textColor = isAlert ? 'text-white' : 'text-primary';
+                const bgColor = isAlert ? 'bg-red-500' : 'bg-surface-container-highest border border-white/10';
+                
+                toast.className = `flex items-center gap-3 px-6 py-4 rounded shadow-2xl toast-animate pointer-events-auto ${bgColor}`;
+                toast.innerHTML = `
+                    <span class="material-symbols-outlined ${textColor}">${icon}</span>
+                    <span class="text-xs font-headline font-bold uppercase tracking-widest text-white">${message}</span>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(10px)';
+                    toast.style.transition = 'all 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+
+            // 2. Studio Status Toggle Logic
+            const statusToggle = document.getElementById('status-toggle');
+            const statusText = document.getElementById('status-text');
+
+            statusToggle.addEventListener('change', (e) => {
+                if(e.target.checked) {
+                    statusText.textContent = "Aceitando Agendamentos";
+                    statusText.classList.remove('text-on-surface-variant');
+                    statusText.classList.add('text-primary');
+                    showToast("Estúdio aberto para agendamentos");
+                } else {
+                    statusText.textContent = "Agendamentos Pausados";
+                    statusText.classList.remove('text-primary');
+                    statusText.classList.add('text-on-surface-variant');
+                    showToast("Agendamentos pausados", "pause_circle", true);
+                }
+            });
+
+
+            // 3. Avatar Upload Preview Logic
+            const avatarInput = document.getElementById('avatar-upload');
+            const mainAvatar = document.getElementById('main-avatar');
+            const sidebarAvatar = document.getElementById('sidebar-avatar');
+
+            avatarInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        mainAvatar.src = event.target.result;
+                        sidebarAvatar.src = event.target.result;
+                        showToast("Foto de perfil atualizada!");
+                    }
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+
+
+            // 4. Specialty Tags Logic
+            const tagsContainer = document.getElementById('tags-container');
+            const btnAddTag = document.getElementById('btn-add-tag');
+
+            // Remove tag (Event Delegation)
+            tagsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-tag')) {
+                    const tag = e.target.closest('.tag');
+                    tag.style.opacity = '0';
+                    tag.style.transform = 'scale(0.9)';
+                    setTimeout(() => tag.remove(), 200); // Wait for transition
+                }
+            });
+
+            // Add tag
+            btnAddTag.addEventListener('click', () => {
+                const newTagText = prompt("Digite a nova especialidade:");
+                if (newTagText && newTagText.trim() !== "") {
+                    const tagHTML = `
+                        <span class="tag bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all">
+                            ${newTagText.trim()} <span class="material-symbols-outlined text-[14px] cursor-pointer hover:text-white remove-tag">close</span>
+                        </span>
+                    `;
+                    // Insert before the "Add" button
+                    btnAddTag.insertAdjacentHTML('beforebegin', tagHTML);
+                }
+            });
+
+
+            // 5. Availability (Schedule) Logic
+            const dayRows = document.querySelectorAll('.day-row');
+            
+            dayRows.forEach(row => {
+                const toggle = row.querySelector('.day-toggle');
+                const timeInputs = row.querySelector('.time-inputs');
+                const pausedText = row.querySelector('.paused-text');
+                const dayLabel = row.querySelector('.day-label');
+
+                toggle.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        // Day Active
+                        timeInputs.classList.remove('hidden');
+                        pausedText.classList.add('hidden');
+                        dayLabel.classList.remove('text-primary');
+                    } else {
+                        // Day Paused
+                        timeInputs.classList.add('hidden');
+                        pausedText.classList.remove('hidden');
+                        dayLabel.classList.add('text-primary');
+                    }
+                });
+            });
+
+
+            // 6. Form Submission (Save / Discard)
+            const form = document.getElementById('settings-form');
+            const btnDiscard = document.getElementById('btn-discard');
+            const btnSave = document.getElementById('btn-save');
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Visual feedback
+                const originalText = btnSave.innerHTML;
+                btnSave.innerHTML = `<span class="material-symbols-outlined animate-spin text-sm">sync</span> Salvando`;
+                btnSave.disabled = true;
+
+                setTimeout(() => {
+                    btnSave.innerHTML = originalText;
+                    btnSave.disabled = false;
+                    showToast("Configurações salvas com sucesso!", "check_circle");
+                }, 1000);
+            });
+
+            btnDiscard.addEventListener('click', () => {
+                if(confirm("Tem certeza que deseja descartar as alterações não salvas?")) {
+                    form.reset();
+                    // trigger change events to reset UI states
+                    statusToggle.dispatchEvent(new Event('change'));
+                    dayRows.forEach(row => row.querySelector('.day-toggle').dispatchEvent(new Event('change')));
+                    showToast("Alterações descartadas", "delete", true);
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
