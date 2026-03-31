@@ -64,7 +64,7 @@ const About = () => {
             color: 'white',
             marginBottom: '2rem',
             lineHeight: '1.1'
-          }}>NÓS SOMOS O MELHOR ESTÚDIO DE TATUAGEM</h2>
+          }}>CONECTANDO ARTISTAS E CLIENTES</h2>
           
           <p style={{
             color: '#ccc',
@@ -72,8 +72,7 @@ const About = () => {
             lineHeight: '1.7',
             marginBottom: '2rem'
           }}>
-            Nossa missão é transformar sua pele em uma obra de arte única. Com mais de 10 anos de experiência, 
-            combinamos técnicas tradicionais com inovação artística para criar tatuagens que contam sua história.
+            Nossa missão é democratizar o acesso à arte da tatuagem, conectando clientes aos melhores tatuadores independentes do Brasil. Cada artista traz sua experiência única, técnicas especializadas e estilo autoral para criar tatuagens que contam sua história.
           </p>
           
           <div style={{
@@ -84,11 +83,11 @@ const About = () => {
               fontSize: '1.5rem',
               color: 'var(--accent-red)',
               marginBottom: '0.5rem'
-            }}>Lilly Kuiavski</div>
+            }}>Equipe INKFLOW</div>
             <p style={{
               color: '#999',
               fontSize: '0.9rem'
-            }}>Fundador & Artista Principal</p>
+            }}>Fundadores da Plataforma</p>
           </div>
           
           <a href="https://wa.me/5515144373894" style={{

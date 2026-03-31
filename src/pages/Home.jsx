@@ -256,7 +256,7 @@ const Home = () => {
               </h1>
               
               <p className="hero-description">
-                A excelência do traço encontra a profundidade da alma. Bem-vindo à nova era da tatuagem autoral em um ambiente de galeria privada.
+                Conectamos você aos melhores tatuadores independentes do Brasil. Encontre o artista perfeito para sua próxima tattoo.
               </p>
               
               <div className="hero-actions">
@@ -450,7 +450,7 @@ const Home = () => {
               color: 'white',
               marginBottom: '2rem',
               lineHeight: '1.1'
-            }}>NÓS SOMOS O MELHOR ESTÚDIO DE TATUAGEM</h2>
+            }}>A MAIOR PLATAFORMA DE TATUADORES INDEPENDENTES</h2>
             
             <p style={{
               color: '#ccc',
@@ -458,8 +458,7 @@ const Home = () => {
               lineHeight: '1.7',
               marginBottom: '2rem'
             }}>
-              Nossa missão é transformar sua pele em uma obra de arte única. Com mais de 10 anos de experiência, 
-              combinamos técnicas tradicionais com inovação artística para criar tatuagens que contam sua história.
+              Conectamos você aos melhores tatuadores independentes do Brasil. Cada artista traz sua experiência única, técnicas especializadas e estilo autoral para criar a tatuagem perfeita.
             </p>
             
             <div style={{
@@ -470,11 +469,11 @@ const Home = () => {
                 fontSize: '1.5rem',
                 color: 'var(--accent-red)',
                 marginBottom: '0.5rem'
-              }}>Lilly Kuiavski</div>
+              }}>Equipe INKFLOW</div>
               <p style={{
                 color: '#999',
                 fontSize: '0.9rem'
-              }}>Fundador & Artista Principal</p>
+              }}>Fundadores da Plataforma</p>
             </div>
             
             <a href="https://wa.me/5515144373894" style={{

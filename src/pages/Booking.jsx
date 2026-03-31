@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { agendamentoService, clienteService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
 import './Booking.css'
@@ -58,6 +59,20 @@ const Booking = () => {
         { id: 1005, name: 'CAMILA R.', role: 'Fine Line & Floral', img: '/assets/portifolio_tatuadores/Tatuadora_5.png', specialties: ['FLORAL'] },
         { id: 1006, name: 'ANDRÉ V.', role: 'Oriental & Geek', img: '/assets/portifolio_tatuadores/Tatuador_4.png', specialties: ['ORIENTAL', 'GEEK'] }
     ]
+
+    const location = useLocation()
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search)
+        const artistaId = params.get('artistaId')
+        
+        if (artistaId) {
+            const foundArtist = artistsOptions.find(a => a.id.toString() === artistaId)
+            if (foundArtist) {
+                setBookingState(prev => ({ ...prev, artist: foundArtist.name }))
+            }
+        }
+    }, [location.search])
 
     const days = [
         { day: '1', active: false }, { day: '2', active: true }, { day: '3', active: true }, { day: '4', active: true },
@@ -217,17 +232,14 @@ const Booking = () => {
 
                     <div className="sidebar-panel">
                         <h3><span className="material-symbols-outlined panel-icon">schedule</span> Horários</h3>
-                        <div className="info-row"><span>Segunda a Sexta</span><span>9h às 18h</span></div>
-                        <div className="info-row highlight"><span>Sábado</span><span>9h às 16h</span></div>
-                        <div className="info-row"><span>Domingo</span><span>Fechado</span></div>
+                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>info</span> <span style={{textAlign: 'left'}}>Cada artista define seus próprios horários disponíveis.</span></div>
+                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>calendar_month</span> <span style={{textAlign: 'left'}}>Consulte o calendário após selecionar um tatuador.</span></div>
                     </div>
 
                     <div className="sidebar-panel" style={{marginTop: '1.5rem'}}>
                         <h3 style={{color: '#ff0000'}}><span className="material-symbols-outlined panel-icon">policy</span> Políticas</h3>
-                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>check</span> <span style={{textAlign: 'left'}}>Agendamento com 24h de antecedência</span></div>
-                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>check</span> <span style={{textAlign: 'left'}}>Sinal de 50% para confirmar</span></div>
-                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>check</span> <span style={{textAlign: 'left'}}>Cancelamento até 2h antes</span></div>
-                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>check</span> <span style={{textAlign: 'left'}}>Consulta inicial gratuita</span></div>
+                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>info</span> <span style={{textAlign: 'left'}}>Cada artista define suas próprias políticas de cancelamento e sinal de pagamento.</span></div>
+                        <div className="info-row" style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', justifyContent: 'flex-start', alignItems: 'flex-start'}}><span className="material-symbols-outlined" style={{color: '#ff0000', fontSize: '1rem', marginRight: '0.5rem', marginTop: '2px'}}>verified_user</span> <span style={{textAlign: 'left'}}>Consulte as regras do artista após confirmar a reserva.</span></div>
                     </div>
                 </aside>
 

@@ -25,6 +25,9 @@ const Contact = () => {
     <div className="contact">
       <section className="section" style={{ paddingTop: '8rem' }}>
         <h2>Contato</h2>
+        <p style={{ textAlign: 'center', marginBottom: '2rem', color: '#ccc' }}>
+          Entre em contato com a equipe INKFLOW para dúvidas sobre a plataforma. Para dúvidas sobre agendamentos ou tatuagens, fale diretamente com o artista através do seu perfil.
+        </p>
         
         <div className="form-container">
           <form onSubmit={handleSubmit}>

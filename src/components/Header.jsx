@@ -104,11 +104,11 @@ const Header = () => {
         <Link to="/" className="logo">INK FLOW</Link>
         <ul className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
           <li><Link to="/" className={isActive('/')}>Home</Link></li>
-          <li><a href="#sobre-nos" onClick={handleSobreNosClick} className={isActive('/sobre')}>Sobre Nós</a></li>
+          <li><Link to="/artistas" className={isActive('/artistas')}>Explorar Artistas</Link></li>
           <li><Link to="/portfolio" className={isActive('/portfolio')}>Portfólio</Link></li>
-          <li><a href="#servicos" onClick={handleServicosClick} className={isActive('/servicos')}>Serviços</a></li>
           <li><Link to="/agendamento" className={isActive('/agendamento')}>Agendamento</Link></li>
           <li><Link to="/contato" className={isActive('/contato')}>Contato</Link></li>
+          <li><Link to="/para-tatuadores" className={isActive('/para-tatuadores')} style={{color: 'var(--accent-red)', fontWeight: 'bold'}}>Para Tatuadores</Link></li>
           {user ? (
             <>
             <li>

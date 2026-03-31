@@ -40,8 +40,8 @@ const Footer = () => {
         </a>
       </div>
       <div className="footer-info">
-        <p>&copy; 2025 Ink Flow Estúdio de Tatuagem Ltda. Todos os direitos reservados.</p>
-        <p>São Paulo, SP - Brasil | CNPJ: 00.000.000/0001-00</p>
+        <p>&copy; 2025 INKFLOW - Plataforma de Tatuadores. Todos os direitos reservados.</p>
+        <p>Conectando artistas e clientes em todo o Brasil | CNPJ: 00.000.000/0001-00</p>
         <p className="footer-blessing">Deus seja louvado, Amém</p>
       </div>
     </footer>

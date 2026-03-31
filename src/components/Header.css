@@ -26,6 +26,7 @@ nav {
     font-size: 2rem;
     color: var(--accent-red);
     text-decoration: none;
+    white-space: nowrap;
 }
 
 .nav-links {
