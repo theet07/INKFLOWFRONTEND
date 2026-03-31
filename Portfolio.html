@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>INKFLOW | Portfolio</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface": "#ffffff",
+              "background": "#0e0e0e",
+              "surface-bright": "#2c2c2c",
+              "surface-container-highest": "#262626",
+              "surface-variant": "#262626",
+              "primary": "#ff8d8c",
+              "primary-fixed": "#ff7576",
+              "on-surface-variant": "#adaaaa",
+              "surface-dim": "#0e0e0e",
+              "outline-variant": "#484847",
+              "primary-dim": "#ff7072",
+              "surface-container-low": "#131313",
+              "surface-container": "#1a1919",
+              "surface-container-lowest": "#000000",
+              "surface": "#0e0e0e",
+              "surface-container-high": "#201f1f",
+            },
+            fontFamily: {
+              "headline": ["Epilogue"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Epilogue', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        
+        /* Modal Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes scaleUp {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-active { display: flex !important; }
+        .modal-bg-anim { animation: fadeIn 0.3s ease-out forwards; }
+        .modal-box-anim { animation: scaleUp 0.3s ease-out forwards; }
+        
+        /* Filter fade animation */
+        .fade-img { animation: fadeIn 0.5s ease-out forwards; }
+        
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0e0e0e; }
+        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary/30">
+
+    <!-- SideNavBar (Shared Component) -->
+    <aside class="fixed left-0 top-0 h-full w-64 flex flex-col pt-20 pb-6 bg-[#131313] border-r border-white/5 z-40 hidden md:flex shadow-[40px_0_40px_rgba(230,57,70,0.06)]">
+        <div class="px-6 mb-10">
+            <h1 class="text-xl font-black text-[#e63946] font-headline">INKFLOW</h1>
+            <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa] mt-1">Artist Studio</p>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <a class="flex items-center px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-headline text-sm font-bold uppercase tracking-widest group" href="#">
+                <span class="material-symbols-outlined mr-4 group-hover:translate-x-1 transition-transform">dashboard</span> Dashboard
+            </a>
+            <a class="flex items-center px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-headline text-sm font-bold uppercase tracking-widest group" href="#">
+                <span class="material-symbols-outlined mr-4 group-hover:translate-x-1 transition-transform">potted_plant</span> Requests
+            </a>
+            <a class="flex items-center px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-headline text-sm font-bold uppercase tracking-widest group" href="#">
+                <span class="material-symbols-outlined mr-4 group-hover:translate-x-1 transition-transform">calendar_today</span> Schedule
+            </a>
+            <a class="flex items-center px-6 py-4 text-white border-l-4 border-[#e63946] bg-gradient-to-r from-[#e63946]/10 to-transparent font-headline text-sm font-bold uppercase tracking-widest group" href="#">
+                <span class="material-symbols-outlined mr-4 translate-x-1 transition-transform">brush</span> Portfolio
+            </a>
+            <a class="flex items-center px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-headline text-sm font-bold uppercase tracking-widest group" href="#">
+                <span class="material-symbols-outlined mr-4 group-hover:translate-x-1 transition-transform">settings</span> Settings
+            </a>
+        </nav>
+        <div class="px-6 pt-6 border-t border-white/5">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-surface-container-highest rounded-sm overflow-hidden">
+                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh8BEvMGRLjfdaLUdI6KOtZpzs037vglThg6cgMCFbMeH3lklKcX-bHR5JEafF_zWnAmpLKowbOP_hv4yADO-rNbadGFai_bTTqCTcFcbLJKQCtPXSdWIcwKoZUmVGNRTOKQRWVqoUlcti0BVxiDrkGFRNM8W_HrxllYUstRsqFYOBOhIofP9Jwh-UMxberJmzzu94b-Nxw8gOw6egOlVggQ2X0f8T28a3MWO9P_9A1yjK3YfGwt9OweuvoVR9HGtIsbX7P-mho8I"/>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-white uppercase tracking-tighter">Viktor Noir</p>
+                    <p class="text-[10px] text-on-surface-variant uppercase">Senior Resident</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- TopAppBar Shell -->
+    <header class="fixed top-0 w-full h-16 flex items-center justify-between px-6 bg-[#131313] z-50 border-b border-white/5 md:w-[calc(100%-16rem)] md:ml-64">
+        <div class="flex items-center">
+            <h2 class="font-headline tracking-tighter font-bold uppercase text-[#e63946] text-lg md:hidden">INKFLOW</h2>
+            <h2 class="hidden md:block font-headline tracking-tighter font-bold uppercase text-[#e63946] text-lg">Portfolio</h2>
+        </div>
+        <div class="flex items-center space-x-6">
+            <button class="text-[#adaaaa] hover:text-white transition-colors duration-200 scale-95 active:opacity-80">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <button class="text-[#adaaaa] hover:text-white transition-colors duration-200 scale-95 active:opacity-80">
+                <span class="material-symbols-outlined">account_circle</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Canvas -->
+    <main class="md:ml-64 min-h-screen bg-background relative pb-20 md:pb-0">
+        
+        <!-- Portfolio Gallery Section -->
+        <section class="pt-24 px-6 md:px-12 pb-12">
+            
+            <!-- Filters & Header -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                <div class="max-w-xl">
+                    <h3 class="text-5xl font-headline font-black tracking-tighter mb-4 text-white">THE ARCHIVE.</h3>
+                    <p class="text-on-surface-variant font-body text-sm leading-relaxed max-w-sm">
+                        Curating a legacy of surgical precision and permanence. Every piece is a story etched in obsidian.
+                    </p>
+                </div>
+                
+                <!-- Filter Chips -->
+                <div class="flex flex-wrap gap-2" id="filters-container">
+                    <!-- Note: In a real app, data-filter would match specific images -->
+                    <button class="js-filter-btn px-5 py-2 bg-primary text-black font-headline text-[10px] font-black uppercase tracking-widest rounded-lg transition-all">Todos</button>
+                    <button class="js-filter-btn px-5 py-2 bg-surface-container-highest text-on-surface-variant hover:text-white font-headline text-[10px] font-black uppercase tracking-widest rounded-lg border border-outline-variant/20 transition-all">Blackwork</button>
+                    <button class="js-filter-btn px-5 py-2 bg-surface-container-highest text-on-surface-variant hover:text-white font-headline text-[10px] font-black uppercase tracking-widest rounded-lg border border-outline-variant/20 transition-all">Realismo</button>
+                    <button class="js-filter-btn px-5 py-2 bg-surface-container-highest text-on-surface-variant hover:text-white font-headline text-[10px] font-black uppercase tracking-widest rounded-lg border border-outline-variant/20 transition-all">Fine Line</button>
+                    <button class="js-filter-btn px-5 py-2 bg-surface-container-highest text-on-surface-variant hover:text-white font-headline text-[10px] font-black uppercase tracking-widest rounded-lg border border-outline-variant/20 transition-all">Aquarela</button>
+                    <button class="js-filter-btn px-5 py-2 bg-surface-container-highest text-on-surface-variant hover:text-white font-headline text-[10px] font-black uppercase tracking-widest rounded-lg border border-outline-variant/20 transition-all">Traditional</button>
+                </div>
+            </div>
+
+            <!-- Full Grid Gallery -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[300px]" id="gallery-grid">
+                
+                <!-- Items -->
+                <div class="js-gallery-item group relative overflow-hidden bg-surface-container-low rounded-lg cursor-pointer transition-all duration-300">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNAf9jgjLNEHlMDRfB3lHBBGegXrcp-I-D36qEDO7QL8RODlXOtQUX4GYU3Q9i7EJQDdbfd-_hnbJnxIFQZsBf3cTK4TTDCfYVHLDZdfWXsMdm_61XfjGdr7RtqEa2sl2zSDYQ14xwf-FNWsk87z2ggfk3XoUvleeAqyFx5nA_7gd8GuC2zMxJUmAXjsk1-Ds1SWy66_knT6NGGfXMtZ04Y-EuccUe0pnroEYHTtU48ru2jxnn6kGlFHHiheBsGfCg1v1edhRQvpM"/>
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="text-white font-headline text-xs font-bold uppercase tracking-widest">Ver Detalhes</span>
+                    </div>
+                </div>
+                
+                <div class="js-gallery-item group relative overflow-hidden bg-surface-container-low rounded-lg cursor-pointer transition-all duration-300">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5wxwQYjTzAQq97JRhJQxKjvpluewHwwdFCiLqnCRqTNs4DD_4bnWcwKniFqxhDdC_SNWHwg2c2rEo0cglSZHRIvpm8IAefuDKqNJdYrH6xiCvSzk8vKD05n_1e7M5qbwHWbfZwgVFYMt5J-4XTG_3-T9tk43W4_qHSybQO7nAhUN4jha4KbRBJVJk8P5m73JaMkRRalORdWtT9af4a5VPTPJgL1GkWngj75UcE_W_uNEpn9iHSBVqPGJLnU9vWHteapNX8M5TBXc"/>
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="text-white font-headline text-xs font-bold uppercase tracking-widest">Ver Detalhes</span>
+                    </div>
+                </div>
+                
+                <div class="js-gallery-item group relative overflow-hidden bg-surface-container-low rounded-lg cursor-pointer transition-all duration-300">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACn3ZYJMn9RyxPQRF1wRb-OcgPU2_e75EzSy9ACPBJ5dRFgeOnspXyFrpJyFoew4KaYaTTkMPgwC8oDpuqcetTO9ErrPAUpyo-b9nc3nB6cNmjX7EjI85w00E6O0_81gMaYipBhTd20c0HesEGXD3xQf7AVZujczkTzD2mGE9qSGXv16zDQqnOiQvn-DA7t49V90hJvBPXBT2yG--1F3APhJQIHWS_AaSVi0okXTl-DSRA4cp_l3bfhMLDPMxmneRo_6ahBEztKos"/>
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="text-white font-headline text-xs font-bold uppercase tracking-widest">Ver Detalhes</span>
+                    </div>
+                </div>
+
+                <div class="js-gallery-item group relative overflow-hidden bg-surface-container-low rounded-lg cursor-pointer transition-all duration-300">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNt6ah9YEdfyY7zZCVObzWgAGeXRJT_FAjmp-xjM4DIQnYKs2-rV1Q8vyCwgL5Kz0qXRQyIIBBOSlhmKCH08q9Y4g5_2D3M9EBaILjIbP8QLgFDloEdlj4k1DsrfDGpfcK2Va-IxhzIxJiPOiOVn68pyn9bb3PGBg8G_7h-tchZguyb9MbwKP4Ont4yoCePVxZ7e1NlEGgfSB1cd3kuT4gcr2o-KOXYdJYUQ7IM91z1CP2D-TMrSCfu5OKHXn1-S49LGRM3FA6UwE"/>
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="text-white font-headline text-xs font-bold uppercase tracking-widest">Ver Detalhes</span>
+                    </div>
+                </div>
+
+                <div class="js-gallery-item group relative overflow-hidden bg-surface-container-low rounded-lg cursor-pointer transition-all duration-300">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWgtlmoPCL-AakzyU0h-8jeVJ5l1yr64Tys7wYJTNs8MbN-DXYLqETNtagxtkdRvADl4551kEZeoHgL8vI_otf-4resU3akWKh-tWMqH3NWa3a-RYbxu1z9wO2AuQXJRG3EKoetGMsvNXRoyp4GfVdWK-wbnyYbKkc4AnNoWnsjfha_sx4A3sH-8wyoauaK6cMmfsEc1beG-zGHwbcN41lRZ0YcLUetMqqtLJ7cLMYP5dHbFPSGXmpEQZNV_Kemi1fkWr7JLiyuVg"/>
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="text-white font-headline text-xs font-bold uppercase tracking-widest">Ver Detalhes</span>
+                    </div>
+                </div>
+
+                <div class="js-gallery-item group relative overflow-hidden bg-surface-container-low rounded-lg cursor-pointer transition-all duration-300">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAajH3XyXL2Ek6NYmMvHjfAMx8b2dLLy_QJ-7W3K-3KXJdxYGxBWstjmqhd8StHDpuDN-dJ2Kc56sueC3uTeYNeK8m5WvQ60jLiLs_J3hbVG6Cr799YUQO1HJRlBMZdifFs53AsbopvvnWvRAJ4teS1FpfDtn1KAbApWNpq5ZFNBn-QUqR-XYbLDPPNNgMoKQpTWml0jLhTvxDE9qzs7NnRnzkEwq024rWLTGGqNKfo1czrIXtbgQEgCtKzpDaD0WXBJ-7PSXihuaM"/>
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="text-white font-headline text-xs font-bold uppercase tracking-widest">Ver Detalhes</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- BottomNavBar (Mobile Only) -->
+    <nav class="fixed bottom-0 left-0 w-full h-16 bg-[#131313] flex md:hidden items-center justify-around z-40 border-t border-white/5">
+        <a class="flex flex-col items-center text-[#adaaaa]" href="#">
+            <span class="material-symbols-outlined text-xl">dashboard</span>
+        </a>
+        <a class="flex flex-col items-center text-[#adaaaa]" href="#">
+            <span class="material-symbols-outlined text-xl">potted_plant</span>
+        </a>
+        <a class="flex flex-col items-center text-primary" href="#">
+            <span class="material-symbols-outlined text-xl">brush</span>
+        </a>
+        <a class="flex flex-col items-center text-[#adaaaa]" href="#">
+            <span class="material-symbols-outlined text-xl">calendar_today</span>
+        </a>
+        <a class="flex flex-col items-center text-[#adaaaa]" href="#">
+            <span class="material-symbols-outlined text-xl">settings</span>
+        </a>
+    </nav>
+
+    <!-- Portfolio Detail Modal (Lightbox) -->
+    <div id="detail-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 md:p-10">
+        <!-- Dark Backdrop -->
+        <div id="modal-backdrop" class="absolute inset-0 bg-black/90 backdrop-blur-sm cursor-pointer"></div>
+        
+        <!-- Modal Content -->
+        <div id="modal-content" class="relative z-10 w-full max-w-5xl bg-[#131313] border border-white/10 rounded-xl overflow-hidden flex flex-col md:flex-row max-h-full">
+            
+            <!-- Image Area -->
+            <div class="w-full md:w-2/3 bg-black flex items-center justify-center h-64 md:h-auto overflow-hidden">
+                <img id="modal-img" class="w-full h-full object-contain" src=""/>
+            </div>
+            
+            <!-- Details Area -->
+            <div class="w-full md:w-1/3 p-6 md:p-8 flex flex-col">
+                <div class="flex justify-between items-start mb-6">
+                    <h4 class="text-2xl font-black font-headline uppercase text-white">Obra Selecionada</h4>
+                    <button id="close-modal-btn" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-[#adaaaa] hover:text-white transition-colors">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
+                </div>
+                
+                <div class="space-y-6 flex-1 overflow-y-auto pr-2">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa] mb-1">Detalhes do Projeto</p>
+                        <p class="text-sm text-on-surface-variant leading-relaxed">
+                            Trabalho exclusivo realizado em única sessão. Combinação de técnicas de sombreamento suave e traços precisos para garantir durabilidade e contraste.
+                        </p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 border-t border-white/5 pt-6">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa] mb-1">Estilo</p>
+                            <p class="text-sm font-bold text-white">Custom Design</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa] mb-1">Tempo</p>
+                            <p class="text-sm font-bold text-white">~ 4 Horas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 mt-4 border-t border-white/5">
+                    <button class="w-full py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-headline text-xs font-bold uppercase tracking-widest transition-all rounded-lg flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">share</span> Compartilhar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 1. FILTER CHIPS LOGIC ---
+            const filterBtns = document.querySelectorAll('.js-filter-btn');
+            const galleryGrid = document.getElementById('gallery-grid');
+            const galleryItems = document.querySelectorAll('.js-gallery-item');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Reset styling on all buttons
+                    filterBtns.forEach(b => {
+                        b.className = "js-filter-btn px-5 py-2 bg-surface-container-highest text-on-surface-variant hover:text-white font-headline text-[10px] font-black uppercase tracking-widest rounded-lg border border-outline-variant/20 transition-all";
+                    });
+                    
+                    // Apply active styling to the clicked button
+                    e.target.className = "js-filter-btn px-5 py-2 bg-primary text-black font-headline text-[10px] font-black uppercase tracking-widest rounded-lg transition-all";
+
+                    // Simulate filtering by adding a quick fade animation to images
+                    galleryItems.forEach(item => {
+                        item.classList.remove('fade-img');
+                        // Force reflow
+                        void item.offsetWidth;
+                        item.classList.add('fade-img');
+                    });
+                });
+            });
+
+
+            // --- 2. MODAL (LIGHTBOX) LOGIC ---
+            const modal = document.getElementById('detail-modal');
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            const modalContent = document.getElementById('modal-content');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const modalImg = document.getElementById('modal-img');
+
+            function openModal(imgSrc) {
+                // Set the image
+                modalImg.src = imgSrc;
+                
+                // Remove hidden, add flex and animation classes
+                modal.classList.remove('hidden');
+                modal.classList.add('modal-active');
+                
+                modalBackdrop.classList.add('modal-bg-anim');
+                modalContent.classList.add('modal-box-anim');
+                
+                // Prevent body scroll
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modal.classList.remove('modal-active');
+                modal.classList.add('hidden');
+                
+                modalBackdrop.classList.remove('modal-bg-anim');
+                modalContent.classList.remove('modal-box-anim');
+                
+                // Restore body scroll
+                document.body.style.overflow = 'hidden'; // Keep hidden due to main layout structure, or use 'auto' if normal page
+            }
+
+            // Bind click to all gallery items
+            galleryItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const imgElement = item.querySelector('img');
+                    if (imgElement) {
+                        openModal(imgElement.src);
+                    }
+                });
+            });
+
+            // Close bindings
+            closeModalBtn.addEventListener('click', closeModal);
+            modalBackdrop.addEventListener('click', closeModal);
+
+            // Close on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('modal-active')) {
+                    closeModal();
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
