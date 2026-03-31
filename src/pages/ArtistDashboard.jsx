@@ -62,6 +62,13 @@ const ArtistDashboard = () => {
     navigate('/login')
   }
 
+  const [viewMode, setViewMode] = useState('monthly')
+
+  const handleViewToggle = (mode) => {
+    setViewMode(mode)
+    showToast(`Visualização alterada para ${mode === 'monthly' ? 'Mensal' : 'Semanal'}`)
+  }
+
   const navItems = [
     { key: 'dashboard', icon: 'dashboard', label: 'Painel' },
     { key: 'requests', icon: 'potted_plant', label: 'Solicitações' },
@@ -103,6 +110,18 @@ const ArtistDashboard = () => {
           <span className="ad-topbar-brand">INKFLOW</span>
         </div>
         <div className="ad-topbar-right">
+          {activeTab === 'schedule' && (
+            <div className="ad-sched-view-toggle">
+              <button
+                className={`ad-sched-view-btn ${viewMode === 'monthly' ? 'active' : ''}`}
+                onClick={() => handleViewToggle('monthly')}
+              >Mensal</button>
+              <button
+                className={`ad-sched-view-btn ${viewMode === 'weekly' ? 'active' : ''}`}
+                onClick={() => handleViewToggle('weekly')}
+              >Semanal</button>
+            </div>
+          )}
           <button className="ad-icon-btn">
             <span className="material-symbols-outlined">notifications</span>
           </button>
@@ -155,7 +174,7 @@ const ArtistDashboard = () => {
 
       {/* Main Content */}
       <main className="ad-main">
-        <div className="ad-content">
+        <div className={`ad-content ${activeTab === 'schedule' ? 'full-width' : ''}`}>
           {renderContent()}
         </div>
       </main>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>INKFLOW | Schedule</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface": "#ffffff",
+              "background": "#0e0e0e",
+              "surface-bright": "#2c2c2c",
+              "surface-container-highest": "#262626",
+              "surface-variant": "#262626",
+              "primary": "#ff8d8c",
+              "primary-container": "#ff7576",
+              "on-surface-variant": "#adaaaa",
+              "surface-dim": "#0e0e0e",
+              "outline-variant": "#484847",
+              "primary-dim": "#ff7072",
+              "error": "#ff7351",
+              "surface-container-low": "#131313",
+              "surface-container": "#1a1919",
+              "surface-container-lowest": "#000000",
+              "surface": "#0e0e0e",
+              "secondary-container": "#832040",
+            },
+            fontFamily: {
+              "headline": ["Epilogue"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body {
+            background-color: #0e0e0e;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Toast Animation */
+        @keyframes slideUpFade {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate { animation: slideUpFade 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="overflow-hidden flex flex-col h-screen selection:bg-primary selection:text-black">
+
+    <!-- SideNavBar Shell -->
+    <aside class="fixed left-0 top-0 h-full w-64 flex flex-col pt-20 pb-6 bg-[#131313] dark:bg-[#131313] shadow-[40px_0_40px_rgba(230,57,70,0.06)] border-r border-white/5 z-40 hidden md:flex">
+        <div class="px-6 mb-10">
+            <h1 class="text-xl font-black text-[#e63946] font-['Epilogue'] tracking-tighter">INKFLOW</h1>
+            <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa] mt-1">Artist Studio</p>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <a class="flex items-center px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-['Epilogue'] text-sm font-bold uppercase tracking-widest group js-action-btn" href="#" data-action="Navigate to Dashboard">
+                <span class="material-symbols-outlined mr-4 group-hover:translate-x-1 transition-transform">dashboard</span> Dashboard
+            </a>
+            <a class="flex items-center px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-['Epilogue'] text-sm font-bold uppercase tracking-widest group js-action-btn" href="#" data-action="Navigate to Requests">
+                <span class="material-symbols-outlined mr-4 group-hover:translate-x-1 transition-transform">potted_plant</span> Requests
+            </a>
+            <a class="flex items-center px-6 py-4 text-white border-l-4 border-[#e63946] bg-gradient-to-r from-[#e63946]/10 to-transparent font-['Epilogue'] text-sm font-bold uppercase tracking-widest group" href="#">
+                <span class="material-symbols-outlined mr-4 translate-x-1 transition-transform">calendar_today</span> Schedule
+            </a>
+            <a class="flex items-center px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-['Epilogue'] text-sm font-bold uppercase tracking-widest group js-action-btn" href="#" data-action="Navigate to Portfolio">
+                <span class="material-symbols-outlined mr-4 group-hover:translate-x-1 transition-transform">brush</span> Portfolio
+            </a>
+            <a class="flex items-center px-6 py-4 text-[#adaaaa] hover:text-white hover:bg-[#262626] transition-all duration-300 font-['Epilogue'] text-sm font-bold uppercase tracking-widest group js-action-btn" href="#" data-action="Navigate to Settings">
+                <span class="material-symbols-outlined mr-4 group-hover:translate-x-1 transition-transform">settings</span> Settings
+            </a>
+        </nav>
+        <div class="px-6 mt-auto">
+            <div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-highest/30">
+                <div class="w-10 h-10 rounded-full bg-primary-container overflow-hidden">
+                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtesLGQa35tkFxdgiUx84Gw6Wl0Hl1RnmFLVMZKiQUj2U09mbOl7zKd0F-8_gbmBKEBAZs8VI1r8KZIO1Jga5dXEEug8ck3erU2XQaxMoecIhSoRHtwMRVpWGM8kLYDXxwzP8zKzq3k1njmCF5a2uLzZ0s5m4DfyQFC5yUoQBg7UUiYBTx0Bm3rI0TGfm4Sq1aHH7db_GdkaD-oiUz8fe8_V9Z7wvRYienvZJZ6ipOhkOd2Uq-PaXG4Q51cmr3saVTOJ3GUEW-uQc"/>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold truncate">MARCUS KANE</p>
+                    <p class="text-[10px] text-on-surface-variant truncate">Master Artist</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- TopAppBar Shell -->
+    <header class="fixed top-0 w-full h-16 flex items-center justify-between px-6 bg-[#131313] border-b border-white/5 z-50">
+        <div class="flex items-center gap-4">
+            <span class="text-2xl font-black tracking-tighter text-[#e63946] uppercase font-['Epilogue'] md:hidden">INKFLOW</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2 bg-surface-container-lowest px-3 py-1.5 rounded-full border border-white/5" id="view-toggle-container">
+                <button class="js-view-btn text-[10px] font-black tracking-widest uppercase px-4 py-1 rounded-full bg-primary text-black transition-all" data-view="monthly">Monthly</button>
+                <button class="js-view-btn text-[10px] font-black tracking-widest uppercase px-4 py-1 rounded-full text-[#adaaaa] hover:text-white transition-all bg-transparent" data-view="weekly">Weekly</button>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="js-action-btn text-[#adaaaa] hover:text-white transition-colors duration-200 scale-95 active:opacity-80" data-action="You have 3 new notifications">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <button class="js-action-btn text-[#adaaaa] hover:text-white transition-colors duration-200 scale-95 active:opacity-80" data-action="Opening Profile Options...">
+                    <span class="material-symbols-outlined">account_circle</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Canvas -->
+    <main class="pt-16 md:pl-64 h-screen flex flex-col md:flex-row overflow-hidden bg-background">
+        
+        <!-- Calendar Grid Section -->
+        <section class="flex-1 p-6 overflow-y-auto scrollbar-hide">
+            <div class="max-w-6xl mx-auto space-y-8 pb-24 md:pb-6">
+                
+                <!-- Calendar Header -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-4xl font-black font-headline uppercase tracking-tighter text-white" id="current-month-display">October <span class="text-primary-dim">2024</span></h2>
+                        <p class="text-on-surface-variant text-sm font-label mt-1">12 Confirmed sessions this month</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="js-action-btn p-2 border border-outline-variant/30 hover:bg-surface-container-highest transition-colors rounded-sm" data-action="Previous Month Loaded">
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                        </button>
+                        <button class="js-action-btn p-2 border border-outline-variant/30 hover:bg-surface-container-highest transition-colors rounded-sm" data-action="Next Month Loaded">
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div class="grid grid-cols-7 gap-px bg-white/5 border border-white/5 overflow-hidden rounded-lg">
+                    <!-- Day Labels -->
+                    <div class="bg-surface-container-low p-3 text-center border-b border-white/5"><span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Mon</span></div>
+                    <div class="bg-surface-container-low p-3 text-center border-b border-white/5"><span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Tue</span></div>
+                    <div class="bg-surface-container-low p-3 text-center border-b border-white/5"><span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Wed</span></div>
+                    <div class="bg-surface-container-low p-3 text-center border-b border-white/5"><span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Thu</span></div>
+                    <div class="bg-surface-container-low p-3 text-center border-b border-white/5"><span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Fri</span></div>
+                    <div class="bg-surface-container-low p-3 text-center border-b border-white/5"><span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Sat</span></div>
+                    <div class="bg-surface-container-low p-3 text-center border-b border-white/5"><span class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Sun</span></div>
+                    
+                    <!-- Week 1 - Leading space -->
+                    <div class="bg-surface-dim/50 p-4 h-32 md:h-40 pointer-events-none"></div>
+                    <div class="bg-surface-dim/50 p-4 h-32 md:h-40 pointer-events-none"></div>
+                    
+                    <!-- Days (Interactive) -->
+                    <div class="js-cal-day bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="01" data-day-name="Wednesday">
+                        <span class="js-day-num text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">01</span>
+                    </div>
+                    <div class="js-cal-day bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="02" data-day-name="Thursday">
+                        <span class="js-day-num text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">02</span>
+                        <div class="mt-2 space-y-1"><div class="h-1.5 w-full bg-secondary-container rounded-full"></div></div>
+                    </div>
+                    <div class="js-cal-day bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="03" data-day-name="Friday">
+                        <span class="js-day-num text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">03</span>
+                    </div>
+                    <div class="js-cal-day bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="04" data-day-name="Saturday">
+                        <span class="js-day-num text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">04</span>
+                        <div class="mt-2 space-y-1">
+                            <div class="py-0.5 px-1.5 bg-primary/20 rounded-sm border-l-2 border-primary">
+                                <p class="text-[8px] font-black uppercase text-primary truncate">10:00 AM - Realism</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="js-cal-day bg-surface p-4 h-32 md:h-40 border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="05" data-day-name="Sunday">
+                        <span class="js-day-num text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">05</span>
+                    </div>
+                    
+                    <!-- Next Row -->
+                    <div class="js-cal-day bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="06" data-day-name="Monday">
+                        <span class="js-day-num text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">06</span>
+                    </div>
+                    
+                    <!-- Pre-Selected Day (07) -->
+                    <div class="js-cal-day bg-primary/5 p-4 h-32 md:h-40 border-r border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="07" data-day-name="Tuesday">
+                        <span class="js-day-num text-xs font-bold text-primary">07</span>
+                        <div class="mt-2 space-y-1">
+                            <div class="py-0.5 px-1.5 bg-primary text-black rounded-sm">
+                                <p class="text-[8px] font-black uppercase truncate">Active Sessions (3)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="js-cal-day bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="08" data-day-name="Wednesday">
+                        <span class="js-day-num text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">08</span>
+                    </div>
+                    <div class="js-cal-day bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="09" data-day-name="Thursday">
+                        <span class="js-day-num text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">09</span>
+                        <div class="mt-2 space-y-1"><div class="h-1.5 w-8 bg-error rounded-full"></div></div>
+                    </div>
+                    <div class="js-cal-day bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="10" data-day-name="Friday">
+                        <span class="js-day-num text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">10</span>
+                    </div>
+                    <div class="js-cal-day bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="11" data-day-name="Saturday">
+                        <span class="js-day-num text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">11</span>
+                    </div>
+                    <div class="js-cal-day bg-surface p-4 h-32 md:h-40 border-b border-white/5 hover:bg-surface-container-highest/50 transition-all cursor-pointer group" data-day="12" data-day-name="Sunday">
+                        <span class="js-day-num text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors">12</span>
+                    </div>
+                    
+                    <!-- Placeholders for remaining grid -->
+                    <div class="bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 pointer-events-none text-on-surface-variant opacity-30 text-xs font-bold">13</div>
+                    <div class="bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 pointer-events-none text-on-surface-variant opacity-30 text-xs font-bold">14</div>
+                    <div class="bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 pointer-events-none text-on-surface-variant opacity-30 text-xs font-bold">15</div>
+                    <div class="bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 pointer-events-none text-on-surface-variant opacity-30 text-xs font-bold">16</div>
+                    <div class="bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 pointer-events-none text-on-surface-variant opacity-30 text-xs font-bold">17</div>
+                    <div class="bg-surface p-4 h-32 md:h-40 border-r border-b border-white/5 pointer-events-none text-on-surface-variant opacity-30 text-xs font-bold">18</div>
+                    <div class="bg-surface p-4 h-32 md:h-40 border-b border-white/5 pointer-events-none text-on-surface-variant opacity-30 text-xs font-bold">19</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Side Panel: Day Details -->
+        <aside class="w-full md:w-[400px] border-l border-white/5 bg-[#131313] flex flex-col h-full overflow-hidden shadow-2xl z-10 shrink-0">
+            <div class="p-8 border-b border-white/5 bg-surface-container-low/50">
+                <div class="flex items-center justify-between mb-2">
+                    <span id="panel-day-name" class="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Tuesday</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant" id="panel-status">Confirmed</span>
+                </div>
+                <h3 id="panel-date" class="text-5xl font-black font-headline tracking-tighter">OCT 07</h3>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-hide" id="panel-sessions">
+                <h4 class="text-xs font-black uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-primary"></span>
+                    Scheduled Sessions
+                </h4>
+                
+                <!-- Session 1 -->
+                <div class="js-action-btn group relative p-6 bg-surface-container-highest/50 border-l-2 border-primary hover:bg-surface-container-highest transition-all cursor-pointer rounded-r-lg" data-action="Opening Session Details: Elias Thorne">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">10:00 AM — 02:00 PM</p>
+                            <h5 class="text-xl font-black font-headline uppercase tracking-tight">Elias Thorne</h5>
+                        </div>
+                        <span class="text-[10px] font-black uppercase px-2 py-0.5 bg-primary/20 text-primary rounded-sm">4h Session</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-surface-dim rounded-sm overflow-hidden grayscale group-hover:grayscale-0 transition-all border border-white/5">
+                            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKPAPuZN7LuO98_XAx_gTS6yOBoNJ28hOrcZ3QftP-HeWOuvtySiIbu_a3D1p54e3KVxvM5aJ0BgB7J5RkxqfIreiacRpTFtDm_PJVB-8gm6neqpNHRFWR60pMWnRjwxYuhF3vYyL8Z7Gpo2JA8ge5KZYfLXyXyeMA95rPcmPM_bven6jOCQmcjRX5VlbEyjYIjei6RmMzfM5_rUqVn2ry889LigIWpX2sSoksyIM5Q11mnemxfFHOPYQAb2_uF1ZO20t6u6kAO2s"/>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-white uppercase tracking-tighter">Realism Sleeve</p>
+                            <p class="text-[10px] text-on-surface-variant uppercase">Forearm • Shading Phase</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session 2 -->
+                <div class="js-action-btn group relative p-6 bg-surface-container-highest/50 border-l-2 border-outline-variant/50 hover:bg-surface-container-highest transition-all cursor-pointer rounded-r-lg" data-action="Opening Session Details: Sarah Jenkins">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">03:30 PM — 06:00 PM</p>
+                            <h5 class="text-xl font-black font-headline uppercase tracking-tight">Sarah Jenkins</h5>
+                        </div>
+                        <span class="text-[10px] font-black uppercase px-2 py-0.5 bg-surface-container text-on-surface-variant rounded-sm">2.5h Session</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-surface-dim rounded-sm overflow-hidden grayscale group-hover:grayscale-0 transition-all border border-white/5">
+                            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrt43pITqUpk6u2HAIIskG7tVkD6o8yE41vFd2kgFFz29mPKmhTmN72YOgvAVDhscg-mtujNp-kX7oTzQue7W-AfMiYfyjuoCDPakZB_Uwzakdd0HVsp23tKNTBeCZNRgIPTGPs41CAve4o_pkvWHP9kzYvRxb0Hul3fbX_z_FFNTbDHjQ_bLRqa2PeZZZxja8tqahmy-15HzoK0wVc3Ci8UtI517tF-FxsapN6iaeAEf8Fmm7_13FdQfWjbfohoki6lfeQ15McNo"/>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-white uppercase tracking-tighter">Fine Line Floral</p>
+                            <p class="text-[10px] text-on-surface-variant uppercase">Lower Leg • Final Details</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Break/Note -->
+                <div class="p-4 border border-dashed border-white/10 flex items-center justify-center text-on-surface-variant rounded-lg">
+                    <span class="material-symbols-outlined text-sm mr-2">coffee</span>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em]">Studio Cleanup &amp; Restock</span>
+                </div>
+
+                <!-- Session 3 -->
+                <div class="js-action-btn group relative p-6 bg-surface-container-highest/50 border-l-2 border-primary hover:bg-surface-container-highest transition-all cursor-pointer rounded-r-lg" data-action="Opening Session Details: Marcus Vane">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">07:30 PM — 10:30 PM</p>
+                            <h5 class="text-xl font-black font-headline uppercase tracking-tight">Marcus Vane</h5>
+                        </div>
+                        <span class="text-[10px] font-black uppercase px-2 py-0.5 bg-primary/20 text-primary rounded-sm">3h Session</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-surface-dim rounded-sm overflow-hidden grayscale group-hover:grayscale-0 transition-all border border-white/5">
+                            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKhyNbj3W3K-z70gC0xg6DacLUF6OCVOzUOifRv7WaLGVU-1TVHkGq_mTnVenJ3h2koe_VduNeA0E4CtrCbLWJPWyeTAa1ijWnLZqIe-Ws30tfOcJBBmiIMl__gJ7LXlRSjXpmLqPofXt9Txbvk2K4mI0q65KkF-TuUeekz_i0TII4zog1jOhbwt-S-IYJ-denjyiuL1Df6FRa8dxLW-YBe2RX1nCmN95FpSSeYsKkWf3DZm9zDYjdjSaSZ0y8B1mhU3fwVW23Sec"/>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-white uppercase tracking-tighter">Geometric Chest</p>
+                            <p class="text-[10px] text-on-surface-variant uppercase">Chest Piece • Linework</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Footer Action -->
+            <div class="p-6 bg-surface-container-low border-t border-white/5 pb-24 md:pb-6">
+                <button class="js-action-btn w-full py-4 bg-gradient-to-r from-primary to-primary-dim text-black font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all rounded shadow-[0_5px_20px_rgba(255,141,140,0.3)]" data-action="Opening New Appointment Form">
+                    <span class="material-symbols-outlined text-lg">add_circle</span> New Appointment
+                </button>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Contextual FAB (Only on Mobile View) -->
+    <div class="fixed bottom-6 right-6 md:hidden z-50">
+        <button class="js-action-btn w-14 h-14 rounded-full bg-primary text-black flex items-center justify-center shadow-[0_0_20px_rgba(230,57,70,0.4)] active:scale-90 transition-transform" data-action="Opening New Appointment Form">
+            <span class="material-symbols-outlined">add</span>
+        </button>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-24 md:bottom-10 right-6 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 1. Toast Notification System ---
+            const toastContainer = document.getElementById('toast-container');
+            
+            function showToast(message, icon = 'check_circle') {
+                const toast = document.createElement('div');
+                toast.className = `flex items-center gap-3 px-6 py-4 rounded shadow-2xl toast-animate pointer-events-auto bg-surface-container-highest border border-white/10`;
+                toast.innerHTML = `
+                    <span class="material-symbols-outlined text-primary">${icon}</span>
+                    <span class="text-xs font-headline font-bold uppercase tracking-widest text-white">${message}</span>
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                // Auto remove after 3s
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(10px)';
+                    toast.style.transition = 'all 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // --- 2. Generic Action Buttons ---
+            document.querySelectorAll('.js-action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const actionMsg = btn.getAttribute('data-action');
+                    if(actionMsg) showToast(actionMsg, 'info');
+                });
+            });
+
+            // --- 3. View Toggle (Monthly / Weekly) ---
+            const viewBtns = document.querySelectorAll('.js-view-btn');
+            viewBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Reset styling on all
+                    viewBtns.forEach(b => {
+                        b.className = "js-view-btn text-[10px] font-black tracking-widest uppercase px-4 py-1 rounded-full text-[#adaaaa] hover:text-white transition-all bg-transparent";
+                    });
+                    
+                    // Apply active styling to clicked
+                    e.target.className = "js-view-btn text-[10px] font-black tracking-widest uppercase px-4 py-1 rounded-full bg-primary text-black transition-all";
+                    
+                    showToast(`View switched to ${e.target.innerText}`, 'calendar_view_week');
+                });
+            });
+
+            // --- 4. Calendar Day Selection Logic ---
+            const calDays = document.querySelectorAll('.js-cal-day');
+            const panelDateDisplay = document.getElementById('panel-date');
+            const panelDayNameDisplay = document.getElementById('panel-day-name');
+            const panelStatusDisplay = document.getElementById('panel-status');
+            const panelSessions = document.getElementById('panel-sessions');
+
+            calDays.forEach(day => {
+                day.addEventListener('click', function() {
+                    // Remove active styling from all days
+                    calDays.forEach(d => {
+                        d.classList.remove('bg-primary/5', 'border-primary/30');
+                        d.classList.add('bg-surface');
+                        const num = d.querySelector('.js-day-num');
+                        if(num) {
+                            num.classList.remove('text-primary');
+                            num.classList.add('text-on-surface-variant');
+                        }
+                    });
+
+                    // Add active styling to clicked day
+                    this.classList.remove('bg-surface');
+                    this.classList.add('bg-primary/5', 'border-primary/30');
+                    const num = this.querySelector('.js-day-num');
+                    if(num) {
+                        num.classList.remove('text-on-surface-variant');
+                        num.classList.add('text-primary');
+                    }
+
+                    // Get Data Attributes
+                    const dayNum = this.getAttribute('data-day');
+                    const dayName = this.getAttribute('data-day-name');
+
+                    // Update Right Panel UI
+                    panelDateDisplay.innerText = `OCT ${dayNum}`;
+                    panelDayNameDisplay.innerText = dayName;
+
+                    // Simulate checking if day has sessions (visual mockup logic)
+                    if(dayNum === "07" || dayNum === "04") {
+                        panelStatusDisplay.innerText = "Confirmed";
+                        panelSessions.style.opacity = '1';
+                        showToast(`Loaded schedule for Oct ${dayNum}`);
+                    } else if (dayNum === "09") {
+                        panelStatusDisplay.innerText = "Canceled";
+                        panelStatusDisplay.classList.add('text-error');
+                        panelSessions.style.opacity = '0.3';
+                        showToast(`No active sessions for Oct ${dayNum}`, 'event_busy');
+                    } else {
+                        panelStatusDisplay.innerText = "Open";
+                        panelStatusDisplay.classList.remove('text-error');
+                        panelSessions.style.opacity = '0.1'; // Hide content to simulate empty day
+                        showToast(`Oct ${dayNum} is open for booking`);
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

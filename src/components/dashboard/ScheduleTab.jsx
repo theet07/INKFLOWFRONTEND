@@ -1,122 +1,253 @@
 import { useState } from 'react'
 
 const ScheduleTab = ({ showToast }) => {
-  const today = new Date()
-  const [selectedDate, setSelectedDate] = useState(today.getDate())
-  const [currentMonth] = useState(today.getMonth())
-  const [currentYear] = useState(today.getFullYear())
+  const [selectedDay, setSelectedDay] = useState('07')
+  const [viewMode, setViewMode] = useState('monthly')
 
-  const appointments = [
-    { id: 1, date: 5, time: '10:00', clientName: 'João Pedro', service: 'Tatuagem Geométrica', status: 'confirmed', duration: '3h' },
-    { id: 2, date: 5, time: '14:00', clientName: 'Maria Silva', service: 'Blackwork Mandala', status: 'confirmed', duration: '4h' },
-    { id: 3, date: 5, time: '19:00', clientName: 'Ana Carolina', service: 'Fine Line Floral', status: 'completed', duration: '2h' },
-    { id: 4, date: 8, time: '10:00', clientName: 'Lucas Mendes', service: 'Realismo Retrato', status: 'confirmed', duration: '5h' },
-    { id: 5, date: 8, time: '16:00', clientName: 'Fernanda Lopes', service: 'Lettering Script', status: 'cancelled', duration: '1.5h' },
-    { id: 6, date: 12, time: '11:00', clientName: 'Carlos Eduardo', service: 'Maori Bracelete', status: 'confirmed', duration: '6h' },
-    { id: 7, date: 15, time: '09:00', clientName: 'Juliana Costa', service: 'Aquarela Abstrata', status: 'confirmed', duration: '3h' },
-    { id: 8, date: 15, time: '14:00', clientName: 'Rafael Santos', service: 'Trash Polka', status: 'confirmed', duration: '4h' },
-    { id: 9, date: 20, time: '10:00', clientName: 'Beatriz Lima', service: 'Pontilhismo', status: 'confirmed', duration: '5h' },
-    { id: 10, date: 22, time: '15:00', clientName: 'Thiago Oliveira', service: 'Old School', status: 'confirmed', duration: '2h' },
+  const dayNames = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+
+  // Calendar grid: null = empty leading space, object = day cell
+  const calendarDays = [
+    null, null, // leading empties (Mon, Tue)
+    { day: '01', name: 'Quarta-feira' },
+    { day: '02', name: 'Quinta-feira', indicator: 'bar-muted' },
+    { day: '03', name: 'Sexta-feira' },
+    { day: '04', name: 'Sábado', event: { label: '10:00 AM - Realismo', type: 'primary' } },
+    { day: '05', name: 'Domingo' },
+
+    { day: '06', name: 'Segunda-feira' },
+    { day: '07', name: 'Terça-feira', event: { label: 'Sessões Ativas (3)', type: 'solid' } },
+    { day: '08', name: 'Quarta-feira' },
+    { day: '09', name: 'Quinta-feira', indicator: 'bar-error' },
+    { day: '10', name: 'Sexta-feira' },
+    { day: '11', name: 'Sábado' },
+    { day: '12', name: 'Domingo' },
+
+    // Remaining placeholders
+    { day: '13', name: 'Segunda-feira', placeholder: true },
+    { day: '14', name: 'Terça-feira', placeholder: true },
+    { day: '15', name: 'Quarta-feira', placeholder: true },
+    { day: '16', name: 'Quinta-feira', placeholder: true },
+    { day: '17', name: 'Sexta-feira', placeholder: true },
+    { day: '18', name: 'Sábado', placeholder: true },
+    { day: '19', name: 'Domingo', placeholder: true },
   ]
 
-  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
-  const dayNames = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB']
+  // Sessions for selected day
+  const sessions = [
+    {
+      time: '10:00 AM — 02:00 PM',
+      client: 'Elias Thorne',
+      duration: '4h Session',
+      style: 'Realism Sleeve',
+      detail: 'Forearm • Shading Phase',
+      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAKPAPuZN7LuO98_XAx_gTS6yOBoNJ28hOrcZ3QftP-HeWOuvtySiIbu_a3D1p54e3KVxvM5aJ0BgB7J5RkxqfIreiacRpTFtDm_PJVB-8gm6neqpNHRFWR60pMWnRjwxYuhF3vYyL8Z7Gpo2JA8ge5KZYfLXyXyeMA95rPcmPM_bven6jOCQmcjRX5VlbEyjYIjei6RmMzfM5_rUqVn2ry889LigIWpX2sSoksyIM5Q11mnemxfFHOPYQAb2_uF1ZO20t6u6kAO2s',
+      primary: true,
+    },
+    {
+      time: '03:30 PM — 06:00 PM',
+      client: 'Sarah Jenkins',
+      duration: '2.5h Session',
+      style: 'Fine Line Floral',
+      detail: 'Lower Leg • Final Details',
+      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBrt43pITqUpk6u2HAIIskG7tVkD6o8yE41vFd2kgFFz29mPKmhTmN72YOgvAVDhscg-mtujNp-kX7oTzQue7W-AfMiYfyjuoCDPakZB_Uwzakdd0HVsp23tKNTBeCZNRgIPTGPs41CAve4o_pkvWHP9kzYvRxb0Hul3fbX_z_FFNTbDHjQ_bLRqa2PeZZZxja8tqahmy-15HzoK0wVc3Ci8UtI517tF-FxsapN6iaeAEf8Fmm7_13FdQfWjbfohoki6lfeQ15McNo',
+      primary: false,
+    },
+    {
+      time: '07:30 PM — 10:30 PM',
+      client: 'Marcus Vane',
+      duration: '3h Session',
+      style: 'Geometric Chest',
+      detail: 'Chest Piece • Linework',
+      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDKhyNbj3W3K-z70gC0xg6DacLUF6OCVOzUOifRv7WaLGVU-1TVHkGq_mTnVenJ3h2koe_VduNeA0E4CtrCbLWJPWyeTAa1ijWnLZqIe-Ws30tfOcJBBmiIMl__gJ7LXlRSjXpmLqPofXt9Txbvk2K4mI0q65KkF-TuUeekz_i0TII4zog1jOhbwt-S-IYJ-denjyiuL1Df6FRa8dxLW-YBe2RX1nCmN95FpSSeYsKkWf3DZm9zDYjdjSaSZ0y8B1mhU3fwVW23Sec',
+      primary: true,
+    },
+  ]
 
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
-  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay()
+  const daysWithSessions = ['04', '07']
+  const daysCanceled = ['09']
 
-  const calendarDays = []
-  for (let i = 0; i < firstDayOfMonth; i++) calendarDays.push(null)
-  for (let i = 1; i <= daysInMonth; i++) calendarDays.push(i)
+  const getPanelStatus = () => {
+    if (daysWithSessions.includes(selectedDay)) return 'Confirmado'
+    if (daysCanceled.includes(selectedDay)) return 'Cancelado'
+    return 'Aberto'
+  }
 
-  const dayAppointments = appointments.filter(a => a.date === selectedDate)
-  const datesWithEvents = [...new Set(appointments.map(a => a.date))]
+  const getPanelOpacity = () => {
+    if (daysWithSessions.includes(selectedDay)) return 1
+    if (daysCanceled.includes(selectedDay)) return 0.3
+    return 0.1
+  }
 
-  const statusConfig = {
-    confirmed: { label: 'Confirmado', badgeClass: 'ad-badge-green' },
-    completed: { label: 'Realizado', badgeClass: 'ad-badge' },
-    cancelled: { label: 'Cancelado', badgeClass: 'ad-badge-red' },
+  const getSelectedDayName = () => {
+    const found = calendarDays.find(d => d && d.day === selectedDay)
+    return found ? found.name : ''
+  }
+
+  const handleDayClick = (day) => {
+    setSelectedDay(day.day)
+    if (daysWithSessions.includes(day.day)) {
+      showToast(`Agenda de Out ${day.day} carregada`)
+    } else if (daysCanceled.includes(day.day)) {
+      showToast(`Nenhuma sessão ativa em Out ${day.day}`, true)
+    } else {
+      showToast(`Out ${day.day} está aberto para agendamento`)
+    }
+  }
+
+  const handleSessionClick = (session) => {
+    showToast(`Abrindo detalhes da sessão: ${session.client}`)
   }
 
   return (
-    <>
-      {/* Header */}
-      <section className="ad-header-section">
-        <div className="ad-header-text">
-          <span className="ad-overview-label">Organização</span>
-          <h1 className="ad-page-title">
-            Agenda do <br />
-            <span className="ad-title-dim">Estúdio</span>
-          </h1>
-        </div>
-        <div className="ad-header-actions">
-          <button className="ad-btn-primary" onClick={() => showToast('Funcionalidade de bloqueio em breve!')}>
-            <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>block</span>
-            Bloquear Horário
-          </button>
+    <div className="ad-sched-layout">
+
+      {/* Calendar Grid Section */}
+      <section className="ad-sched-calendar-section">
+        <div className="ad-sched-inner">
+
+          {/* Calendar Header */}
+          <div className="ad-sched-cal-header">
+            <div>
+              <h2 className="ad-sched-month-title">
+                Outubro <span className="ad-sched-year">2024</span>
+              </h2>
+              <p className="ad-sched-month-subtitle">12 Sessões confirmadas este mês</p>
+            </div>
+            <div className="ad-sched-nav-btns">
+              <button className="ad-sched-nav-btn" onClick={() => showToast('Mês anterior carregado')}>
+                <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>chevron_left</span>
+              </button>
+              <button className="ad-sched-nav-btn" onClick={() => showToast('Próximo mês carregado')}>
+                <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>chevron_right</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="ad-sched-grid">
+            {/* Day Labels */}
+            {dayNames.map(name => (
+              <div key={name} className="ad-sched-day-header">{name}</div>
+            ))}
+
+            {/* Day Cells */}
+            {calendarDays.map((day, i) => {
+              if (!day) {
+                return <div key={`empty-${i}`} className="ad-sched-day-cell empty"></div>
+              }
+
+              if (day.placeholder) {
+                return (
+                  <div key={day.day} className="ad-sched-day-cell placeholder">
+                    {day.day}
+                  </div>
+                )
+              }
+
+              const isSelected = selectedDay === day.day
+
+              return (
+                <div
+                  key={day.day}
+                  className={`ad-sched-day-cell ${isSelected ? 'selected' : ''}`}
+                  onClick={() => handleDayClick(day)}
+                >
+                  <span className={`ad-sched-day-num ${isSelected ? 'active' : ''}`}>{day.day}</span>
+
+                  {day.indicator === 'bar-muted' && (
+                    <div className="ad-sched-day-events">
+                      <div className="ad-sched-indicator muted"></div>
+                    </div>
+                  )}
+                  {day.indicator === 'bar-error' && (
+                    <div className="ad-sched-day-events">
+                      <div className="ad-sched-indicator error"></div>
+                    </div>
+                  )}
+                  {day.event && day.event.type === 'primary' && (
+                    <div className="ad-sched-day-events">
+                      <div className="ad-sched-event-tag primary">
+                        <p>{day.event.label}</p>
+                      </div>
+                    </div>
+                  )}
+                  {day.event && day.event.type === 'solid' && (
+                    <div className="ad-sched-day-events">
+                      <div className="ad-sched-event-tag solid">
+                        <p>{day.event.label}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
       </section>
 
-      <div className="ad-schedule-layout">
-        {/* Calendar */}
-        <div className="ad-schedule-calendar">
-          <div className="ad-cal-header">
-            <h3 className="ad-cal-month">{monthNames[currentMonth]} {currentYear}</h3>
+      {/* Right Side Panel: Day Details */}
+      <aside className="ad-sched-panel">
+        <div className="ad-sched-panel-header">
+          <div className="ad-sched-panel-header-row">
+            <span className="ad-sched-panel-day-name">{getSelectedDayName()}</span>
+            <span className={`ad-sched-panel-status ${daysCanceled.includes(selectedDay) ? 'error' : ''}`}>
+              {getPanelStatus()}
+            </span>
           </div>
-          <div className="ad-cal-weekdays">
-            {dayNames.map(d => <span key={d}>{d}</span>)}
-          </div>
-          <div className="ad-cal-grid">
-            {calendarDays.map((day, i) => (
-              <div
-                key={i}
-                className={`ad-cal-day ${!day ? 'empty' : ''} ${day === selectedDate ? 'selected' : ''} ${day === today.getDate() ? 'today' : ''} ${datesWithEvents.includes(day) ? 'has-event' : ''}`}
-                onClick={() => day && setSelectedDate(day)}
-              >
-                {day || ''}
+          <h3 className="ad-sched-panel-date">OUT {selectedDay}</h3>
+        </div>
+
+        <div className="ad-sched-panel-sessions" style={{ opacity: getPanelOpacity() }}>
+          <h4 className="ad-sched-panel-section-title">
+            <span className="ad-sched-dot"></span>
+            Sessões Agendadas
+          </h4>
+
+          {/* Session Cards */}
+          {sessions.map((session, i) => (
+            <div
+              key={i}
+              className={`ad-sched-session-card ${session.primary ? 'primary' : ''}`}
+              onClick={() => handleSessionClick(session)}
+            >
+              <div className="ad-sched-session-top">
+                <div>
+                  <p className="ad-sched-session-time">{session.time}</p>
+                  <h5 className="ad-sched-session-client">{session.client}</h5>
+                </div>
+                <span className={`ad-sched-session-duration ${session.primary ? 'primary' : ''}`}>
+                  {session.duration}
+                </span>
               </div>
-            ))}
-          </div>
-          <div className="ad-cal-legend">
-            <span><span className="ad-dot today-dot"></span> Hoje</span>
-            <span><span className="ad-dot event-dot"></span> Com agendamento</span>
-            <span><span className="ad-dot selected-dot"></span> Selecionado</span>
+              <div className="ad-sched-session-bottom">
+                <div className="ad-sched-session-img">
+                  <img src={session.img} alt={session.client} />
+                </div>
+                <div>
+                  <p className="ad-sched-session-style">{session.style}</p>
+                  <p className="ad-sched-session-detail">{session.detail}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Break */}
+          <div className="ad-sched-break">
+            <span className="material-symbols-outlined" style={{ fontSize: '0.875rem', marginRight: 8 }}>coffee</span>
+            <span>Limpeza &amp; Reposição do Estúdio</span>
           </div>
         </div>
 
-        {/* Day's Appointments */}
-        <div className="ad-schedule-day">
-          <h3 className="ad-section-title" style={{ marginBottom: 16 }}>
-            {selectedDate} de {monthNames[currentMonth]}
-          </h3>
-          {dayAppointments.length === 0 ? (
-            <div className="ad-empty-state">
-              <span className="material-symbols-outlined">event_busy</span>
-              <p>Nenhum agendamento neste dia.</p>
-            </div>
-          ) : (
-            <div className="ad-schedule-list">
-              {dayAppointments.map(apt => (
-                <div key={apt.id} className="ad-schedule-item">
-                  <div className="ad-schedule-time">
-                    <span className="ad-schedule-time-value">{apt.time}</span>
-                    <span className="ad-schedule-duration">{apt.duration}</span>
-                  </div>
-                  <div className="ad-schedule-line"></div>
-                  <div className="ad-schedule-info">
-                    <p className="ad-schedule-client">{apt.clientName}</p>
-                    <p className="ad-schedule-service">{apt.service}</p>
-                    <span className={`ad-badge ${statusConfig[apt.status]?.badgeClass || ''}`}>
-                      {statusConfig[apt.status]?.label || apt.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+        {/* Panel Footer */}
+        <div className="ad-sched-panel-footer">
+          <button className="ad-sched-new-btn" onClick={() => showToast('Abrindo formulário de novo agendamento')}>
+            <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>add_circle</span>
+            Novo Agendamento
+          </button>
         </div>
-      </div>
-    </>
+      </aside>
+    </div>
   )
 }
 
