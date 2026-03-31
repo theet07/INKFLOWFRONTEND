@@ -14,6 +14,9 @@ import Booking from './pages/Booking'
 import AdminDashboard from './pages/AdminDashboard'
 import Profile from './pages/Profile'
 import ArtistDashboard from './pages/ArtistDashboard'
+import Artists from './pages/Artists'
+import ArtistProfile from './pages/ArtistProfile'
+import ForTattooArtists from './pages/ForTattooArtists'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -47,6 +50,9 @@ function AppContent() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/perfil" element={<Profile />} />
           <Route path="/artist-dashboard" element={<ArtistDashboard />} />
+          <Route path="/artistas" element={<Artists />} />
+          <Route path="/artista/:id" element={<ArtistProfile />} />
+          <Route path="/para-tatuadores" element={<ForTattooArtists />} />
         </Routes>
       </main>
       {!hideShell && <Footer />}

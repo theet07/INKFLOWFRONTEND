@@ -41,7 +41,7 @@ const Footer = () => {
       </div>
       <div className="footer-info">
         <p>&copy; 2025 INKFLOW - Plataforma de Tatuadores. Todos os direitos reservados.</p>
-        <p>Conectando artistas e clientes em todo o Brasil | CNPJ: 00.000.000/0001-00</p>
+        <p>Conectando artistas e clientes em todo o Brasil</p>
         <p className="footer-blessing">Deus seja louvado, Amém</p>
       </div>
     </footer>
