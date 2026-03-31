@@ -74,8 +74,7 @@ const WhatsAppSection = () => {
             margin: 0,
             display: 'flex',
             alignItems: 'center'
-          }}><svg viewBox="0 0 24 24" fill="#fff700" xmlns="http://www.w3.org/2000/svg" style={{ width: '32px', height: '32px', marginRight: '8px' }}><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11.245 4.174C11.4765 3.50808 11.5922 3.17513 11.7634 3.08285C11.9115 3.00298 12.0898 3.00298 12.238 3.08285C12.4091 3.17513 12.5248 3.50808 12.7563 4.174L14.2866 8.57639C14.3525 8.76592 14.3854 8.86068 14.4448 8.93125C14.4972 8.99359 14.5641 9.04218 14.6396 9.07278C14.725 9.10743 14.8253 9.10947 15.0259 9.11356L19.6857 9.20852C20.3906 9.22288 20.743 9.23007 20.8837 9.36432C21.0054 9.48051 21.0605 9.65014 21.0303 9.81569C20.9955 10.007 20.7146 10.2199 20.1528 10.6459L16.4387 13.4616C16.2788 13.5829 16.1989 13.6435 16.1501 13.7217C16.107 13.7909 16.0815 13.8695 16.0757 13.9507C16.0692 14.0427 16.0982 14.1387 16.1563 14.3308L17.506 18.7919C17.7101 19.4667 17.8122 19.8041 17.728 19.9793C17.6551 20.131 17.5108 20.2358 17.344 20.2583C17.1513 20.2842 16.862 20.0829 16.2833 19.6802L12.4576 17.0181C12.2929 16.9035 12.2106 16.8462 12.1211 16.8239C12.042 16.8043 11.9593 16.8043 11.8803 16.8239C11.7908 16.8462 11.7084 16.9035 11.5437 17.0181L7.71805 19.6802C7.13937 20.0829 6.85003 20.2842 6.65733 20.2583C6.49056 20.2358 6.34626 20.131 6.27337 19.9793C6.18915 19.8041 6.29123 19.4667 6.49538 18.7919L7.84503 14.3308C7.90313 14.1387 7.93218 14.0427 7.92564 13.9507C7.91986 13.8695 7.89432 13.7909 7.85123 13.7217C7.80246 13.6435 7.72251 13.5829 7.56262 13.4616L3.84858 10.6459C3.28678 10.2199 3.00588 10.007 2.97101 9.81569C2.94082 9.65014 2.99594 9.48051 3.11767 9.36432C3.25831 9.23007 3.61074 9.22289 4.31559 9.20852L8.9754 9.11356C9.176 9.10947 9.27631 9.10743 9.36177 9.07278C9.43726 9.04218 9.50414 8.99359 9.55657 8.93125C9.61593 8.86068 9.64887 8.76592 9.71475 8.57639L11.245 4.174Z" fill="#fff700"></path> </g></svg>VENHA FAZER UM ORÇAMENTO!!</p>
-
+          }}><svg viewBox="0 0 24 24" fill="#fff700" xmlns="http://www.w3.org/2000/svg" style={{ width: '32px', height: '32px', marginRight: '8px' }}><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11.245 4.174C11.4765 3.50808 11.5922 3.17513 11.7634 3.08285C11.9115 3.00298 12.0898 3.00298 12.238 3.08285C12.4091 3.17513 12.5248 3.50808 12.7563 4.174L14.2866 8.57639C14.3525 8.76592 14.3854 8.86068 14.4448 8.93125C14.4972 8.99359 14.5641 9.04218 14.6396 9.07278C14.725 9.10743 14.8253 9.10947 15.0259 9.11356L19.6857 9.20852C20.3906 9.22288 20.743 9.23007 20.8837 9.36432C21.0054 9.48051 21.0605 9.65014 21.0303 9.81569C20.9955 10.007 20.7146 10.2199 20.1528 10.6459L16.4387 13.4616C16.2788 13.5829 16.1989 13.6435 16.1501 13.7217C16.107 13.7909 16.0815 13.8695 16.0757 13.9507C16.0692 14.0427 16.0982 14.1387 16.1563 14.3308L17.506 18.7919C17.7101 19.4667 17.8122 19.8041 17.728 19.9793C17.6551 20.131 17.5108 20.2358 17.344 20.2583C17.1513 20.2842 16.862 20.0829 16.2833 19.6802L12.4576 17.0181C12.2929 16.9035 12.2106 16.8462 12.1211 16.8239C12.042 16.8043 11.9593 16.8043 11.8803 16.8239C11.7908 16.8462 11.7084 16.9035 11.5437 17.0181L7.71805 19.6802C7.13937 20.0829 6.85003 20.2842 6.65733 20.2583C6.49056 20.2358 6.34626 20.131 6.27337 19.9793C6.18915 19.8041 6.29123 19.4667 6.49538 18.7919L7.84503 14.3308C7.90313 14.1387 7.93218 14.0427 7.92564 13.9507C7.91986 13.8695 7.89432 13.7909 7.85123 13.7217C7.80246 13.6435 7.72251 13.5829 7.56262 13.4616L3.84858 10.6459C3.28678 10.2199 3.00588 10.007 2.97101 9.81569C2.94082 9.65014 2.99594 9.48051 3.11767 9.36432C3.25831 9.23007 3.61074 9.22289 4.31559 9.20852L8.9754 9.11356C9.176 9.10947 9.27631 9.10743 9.36177 9.07278C9.43726 9.04218 9.50414 8.99359 9.55657 8.93125C9.61593 8.86068 9.64887 8.76592 9.71475 8.57639L11.245 4.174Z" fill="#fff700"></path> </g></svg>VENHA FAZER PARTE DA NOSSA HISTÓRIA!!</p>
           <h2 style={{
             color: '#FFFFFF',
             fontSize: '48px',
@@ -86,7 +85,7 @@ const WhatsAppSection = () => {
           }}>CLIQUE AQUI EMBAIXO E NOS CHAME PELO WHATSAPP</h2>
 
           <a 
-            href="https://api.whatsapp.com/send?phone=5515144373894&text=Olá!%20Vim%20pelo%20site%20e%20quero%20fazer%20um%20orçamento%20de%20tatuagem."
+            href="https://wa.me/15144373894"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -112,7 +111,7 @@ const WhatsAppSection = () => {
             }}
           >
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '20px', height: '20px', marginRight: '8px' }}><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.464 3.488" fill="#ffffff"/></svg>
-            ORÇAMENTO WHATSAPP
+            TIRAR DÚVIDAS NO WHATSAPP
           </a>
         </div>
 
@@ -322,21 +321,16 @@ const Home = () => {
               color: 'var(--accent-red)',
               marginBottom: '1.5rem',
               lineHeight: '1'
-            }}>Experiência</h2>
+            }}>O Padrão INKFLOW</h2>
             <p style={{
               color: 'var(--text-gray)',
               fontSize: '1.1rem',
               lineHeight: '1.6',
               fontWeight: '300'
             }}>
-              Mais de uma década transformando pele em arte, com especialização em técnicas avançadas e 
-              compromisso absoluto com a excelência artística e segurança. Nossa jornada evoluiu constantemente 
-              através de cursos especializados e certificações rigorosas, garantindo resultados que superam 
-              expectativas e resistem ao tempo.
-              
-              Desenvolvemos expertise em múltiplos estilos artísticos, utilizando equipamentos de última geração 
-              e tintas premium importadas. Cada projeto é tratado como obra única, seguindo protocolos de 
-              esterilização hospitalar para total segurança.
+              A INKFLOW é a principal rede tecnológica de conexão entre amantes da arte corporal e os melhores profissionais de todo o Brasil. Desenvolvemos um ecossistema completo e inteligente pensado exclusivamente para revolucionar a forma como você descobre, avalia e se conecta com tatuadores independentes, unindo conveniência digital e infraestrutura de ponta.
+              <br /><br />
+              Nosso compromisso é com a segurança e a excelência. Curamos ativamente todos os profissionais cadastrados em nossa base, assegurando que o usuário tenha acesso apenas a especialistas e estúdios de alto nível técnico — desde o traço fino sutil ao realismo em grandes proporções. Com a INKFLOW, você recebe o poder de comparar dezenas de portfólios autênticos na palma da sua mão, validar as avaliações de clientes reais, ler as políticas individuais de cada artista e confirmar seu agendamento de forma 100% segura.
             </p>
           </div>
           
@@ -347,10 +341,10 @@ const Home = () => {
               marginBottom: '2rem'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <h3 style={{ color: 'var(--text-light)', fontSize: '1.2rem', margin: '0' }}>Realista & Blackwork</h3>
-                <span style={{ color: 'var(--accent-red)', fontSize: '0.9rem' }}>2015 - Presente</span>
+                <h3 style={{ color: 'var(--text-light)', fontSize: '1.2rem', margin: '0' }}>Curadoria de Artistas</h3>
+                <span style={{ color: 'var(--accent-red)', fontSize: '0.9rem' }}>Verificação Rigorosa</span>
               </div>
-              <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem', margin: '0' }}>Especialização em técnicas hiper-realistas e designs ousados</p>
+              <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem', margin: '0' }}>Avaliação atenta de portfólio e histórico profissional dos estúdios parceiros</p>
             </div>
             
             <div className="experience-item" style={{
@@ -359,10 +353,10 @@ const Home = () => {
               marginBottom: '2rem'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <h3 style={{ color: 'var(--text-light)', fontSize: '1.2rem', margin: '0' }}>Geek & Oriental</h3>
-                <span style={{ color: 'var(--accent-red)', fontSize: '0.9rem' }}>2018 - Presente</span>
+                <h3 style={{ color: 'var(--text-light)', fontSize: '1.2rem', margin: '0' }}>Agendamento Digital</h3>
+                <span style={{ color: 'var(--accent-red)', fontSize: '0.9rem' }}>Smart Calendar</span>
               </div>
-              <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem', margin: '0' }}>Cultura geek e tradição japonesa com mitologia</p>
+              <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem', margin: '0' }}>Reservas automáticas sincronizadas com a agenda de cada tatuador escolhido</p>
             </div>
             
             <div className="experience-item" style={{
@@ -371,18 +365,18 @@ const Home = () => {
               marginBottom: '2rem'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <h3 style={{ color: 'var(--text-light)', fontSize: '1.2rem', margin: '0' }}>Maori & Floral</h3>
-                <span style={{ color: 'var(--accent-red)', fontSize: '0.9rem' }}>2020 - Presente</span>
+                <h3 style={{ color: 'var(--text-light)', fontSize: '1.2rem', margin: '0' }}>Pagamento Seguro</h3>
+                <span style={{ color: 'var(--accent-red)', fontSize: '0.9rem' }}>Garantia Flexível</span>
               </div>
-              <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem', margin: '0' }}>Arte corporal tradicional e beleza natural</p>
+              <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem', margin: '0' }}>Cada artista define sua política de sinal, com transações garantidas pelo gateway integrado</p>
             </div>
             
             <div className="experience-item">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <h3 style={{ color: 'var(--text-light)', fontSize: '1.2rem', margin: '0' }}>Certificação ANVISA</h3>
-                <span style={{ color: 'var(--accent-red)', fontSize: '0.9rem' }}>Renovado 2024</span>
+                <h3 style={{ color: 'var(--text-light)', fontSize: '1.2rem', margin: '0' }}>Controle Sanitário</h3>
+                <span style={{ color: 'var(--accent-red)', fontSize: '0.9rem' }}>Padrão ANVISA</span>
               </div>
-              <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem', margin: '0' }}>Protocolos de segurança e higiene</p>
+              <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem', margin: '0' }}>Exigência de certificações rigorosas de segurança, higiene e esterilização ativas</p>
             </div>
           </div>
         </div>
@@ -476,7 +470,7 @@ const Home = () => {
               }}>Fundadores da Plataforma</p>
             </div>
             
-            <a href="https://wa.me/5515144373894" style={{
+            <a href="https://wa.me/15144373894" target="_blank" rel="noopener noreferrer" style={{
               background: '#25d366',
               color: 'white',
               padding: '1rem 2rem',
@@ -496,7 +490,7 @@ const Home = () => {
               e.target.style.boxShadow = '0 4px 15px rgba(37, 211, 102, 0.3)'
             }}>
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '32px', height: '32px' }}><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.464 3.488" fill="#ffffff"/></svg>
-              ORÇAMENTO WHATSAPP
+              TIRAR DÚVIDAS NO WHATSAPP
             </a>
           </div>
         </div>

@@ -90,7 +90,7 @@ const About = () => {
             }}>Fundadores da Plataforma</p>
           </div>
           
-          <a href="https://wa.me/5515144373894" style={{
+          <a href="https://wa.me/15144373894" target="_blank" rel="noopener noreferrer" style={{
             background: '#25d366',
             color: 'white',
             padding: '1rem 2rem',
@@ -110,7 +110,7 @@ const About = () => {
             e.target.style.boxShadow = '0 4px 15px rgba(37, 211, 102, 0.3)'
           }}>
             <span>📱</span>
-            ORÇAMENTO WHATSAPP
+            TIRAR DÚVIDAS NO WHATSAPP
           </a>
         </div>
       </div>
