@@ -1,0 +1,22 @@
+/* Custom Animations for Artists Page */
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade { animation: fade-in 0.5s ease-out forwards; }
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.toast-animate { animation: slideUpFade 0.3s ease-out forwards; }
+
+/* Custom Gradient Button */
+.noir-gradient-btn {
+  background: linear-gradient(135deg, #ff8d8c 0%, #ff7072 100%);
+}
+
+/* Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
