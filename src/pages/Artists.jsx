@@ -128,13 +128,13 @@ const Artists = () => {
                             </h1>
                         </div>
                         <div className="flex gap-4 border-l border-white/5 pl-8 hidden lg:flex">
-                            <div className="text-right">
-                                <p className="text-[0.65rem] uppercase tracking-widest text-on-surface-variant mb-1">Availability</p>
-                                <p className="font-headline font-bold text-lg">Next 48h</p>
+                            <div className="text-right flex flex-col justify-end">
+                                <span className="text-[0.65rem] uppercase tracking-widest text-on-surface-variant mb-0.9">Availability</span>
+                                <span className="font-headline font-bold text-lg m-0">Next 48h</span>
                             </div>
-                            <div className="text-right">
-                                <p className="text-[0.65rem] uppercase tracking-widest text-on-surface-variant mb-1">Total Residencies</p>
-                                <p className="font-headline font-bold text-lg">24 Masters</p>
+                            <div className="text-right flex flex-col justify-end">
+                                <span className="text-[0.65rem] uppercase tracking-widest text-on-surface-variant mb-0.9">Total Residencies</span>
+                                <span className="font-headline font-bold text-lg m-0">24 Masters</span>
                             </div>
                         </div>
                     </div>
@@ -180,7 +180,7 @@ const Artists = () => {
                             </div>
                         </div>
                         <div className="absolute bottom-6 left-6 right-6">
-                            <div className="flex flex-wrap gap-2 mb-6">
+                            <div className="flex flex-wrap gap-1.5 mb-6 justify-start items-center">
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Geometric</span>
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Blackwork</span>
                             </div>
@@ -209,7 +209,7 @@ const Artists = () => {
                             </div>
                         </div>
                         <div className="absolute bottom-6 left-6 right-6">
-                            <div className="flex flex-wrap gap-2 mb-6">
+                            <div className="flex flex-wrap gap-1.5 mb-6 justify-start items-center">
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Micro-Realism</span>
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Anatomy</span>
                             </div>
@@ -238,7 +238,7 @@ const Artists = () => {
                             </div>
                         </div>
                         <div className="absolute bottom-6 left-6 right-6">
-                            <div className="flex flex-wrap gap-2 mb-6">
+                            <div className="flex flex-wrap gap-1.5 mb-6 justify-start items-center">
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Fine Line</span>
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Botanical</span>
                             </div>
@@ -267,7 +267,7 @@ const Artists = () => {
                             </div>
                         </div>
                         <div className="absolute bottom-6 left-6 right-6">
-                            <div className="flex flex-wrap gap-2 mb-6">
+                            <div className="flex flex-wrap gap-1.5 mb-6 justify-start items-center">
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Cyber-Sigilism</span>
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Neo-Goth</span>
                             </div>
@@ -296,7 +296,7 @@ const Artists = () => {
                             </div>
                         </div>
                         <div className="absolute bottom-6 left-6 right-6">
-                            <div className="flex flex-wrap gap-2 mb-6">
+                            <div className="flex flex-wrap gap-1.5 mb-6 justify-start items-center">
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Irezumi</span>
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Traditional</span>
                             </div>
@@ -325,7 +325,7 @@ const Artists = () => {
                             </div>
                         </div>
                         <div className="absolute bottom-6 left-6 right-6">
-                            <div className="flex flex-wrap gap-2 mb-6">
+                            <div className="flex flex-wrap gap-1.5 mb-6 justify-start items-center">
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Abstract</span>
                                 <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-on-surface-variant">Minimalist</span>
                             </div>

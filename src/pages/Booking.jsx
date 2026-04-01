@@ -57,7 +57,8 @@ const Booking = () => {
         { id: 1003, name: 'LILLY K.', role: 'Realismo & Fine Line', img: '/assets/portifolio_tatuadores/Tatuadora_3.png', specialties: ['REALISTA'] },
         { id: 1004, name: 'RAFAEL S.', role: 'Blackwork & Ornamental', img: '/assets/portifolio_tatuadores/Tatuador_2.png', specialties: ['BLACKWORK', 'MAORI'] },
         { id: 1005, name: 'CAMILA R.', role: 'Fine Line & Floral', img: '/assets/portifolio_tatuadores/Tatuadora_5.png', specialties: ['FLORAL'] },
-        { id: 1006, name: 'ANDRÉ V.', role: 'Oriental & Geek', img: '/assets/portifolio_tatuadores/Tatuador_4.png', specialties: ['ORIENTAL', 'GEEK'] }
+        { id: 1006, name: 'ANDRÉ V.', role: 'Oriental & Geek', img: '/assets/portifolio_tatuadores/Tatuador_4.png', specialties: ['ORIENTAL', 'GEEK'] },
+        { id: 1007, name: 'ELENA M.', role: 'Geek & Floral', img: '/assets/portifolio_tatuadores/Tatuadora_6.png', specialties: ['GEEK', 'FLORAL'] }
     ]
 
     const location = useLocation()
