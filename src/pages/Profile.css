@@ -115,64 +115,242 @@
 }
 
 .p-btn-settings {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #94a3b8;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.p-btn-settings::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 0, 0, 0.15), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .p-btn-settings:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  transform: rotate(45deg);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 0, 0, 0.3);
+  color: var(--accent-red, #ff0000);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2);
 }
 
-.p-btn-settings .material-symbols-outlined { font-size: 20px; }
+.p-btn-settings:hover::before {
+  opacity: 1;
+}
 
-.p-settings-dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+.p-btn-settings:active {
+  transform: scale(0.95);
+}
+
+.p-btn-settings .material-symbols-outlined { 
+  font-size: 20px;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.p-btn-settings:hover .material-symbols-outlined {
+  transform: rotate(90deg);
+}
+
+/* Settings Modal (Instagram Style) */
+.p-settings-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: settingsOverlayFadeIn 0.2s ease-out forwards;
+}
+
+.p-settings-modal {
   background: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
   overflow: hidden;
-  min-width: 160px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  z-index: 50;
-  animation: slideIn 0.2s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  animation: settingsModalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.p-settings-dropdown button {
+.p-settings-modal-item {
   width: 100%;
   background: transparent;
   border: none;
-  color: #cbd5e1;
-  padding: 0.75rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
-  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease-out;
+  text-align: center;
+  font-family: 'Public Sans', sans-serif;
 }
 
-.p-settings-dropdown button:hover {
-  background: rgba(255, 0, 0, 0.1);
-  color: var(--accent-red, #ff0000);
+.p-settings-modal-item:last-child {
+  border-bottom: none;
 }
 
-.p-settings-dropdown button .material-symbols-outlined { font-size: 16px; }
+.p-settings-modal-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.p-settings-modal-item:active {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(0.98);
+}
+
+.p-settings-modal-item.danger {
+  color: #e8192c;
+  font-weight: 700;
+}
+
+.p-settings-modal-item.danger:hover {
+  background: rgba(232, 25, 44, 0.1);
+}
+
+.p-settings-modal-item.cancel {
+  color: #94a3b8;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.p-settings-modal-item.cancel:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Avatar Modal (Instagram Style) */
+.p-avatar-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: settingsOverlayFadeIn 0.2s ease-out forwards;
+}
+
+.p-avatar-modal {
+  background: #1a1a1a;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  animation: settingsModalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.p-avatar-modal-title {
+  padding: 1.5rem 1.5rem 1rem;
+  text-align: center;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: 'Public Sans', sans-serif;
+}
+
+.p-avatar-modal-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  text-align: center;
+  font-family: 'Public Sans', sans-serif;
+}
+
+.p-avatar-modal-item:last-child {
+  border-bottom: none;
+}
+
+.p-avatar-modal-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.p-avatar-modal-item:active {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(0.98);
+}
+
+.p-avatar-modal-item.primary {
+  color: #e8192c;
+  font-weight: 700;
+}
+
+.p-avatar-modal-item.primary:hover {
+  background: rgba(232, 25, 44, 0.1);
+}
+
+.p-avatar-modal-item.danger {
+  color: #ff6b7a;
+  font-weight: 600;
+}
+
+.p-avatar-modal-item.danger:hover {
+  background: rgba(255, 107, 122, 0.1);
+}
+
+.p-avatar-modal-item.cancel {
+  color: #fff;
+  font-weight: 500;
+}
+
+.p-avatar-modal-item.cancel:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+@keyframes settingsOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes settingsModalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
 
 @media (min-width: 768px) {
   .profile-actions { justify-content: flex-start; }

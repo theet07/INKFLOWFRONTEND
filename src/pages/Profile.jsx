@@ -50,10 +50,13 @@ const Profile = () => {
   const [toasts, setToasts] = useState([])
   const [modal, setModal] = useState({ isOpen: false, title: '', content: null, isImage: false })
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false)
+  const [deleteAccountModal, setDeleteAccountModal] = useState({ isOpen: false, password: '', deleting: false })
   const [agendamentos, setAgendamentos] = useState([])
   const [loadingAg, setLoadingAg] = useState(true)
   const [editProfile, setEditProfile] = useState({ isOpen: false, nome: '', telefone: '', saving: false })
   const settingsRef = useRef(null)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -107,12 +110,88 @@ const Profile = () => {
         navigator.clipboard.writeText('INK-' + (user.nome?.split(' ')[0]?.toUpperCase() || 'USER') + '-2024')
           .then(() => showToast('Código de indicação copiado!', 'loyalty'))
         break
+      case 'switch_account':
+        showToast('Funcionalidade em desenvolvimento', 'info')
+        setSettingsOpen(false)
+        break
       case 'logout':
         localStorage.removeItem('user')
         localStorage.removeItem('token')
+        localStorage.removeItem('userType')
         navigate('/login')
         break
+      case 'delete_account':
+        setSettingsOpen(false)
+        setDeleteAccountModal({ isOpen: true, password: '', deleting: false })
+        break
       default: break
+    }
+  }
+
+  const handleAvatarAction = (action) => {
+    switch(action) {
+      case 'upload':
+        fileInputRef.current?.click()
+        setAvatarModalOpen(false)
+        break
+      case 'remove':
+        // TODO: Implementar remoção de avatar via API
+        showToast('Foto de perfil removida', 'check_circle')
+        setAvatarModalOpen(false)
+        break
+      default:
+        break
+    }
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // TODO: Implementar upload de avatar via API
+      showToast('Upload de foto em desenvolvimento', 'info')
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!deleteAccountModal.password) {
+      showToast('Digite sua senha para confirmar', 'error')
+      return
+    }
+
+    setDeleteAccountModal(prev => ({ ...prev, deleting: true }))
+    
+    try {
+      // Validar senha antes de excluir
+      const API_URL = import.meta.env.VITE_API_URL
+        ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
+        : 'https://inkflowbackend-4w1g.onrender.com'
+      
+      const loginResponse = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, password: deleteAccountModal.password })
+      })
+
+      if (!loginResponse.ok) {
+        showToast('Senha incorreta', 'error')
+        setDeleteAccountModal(prev => ({ ...prev, deleting: false }))
+        return
+      }
+
+      // Excluir conta
+      if (user.id) {
+        await clienteService.delete(user.id)
+      }
+      
+      localStorage.removeItem('user')
+      localStorage.removeItem('token')
+      localStorage.removeItem('userType')
+      showToast('Conta excluída com sucesso', 'check_circle')
+      setTimeout(() => navigate('/'), 1500)
+    } catch (error) {
+      console.error('Erro ao excluir conta:', error)
+      showToast('Erro ao excluir conta. Tente novamente.', 'error')
+      setDeleteAccountModal(prev => ({ ...prev, deleting: false }))
     }
   }
 
@@ -215,7 +294,9 @@ const Profile = () => {
         {/* Header */}
         <section className="profile-header">
           <div className="profile-avatar-wrap">
-            <div className="profile-avatar">{user.nome?.charAt(0)?.toUpperCase() || user.fullName?.charAt(0)?.toUpperCase() || 'U'}</div>
+            <div className="profile-avatar" onClick={() => setAvatarModalOpen(true)} style={{ cursor: 'pointer' }}>
+              {user.nome?.charAt(0)?.toUpperCase() || user.fullName?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
             <div className="profile-badge"><span className="material-symbols-outlined">verified</span></div>
           </div>
 
@@ -229,19 +310,9 @@ const Profile = () => {
               <button className="p-btn-secondary" onClick={() => handleAction('share')}>
                 Compartilhar Galeria
               </button>
-              <div className="p-settings-wrap" ref={settingsRef}>
-                <button className="p-btn-settings" onClick={() => setSettingsOpen(prev => !prev)}>
-                  <span className="material-symbols-outlined">settings</span>
-                </button>
-                {settingsOpen && (
-                  <div className="p-settings-dropdown">
-                    <button onClick={() => handleAction('logout')}>
-                      <span className="material-symbols-outlined">logout</span>
-                      Sair da Conta
-                    </button>
-                  </div>
-                )}
-              </div>
+              <button className="p-btn-settings" onClick={() => setSettingsOpen(true)}>
+                <span className="material-symbols-outlined">settings</span>
+              </button>
             </div>
           </div>
 
@@ -403,6 +474,130 @@ const Profile = () => {
           </div>
         </div>
       </main>
+
+      {/* Hidden File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+
+      {/* Avatar Modal (Instagram Style) */}
+      {avatarModalOpen && (
+        <div className="p-avatar-modal-overlay" onClick={() => setAvatarModalOpen(false)}>
+          <div className="p-avatar-modal" onClick={e => e.stopPropagation()}>
+            <div className="p-avatar-modal-title">
+              Alterar foto de perfil
+            </div>
+            <button className="p-avatar-modal-item primary" onClick={() => handleAvatarAction('upload')}>
+              Carregar foto
+            </button>
+            <button className="p-avatar-modal-item danger" onClick={() => handleAvatarAction('remove')}>
+              Remover foto atual
+            </button>
+            <button className="p-avatar-modal-item cancel" onClick={() => setAvatarModalOpen(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal (Instagram Style) */}
+      {settingsOpen && (
+        <div className="p-settings-modal-overlay" onClick={() => setSettingsOpen(false)}>
+          <div className="p-settings-modal" onClick={e => e.stopPropagation()}>
+            <button className="p-settings-modal-item" onClick={() => handleAction('switch_account')}>
+              Trocar de Conta
+            </button>
+            <button className="p-settings-modal-item" onClick={() => handleAction('logout')}>
+              Sair da Conta
+            </button>
+            <button className="p-settings-modal-item danger" onClick={() => handleAction('delete_account')}>
+              Excluir Conta
+            </button>
+            <button className="p-settings-modal-item cancel" onClick={() => setSettingsOpen(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Confirmation Modal */}
+      {deleteAccountModal.isOpen && (
+        <div className="p-modal-overlay" onClick={() => !deleteAccountModal.deleting && setDeleteAccountModal({ isOpen: false, password: '', deleting: false })}>
+          <div className="p-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+            <div className="p-modal-header">
+              <h3>Excluir Conta</h3>
+              <button onClick={() => !deleteAccountModal.deleting && setDeleteAccountModal({ isOpen: false, password: '', deleting: false })} disabled={deleteAccountModal.deleting}>
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-modal-body custom-scrollbar">
+              <div className="p-modal-stack">
+                <div style={{ padding: '1rem', background: 'rgba(232, 25, 44, 0.1)', border: '1px solid rgba(232, 25, 44, 0.3)', borderRadius: '8px', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                    <span className="material-symbols-outlined" style={{ color: '#e8192c', fontSize: '1.5rem' }}>warning</span>
+                    <strong style={{ color: '#e8192c', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Atenção: Ação Irreversível</strong>
+                  </div>
+                  <p style={{ color: '#cbd5e1', fontSize: '0.85rem', lineHeight: '1.5', margin: 0 }}>
+                    Ao excluir sua conta, todos os seus dados serão permanentemente removidos, incluindo:
+                  </p>
+                  <ul style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '0.5rem', paddingLeft: '1.5rem' }}>
+                    <li>Histórico de agendamentos</li>
+                    <li>Avaliações e comentários</li>
+                    <li>Preferências e configurações</li>
+                    <li>Galeria de tatuagens</li>
+                  </ul>
+                </div>
+
+                <div className="p-modal-card">
+                  <span style={{ color: '#fff', fontWeight: '600' }}>Digite sua senha para confirmar</span>
+                  <input
+                    type="password"
+                    value={deleteAccountModal.password}
+                    onChange={e => setDeleteAccountModal(prev => ({ ...prev, password: e.target.value }))}
+                    placeholder="Sua senha"
+                    disabled={deleteAccountModal.deleting}
+                    onKeyPress={e => e.key === 'Enter' && handleDeleteAccount()}
+                    style={{ 
+                      width: '100%', 
+                      background: 'rgba(255,255,255,0.05)', 
+                      border: '1px solid rgba(255,255,255,0.1)', 
+                      color: '#fff', 
+                      borderRadius: '6px', 
+                      padding: '12px', 
+                      marginTop: '8px', 
+                      fontSize: '1rem',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                  <button
+                    className="p-btn-secondary"
+                    disabled={deleteAccountModal.deleting}
+                    onClick={() => setDeleteAccountModal({ isOpen: false, password: '', deleting: false })}
+                    style={{ flex: 1 }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="p-btn-primary"
+                    disabled={deleteAccountModal.deleting || !deleteAccountModal.password}
+                    onClick={handleDeleteAccount}
+                    style={{ flex: 1, background: '#e8192c', opacity: deleteAccountModal.deleting || !deleteAccountModal.password ? 0.5 : 1 }}
+                  >
+                    {deleteAccountModal.deleting ? 'Excluindo...' : 'Excluir Conta'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       {modal.isOpen && (
