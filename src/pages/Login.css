@@ -158,9 +158,38 @@
   box-shadow: 0 8px 24px rgba(255, 0, 64, 0.3);
 }
 
-.login-btn:hover {
+.login-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 12px 32px rgba(255, 0, 64, 0.4);
+}
+
+.login-btn--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  opacity: 0.85;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.login-btn:disabled {
+  cursor: not-allowed;
+}
+
+.login-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #ffffff;
+  border-radius: 50%;
+  animation: loginSpin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes loginSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .login-links {

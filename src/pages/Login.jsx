@@ -10,6 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
   const [isArtistLogin, setIsArtistLogin] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     senha: '',
@@ -20,6 +21,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (isLoading) return
+    setIsLoading(true)
 
     try {
       if (isLogin) {
@@ -75,6 +78,8 @@ const Login = () => {
     } catch (error) {
       console.error('Erro:', error)
       alert('Erro ao conectar com o servidor.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -208,8 +213,15 @@ const Login = () => {
                   </div>
                 )}
                 
-                <button type="submit" className="login-btn">
-                  {isLogin ? 'Entrar' : 'Criar Conta'}
+                <button type="submit" className={`login-btn${isLoading ? ' login-btn--loading' : ''}`} disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <span className="login-spinner"></span>
+                      <span>{isLogin ? 'Entrando...' : 'Criando conta...'}</span>
+                    </>
+                  ) : (
+                    isLogin ? 'Entrar' : 'Criar Conta'
+                  )}
                 </button>
                 
               </form>
