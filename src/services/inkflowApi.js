@@ -26,6 +26,8 @@ export const clienteService = {
   create: (cliente) => api.post('/clientes', cliente),
   update: (id, cliente) => api.put(`/clientes/${id}`, cliente),
   delete: (id) => api.delete(`/clientes/${id}`),
+  uploadFoto: (id, formData) => api.post(`/clientes/${id}/foto`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  deleteFoto: (id) => api.delete(`/clientes/${id}/foto`),
 };
 
 export const agendamentoService = {

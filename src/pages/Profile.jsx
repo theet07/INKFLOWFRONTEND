@@ -128,28 +128,61 @@ const Profile = () => {
     }
   }
 
-  const handleAvatarAction = (action) => {
+  const handleAvatarAction = async (action) => {
     switch(action) {
       case 'upload':
         fileInputRef.current?.click()
         setAvatarModalOpen(false)
         break
       case 'remove':
-        // TODO: Implementar remoção de avatar via API
-        showToast('Foto de perfil removida', 'check_circle')
+        if (!user.id) return;
         setAvatarModalOpen(false)
+        showToast('Removendo foto...', 'hourglass_empty')
+        try {
+          await clienteService.deleteFoto(user.id)
+          const updatedUser = { ...user }
+          delete updatedUser.fotoUrl
+          localStorage.setItem('user', JSON.stringify(updatedUser))
+          showToast('Foto de perfil removida', 'check_circle')
+          setTimeout(() => window.location.reload(), 500)
+        } catch (err) {
+          showToast('Erro ao remover foto', 'error')
+        }
         break
       default:
         break
     }
   }
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0]
     if (file) {
-      // TODO: Implementar upload de avatar via API
-      showToast('Upload de foto em desenvolvimento', 'info')
+      if (!user.id) return;
+      const validTypes = ['image/png', 'image/jpeg', 'image/webp']
+      if (!validTypes.includes(file.type)) {
+        showToast('Formato inválido. Use PNG, JPG ou WEBP.', 'error')
+        return
+      }
+
+      const formData = new FormData()
+      formData.append('foto', file)
+      
+      showToast('Enviando foto...', 'hourglass_empty')
+      try {
+        const response = await clienteService.uploadFoto(user.id, formData)
+        // Assume API returns plain URL string or object like { fotoUrl: '...' }
+        const imageUrl = typeof response.data === 'string' ? response.data : response.data.fotoUrl
+        
+        const updatedUser = { ...user, fotoUrl: imageUrl }
+        localStorage.setItem('user', JSON.stringify(updatedUser))
+        
+        showToast('Foto atualizada com sucesso!', 'check_circle')
+        setTimeout(() => window.location.reload(), 500)
+      } catch (err) {
+        showToast('Erro ao carregar foto.', 'error')
+      }
     }
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleDeleteAccount = async () => {
@@ -294,7 +327,17 @@ const Profile = () => {
         {/* Header */}
         <section className="profile-header">
           <div className="profile-avatar-wrap">
-            <div className="profile-avatar" onClick={() => setAvatarModalOpen(true)} style={{ cursor: 'pointer' }}>
+            <div 
+              className="profile-avatar" 
+              onClick={() => setAvatarModalOpen(true)} 
+              style={{ 
+                cursor: 'pointer',
+                backgroundImage: user.fotoUrl ? `url(${user.fotoUrl})` : 'none',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                color: user.fotoUrl ? 'transparent' : '#fff'
+              }}
+            >
               {user.nome?.charAt(0)?.toUpperCase() || user.fullName?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <div className="profile-badge"><span className="material-symbols-outlined">verified</span></div>
