@@ -17,6 +17,11 @@ const Booking = () => {
         phone: '',
         email: '',
         desc: '',
+        regiao: '',
+        largura: '',
+        altura: '',
+        tags: [],
+        imagemReferenciaFile: null,
         terms: false
     })
 
@@ -86,11 +91,17 @@ const Booking = () => {
         { day: '29', active: false }, { day: '30', active: true }, { day: '31', active: true }
     ]
 
-    const timeSlots = [
-        { id: 'MANHÃ', label: 'MANHÃ', time: '6h às 12h', icon: 'light_mode', customSvg: false },
-        { id: 'TARDE', label: 'TARDE', time: '12h às 18h', icon: null, customSvg: true },
-        { id: 'NOITE', label: 'NOITE', time: '18h às 00h', icon: 'dark_mode', customSvg: false }
-    ]
+    const timeSlots = Array.from({ length: 12 }, (_, i) => {
+        const hour = i + 9;
+        const timeString = `${hour.toString().padStart(2, '0')}:00`;
+        return {
+            id: timeString,
+            label: timeString,
+            time: '',
+            icon: 'schedule',
+            customSvg: false
+        };
+    });
 
     const showToast = (message, type = 'success') => {
         const id = Date.now()
@@ -112,6 +123,24 @@ const Booking = () => {
             [key]: finalValue
         }));
     }
+
+    const handleTagToggle = (tag) => {
+        setFormData(prev => ({
+            ...prev,
+            tags: prev.tags.includes(tag) 
+                ? prev.tags.filter(t => t !== tag) 
+                : [...prev.tags, tag]
+        }));
+    };
+
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setFormData(prev => ({
+                ...prev,
+                imagemReferenciaFile: e.target.files[0]
+            }));
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -164,9 +193,9 @@ const Booking = () => {
 
             const formattedDate = `2026-03-${bookingState.day.padStart(2, '0')}`
             let isoTime = '12:00:00'
-            if (bookingState.time === 'MANHÃ') isoTime = '09:00:00'
-            if (bookingState.time === 'TARDE') isoTime = '14:00:00'
-            if (bookingState.time === 'NOITE') isoTime = '19:00:00'
+            if (bookingState.time) {
+                isoTime = `${bookingState.time}:00`;
+            }
 
             const dataHora = `${formattedDate}T${isoTime}`
 
@@ -177,7 +206,12 @@ const Booking = () => {
                 artista: artistaSelecionado ? { id: artistaSelecionado.id } : null,
                 dataHora: dataHora,
                 servico: artistaSelecionado ? `${bookingState.style} com ${artistaSelecionado.name}` : bookingState.style,
-                descricao: formData.desc
+                descricao: formData.desc,
+                regiao: formData.regiao || null,
+                largura: formData.largura ? parseFloat(formData.largura) : null,
+                altura: formData.altura ? parseFloat(formData.altura) : null,
+                tags: formData.tags.length > 0 ? formData.tags.join(",") : null,
+                imagemReferenciaUrl: null
             }
 
             await agendamentoService.create(novoAgendamento)
@@ -185,7 +219,7 @@ const Booking = () => {
             showToast('Agendamento Confirmado! Entraremos em contato em breve.', 'success')
 
             setTimeout(() => {
-                setFormData({ name: '', phone: '', email: '', desc: '', terms: false })
+                setFormData({ name: '', phone: '', email: '', desc: '', terms: false, regiao: '', largura: '', altura: '', tags: [], imagemReferenciaFile: null })
                 setBookingState({ style: '', artist: '', day: '', time: '' })
                 window.scrollTo(0, 0)
             }, 3000)
@@ -359,25 +393,26 @@ const Booking = () => {
                                     <div className="time-slots-section">
                                         <h4>HORÁRIO PREFERENCIAL</h4>
                                         <div className="time-periods-grid">
-                                            {timeSlots.map(ts => (
-                                                <div
-                                                    key={ts.id}
-                                                    onClick={() => setBookingState(prev => ({ ...prev, time: prev.time === ts.id ? '' : ts.id }))}
-                                                    className={`time-period ${bookingState.time === ts.id ? 'selected' : ''}`}
-                                                >
-                                                    {ts.customSvg ? (
-                                                        <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M21,12h-3c0-1.3-0.4-2.5-1.1-3.5l0.8-0.8c0.4-0.4,0.4-1,0-1.4s-1-0.4-1.4,0l-0.8,0.8c-0.7-0.5-1.6-0.9-2.5-1V5c0-0.6-0.4-1-1-1s-1,0.4-1,1v1.1c-0.9,0.2-1.7,0.5-2.5,1L7.7,6.3c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l0.8,0.8C6.4,9.5,6,10.7,6,12H3c-0.6,0-1,0.4-1,1s0.4,1,1,1h4.1h9.8H21c0.6,0,1-0.4,1-1S21.6,12,21,12z M8,12c0-2.2,1.8-4,4-4s4,1.8,4,4H8z"/>
-                                                            <path d="M15,15H9c-0.6,0-1,0.4-1,1s0.4,1,1,1h6c0.6,0,1-0.4,1-1S15.6,15,15,15z"/>
-                                                            <path d="M13,20h-2c-0.6,0-1-0.4-1-1s0.4-1,1-1h2c0.6,0,1,0.4,1,1S13.6,20,13,20z"/>
-                                                        </svg>
-                                                    ) : (
-                                                        <span className="material-symbols-outlined">{ts.icon}</span>
-                                                    )}
-                                                    <span className="time-period-label">{ts.label}</span>
-                                                    <span className="time-period-hours">{ts.time}</span>
-                                                </div>
-                                            ))}
+                                            {timeSlots.map(ts => {
+                                                const currentHour = new Date().getHours();
+                                                const slotHour = parseInt(ts.label.split(':')[0], 10);
+                                                const isToday = bookingState.day === new Date().getDate().toString();
+                                                const isPast = isToday && slotHour <= currentHour;
+
+                                                return (
+                                                    <div
+                                                        key={ts.id}
+                                                        onClick={() => {
+                                                            if (isPast) return;
+                                                            setBookingState(prev => ({ ...prev, time: prev.time === ts.id ? '' : ts.id }));
+                                                        }}
+                                                        className={`time-period ${bookingState.time === ts.id ? 'selected' : ''} ${isPast ? 'disabled' : ''}`}
+                                                        style={isPast ? { opacity: 0.3, cursor: 'not-allowed', backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.05)' } : {}}
+                                                    >
+                                                        <span className="time-period-label">{ts.label}</span>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </div>
@@ -406,7 +441,72 @@ const Booking = () => {
                                     </div>
                                     <div className="form-field">
                                         <label>DESCRIÇÃO DO PROJETO</label>
-                                        <textarea id="form-desc" value={formData.desc} onChange={handleChange} placeholder="Descreva sua ideia de tatuagem, tamanho aproximado e local no corpo..." rows="4" required></textarea>
+                                        <textarea id="form-desc" value={formData.desc} onChange={handleChange} placeholder="Descreva sua ideia de tatuagem..." rows="4" required></textarea>
+                                    </div>
+                                    <div className="form-row">
+                                        <div className="form-field">
+                                            <label>REGIÃO (OPCIONAL)</label>
+                                            <input id="form-regiao" value={formData.regiao} onChange={handleChange} list="regioes-list" placeholder="Ex: Antebraço" type="text" />
+                                            <datalist id="regioes-list">
+                                                <option value="Antebraço" />
+                                                <option value="Costela" />
+                                                <option value="Escápula" />
+                                                <option value="Perna" />
+                                                <option value="Braço" />
+                                                <option value="Costas" />
+                                                <option value="Pescoço" />
+                                                <option value="Tornozelo" />
+                                            </datalist>
+                                        </div>
+                                        <div className="form-field">
+                                            <label>TAMANHO EM CM (OPC.)</label>
+                                            <div style={{display: 'flex', gap: '0.5rem', height: '100%'}}>
+                                                <input id="form-largura" value={formData.largura} onChange={handleChange} placeholder="Larg. cm" type="number" step="0.1" style={{height: '100%'}}/>
+                                                <input id="form-altura" value={formData.altura} onChange={handleChange} placeholder="Alt. cm" type="number" step="0.1" style={{height: '100%'}}/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="form-field">
+                                        <label>IMAGEM DE REFERÊNCIA (OPCIONAL)</label>
+                                        <div className="file-upload-wrapper">
+                                            <input type="file" id="imagem-ref" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} className="file-input-hidden" key={formData.imagemReferenciaFile ? 'has-file' : 'empty'} />
+                                            <label htmlFor="imagem-ref" className="file-upload-label">
+                                                <span className="material-symbols-outlined">upload_file</span>
+                                                {formData.imagemReferenciaFile ? (
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        {formData.imagemReferenciaFile.name}
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                setFormData(prev => ({ ...prev, imagemReferenciaFile: null }));
+                                                            }} 
+                                                            className="clear-file-btn"
+                                                        >
+                                                            <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>close</span>
+                                                        </button>
+                                                    </span>
+                                                ) : "Clique para anexar PNG, JPG ou WEBP"}
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-field">
+                                        <label>TAGS DO PROJETO (OPCIONAL)</label>
+                                        <div className="tags-grid">
+                                            {['Primeira Tatuagem', 'Colorido', 'Preto e Cinza', 'Cover-up', 'Design Personalizado', 'Tenho Referência'].map(tag => (
+                                                <div 
+                                                    key={tag} 
+                                                    className={`tag-chip ${formData.tags.includes(tag) ? 'selected' : ''}`}
+                                                    onClick={() => handleTagToggle(tag)}
+                                                >
+                                                    {formData.tags.includes(tag) && <span className="material-symbols-outlined tag-check">check</span>}
+                                                    {tag}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                     <label className="form-terms" onClick={(e) => { if (!formData.terms) { e.preventDefault(); setShowTerms(true); } }}>
                                         <input id="form-terms" checked={formData.terms} onChange={handleChange} type="checkbox" />
