@@ -415,6 +415,21 @@ const Booking = () => {
                                             })}
                                         </div>
                                     </div>
+                                    <div className="tags-section" style={{marginTop: '2rem'}}>
+                                        <h4 style={{fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', color: 'rgba(255, 255, 255, 0.4)', marginBottom: '1rem'}}>TAGS DO PROJETO (OPCIONAL)</h4>
+                                        <div className="tags-grid">
+                                            {['Primeira Tatuagem', 'Colorido', 'Preto e Cinza', 'Cover-up', 'Design Personalizado', 'Tenho Referência'].map(tag => (
+                                                <div 
+                                                    key={tag} 
+                                                    className={`tag-chip ${formData.tags.includes(tag) ? 'selected' : ''}`}
+                                                    onClick={() => handleTagToggle(tag)}
+                                                >
+                                                    {formData.tags.includes(tag) && <span className="material-symbols-outlined tag-check">check</span>}
+                                                    {tag}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -493,21 +508,6 @@ const Booking = () => {
                                         </div>
                                     </div>
 
-                                    <div className="form-field">
-                                        <label>TAGS DO PROJETO (OPCIONAL)</label>
-                                        <div className="tags-grid">
-                                            {['Primeira Tatuagem', 'Colorido', 'Preto e Cinza', 'Cover-up', 'Design Personalizado', 'Tenho Referência'].map(tag => (
-                                                <div 
-                                                    key={tag} 
-                                                    className={`tag-chip ${formData.tags.includes(tag) ? 'selected' : ''}`}
-                                                    onClick={() => handleTagToggle(tag)}
-                                                >
-                                                    {formData.tags.includes(tag) && <span className="material-symbols-outlined tag-check">check</span>}
-                                                    {tag}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
                                     <label className="form-terms" onClick={(e) => { if (!formData.terms) { e.preventDefault(); setShowTerms(true); } }}>
                                         <input id="form-terms" checked={formData.terms} onChange={handleChange} type="checkbox" />
                                         <span>Concordo com os <a href="#" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowTerms(true); }}>termos de agendamento</a> e confirmo que sou maior de 18 anos.</span>
