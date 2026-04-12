@@ -108,7 +108,9 @@ const Header = () => {
           <li><Link to="/portfolio" className={isActive('/portfolio')}>Portfólio</Link></li>
           <li><Link to="/agendamento" className={isActive('/agendamento')}>Agendamento</Link></li>
           <li><Link to="/contato" className={isActive('/contato')}>Contato</Link></li>
-          <li><Link to="/para-tatuadores" className={isActive('/para-tatuadores')} style={{color: 'var(--accent-red)', fontWeight: 'bold'}}>Para Tatuadores</Link></li>
+          {!user && (
+            <li><Link to="/para-tatuadores" className={isActive('/para-tatuadores')} style={{color: 'var(--accent-red)', fontWeight: 'bold'}}>Para Tatuadores</Link></li>
+          )}
           {user ? (
             <>
             <li>
