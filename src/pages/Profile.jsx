@@ -43,6 +43,18 @@ const formatTime = (dataHora) => {
   return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
 }
 
+const getFallbackImage = (servico) => {
+  const s = (servico || '').toLowerCase();
+  if (s.includes('floral') || s.includes('botâni')) return '/assets/portifolio_novo/Tattoo-Cobra-Floral.webp';
+  if (s.includes('realist') || s.includes('realismo')) return '/assets/portifolio_novo/Rosto.webp';
+  if (s.includes('colorid') || s.includes('aquarela')) return '/assets/portifolio_novo/Borboleta-Colorida.webp';
+  if (s.includes('anime') || s.includes('geek')) return '/assets/portifolio_novo/Tattoo-Anim.webp';
+  if (s.includes('pet') || s.includes('animal') || s.includes('cachorro')) return '/assets/portifolio_novo/Dog.webp';
+  if (s.includes('oriental')) return '/assets/portifolio_novo/tigrao.webp';
+  if (s.includes('preto e cinza') || s.includes('caveira') || s.includes('black')) return '/assets/portifolio_novo/Caveira.webp';
+  return '/assets/portifolio_novo/Rosa-Dos-Ventos-1.webp';
+}
+
 const Profile = () => {
   const navigate = useNavigate()
   const user = JSON.parse(localStorage.getItem('user') || '{}')
@@ -277,6 +289,16 @@ const Profile = () => {
     openModal('Detalhes da Sessão', content)
   }
 
+  const openAllSessionsModal = () => {
+    const content = (
+      <AllSessionsModalContent 
+        sessoes={agendamentos} 
+        onAgendamentoClick={openSessionModal} 
+      />
+    )
+    openModal('Todas as Sessões', content)
+  }
+
   const modalData = {
     'guide_1': {
       title: 'Guia: Primeiras 24 Horas',
@@ -383,7 +405,7 @@ const Profile = () => {
             <div className="profile-section">
               <div className="section-header">
                 <h3><span className="material-symbols-outlined">calendar_today</span> Próximas Sessões</h3>
-                <a onClick={() => {}}>Ver Todas</a>
+                <a onClick={openAllSessionsModal}>Ver Todas</a>
               </div>
 
               {loadingAg ? (
@@ -395,9 +417,9 @@ const Profile = () => {
                 </div>
               ) : (
                 <div className="sessions-grid">
-                  {proximas.map(ag => (
+                  {proximas.slice(0, 4).map(ag => (
                     <div key={ag.id} className="session-card">
-                      <div className="session-img" style={{ backgroundImage: 'url("/assets/portifolio_novo/Rosto.webp")', backgroundSize: 'cover' }}></div>
+                      <div className="session-img" style={{ backgroundImage: `url("${ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}")`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
                       <div className="session-content">
                         <div className="session-top">
                           <div>
@@ -718,10 +740,40 @@ const Profile = () => {
   )
 }
 
+const AllSessionsModalContent = ({ sessoes, onAgendamentoClick }) => {
+  if (sessoes.length === 0) {
+    return <div style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '2rem' }}>Nenhuma sessão encontrada.</div>
+  }
+
+  return (
+    <div className="all-sessions-list">
+      {sessoes.map(ag => (
+        <div key={ag.id} className="all-sessions-item" onClick={() => onAgendamentoClick(ag)}>
+          <div className="all-sessions-item-img" style={{ backgroundImage: `url("${ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}")`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
+          <div className="all-sessions-item-content">
+            <div className="all-sessions-item-header">
+              <h4>{(ag.servico || 'Tatuagem').replace(/\s+com\s+.+$/i, '')}</h4>
+              <div className={`session-date ${ag.status === 'AGENDADO' ? 'red' : 'gray'}`}>
+                {formatDate(ag.dataHora)}
+              </div>
+            </div>
+            <div className="all-sessions-item-details">
+              <span><span className="material-symbols-outlined">person</span> {ag.artista?.nome || (ag.servico?.match(/com\s+(.+)$/i)?.[1]) || 'Artista'}</span>
+              <span><span className="material-symbols-outlined">schedule</span> {formatTime(ag.dataHora)}</span>
+              <span><span className="material-symbols-outlined">info</span> {ag.status}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 const SessionModalContent = ({ ag, onUpdate }) => {
   const [avaliacao, setAvaliacao] = useState(ag.avaliacao || 0)
   const [observacoes, setObservacoes] = useState(ag.observacoes || '')
   const [loading, setLoading] = useState(false)
+  const [expandedImage, setExpandedImage] = useState(null)
 
   const handleUpdate = async (status) => {
     setLoading(true)
@@ -738,6 +790,7 @@ const SessionModalContent = ({ ag, onUpdate }) => {
   }
 
   return (
+    <>
     <div className="p-modal-stack">
       <div className="p-modal-card border-red">
         <h4>Serviço</h4>
@@ -753,6 +806,53 @@ const SessionModalContent = ({ ag, onUpdate }) => {
           <strong>{ag.artista?.nome || (ag.servico?.match(/com\s+(.+)$/i)?.[1]) || '—'}</strong>
         </div>
       </div>
+
+      <div className="p-modal-grid">
+        <div className="p-modal-card">
+          <span>Região do Corpo</span>
+          <strong>{ag.regiao || 'Não informada'}</strong>
+        </div>
+        <div className="p-modal-card">
+          <span>Tamanho Aproximado</span>
+          <strong>{ag.largura && ag.altura ? `${ag.largura} x ${ag.altura} cm` : 'Não informado'}</strong>
+        </div>
+      </div>
+
+      {(Array.isArray(ag.tags) && ag.tags.length > 0) ? (
+        <div className="p-modal-card">
+          <span>Tags & Referências</span>
+          <div className="session-tags-wrap">
+            {ag.tags.map(tag => (
+              <span key={tag} className="session-tag-chip">{tag}</span>
+            ))}
+          </div>
+        </div>
+      ) : (typeof ag.tags === 'string' && ag.tags.trim().length > 0) ? (
+        <div className="p-modal-card">
+          <span>Tags & Referências</span>
+          <div className="session-tags-wrap">
+            {ag.tags.split(',').map(tag => {
+              const t = tag.trim();
+              return t ? <span key={t} className="session-tag-chip">{t}</span> : null;
+            })}
+          </div>
+        </div>
+      ) : null}
+
+      {ag.imagemReferenciaUrl && (
+        <div className="p-modal-card">
+          <div className="reference-image-container">
+            <span>Imagem de Referência</span>
+            <img 
+              src={ag.imagemReferenciaUrl} 
+              alt="Referência" 
+              className="session-detail-img-thumb" 
+              onClick={() => setExpandedImage(ag.imagemReferenciaUrl)} 
+            />
+          </div>
+        </div>
+      )}
+
       <div className="p-modal-card">
         <span>Status</span>
         <strong style={{ color: '#ff0000' }}>{statusLabel[ag.status] || ag.status}</strong>
@@ -808,6 +908,21 @@ const SessionModalContent = ({ ag, onUpdate }) => {
         </>
       ) : null}
     </div>
+
+      {expandedImage && (
+        <div className="p-modal-overlay" style={{ zIndex: 9999 }} onClick={() => setExpandedImage(null)}>
+          <div className="p-modal image-modal" onClick={e => e.stopPropagation()}>
+            <div className="p-modal-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+              <h3>Referência Visual</h3>
+              <button onClick={() => setExpandedImage(null)}><span className="material-symbols-outlined">close</span></button>
+            </div>
+            <div className="p-modal-body" style={{ textAlign: 'center', marginTop: '1rem', overflow: 'hidden' }}>
+              <img src={expandedImage} alt="Referência" style={{ maxWidth: '100%', maxHeight: '70vh', borderRadius: '8px', objectFit: 'contain' }} />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
