@@ -60,7 +60,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="admin-dashboard">
+    <div className="admin-dashboard" style={{ paddingTop: '100px', minHeight: '100vh' }}>
       <section className="section">
         <h2>Painel Administrativo</h2>
         
