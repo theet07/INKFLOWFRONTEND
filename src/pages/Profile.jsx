@@ -92,8 +92,8 @@ const Profile = () => {
 
   if (!user.email) return null
 
-  const proximas = agendamentos.filter(a => a.status === 'AGENDADO' || a.status === 'CONFIRMADO' || a.status === 'EM_ANDAMENTO')
-  const colecao = agendamentos.filter(a => a.status === 'REALIZADO')
+  const proximas = agendamentos.filter(a => a.status === 'AGENDADO' || a.status === 'CONFIRMADO' || a.status === 'EM_ANDAMENTO' || a.status === 'REALIZADO')
+  const colecao = agendamentos.filter(a => a.status === 'FINALIZADO')
   const artistasUnicos = agendamentos
     .filter(a => a.artista)
     .reduce((acc, a) => {
@@ -786,7 +786,8 @@ const SessionModalContent = ({ ag, onUpdate }) => {
     'AGENDADO': 'Agendada',
     'CONFIRMADO': 'Confirmada',
     'EM_ANDAMENTO': 'Em Andamento',
-    'REALIZADO': 'Realizada',
+    'REALIZADO': 'Realizada (Aguardando Avaliação)',
+    'FINALIZADO': 'Finalizada',
     'CANCELADO': 'Cancelada',
   }
 
@@ -907,12 +908,20 @@ const SessionModalContent = ({ ag, onUpdate }) => {
         </>
       ) : ag.status === 'REALIZADO' ? (
         <>
-          <div className="p-modal-card">
-            <span>Avaliação do Artista</span>
-            <StarRating value={avaliacao} onChange={setAvaliacao} />
+          <div className="p-modal-card border-red">
+            <span style={{ color: '#ff0000', fontWeight: 'bold' }}>Sessão Concluída! Deixe sua avaliação</span>
+            <div style={{ marginTop: '0.5rem' }}>
+              <StarRating value={avaliacao} onChange={setAvaliacao} />
+            </div>
+            {avaliacao < 1 && <span style={{ color: '#ff6b7a', fontSize: '0.65rem' }}>Selecione no mínimo 1 estrela para avaliar.</span>}
           </div>
-          <button className="p-btn-primary" disabled={loading} onClick={() => handleUpdate('REALIZADO')}>
-            Salvar Avaliação
+          <button 
+            className="p-btn-primary" 
+            disabled={loading || avaliacao < 1} 
+            onClick={() => handleUpdate('FINALIZADO')}
+            style={{ width: '100%', marginTop: '0.5rem' }}
+          >
+            Confirmar e Avaliar
           </button>
         </>
       ) : null}
