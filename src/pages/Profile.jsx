@@ -177,7 +177,7 @@ const Profile = () => {
       }
 
       const formData = new FormData()
-      formData.append('foto', file)
+      formData.append('file', file)
       
       showToast('Enviando foto...', 'hourglass_empty')
       try {
@@ -191,7 +191,9 @@ const Profile = () => {
         showToast('Foto atualizada com sucesso!', 'check_circle')
         setTimeout(() => window.location.reload(), 500)
       } catch (err) {
-        showToast('Erro ao carregar foto.', 'error')
+        console.error('Erro de Upload:', err.response?.data || err.message || err);
+        const errorMessage = err.response?.data?.message || err.response?.data || 'Erro de comunicação com o servidor ao carregar foto.'
+        showToast(typeof errorMessage === 'string' ? errorMessage : 'Erro 500: Falha ao carregar foto.', 'error')
       }
     }
     if (fileInputRef.current) fileInputRef.current.value = ''
