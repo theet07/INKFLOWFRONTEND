@@ -272,7 +272,8 @@ const Profile = () => {
       closeModal()
     } catch (err) {
       console.error('Erro ao atualizar status:', err)
-      showToast('Erro ao atualizar sessão. Verifique sua conexão.', 'error')
+      const errorMsg = err.response?.data?.message || 'Erro ao atualizar sessão. Verifique sua conexão.'
+      showToast(errorMsg, 'error')
     }
   }
 
@@ -789,6 +790,11 @@ const SessionModalContent = ({ ag, onUpdate }) => {
     'CANCELADO': 'Cancelada',
   }
 
+  const sessionDate = new Date(ag.dataHora);
+  const now = new Date();
+  const diffHours = (sessionDate - now) / (1000 * 60 * 60);
+  const isCancellable = diffHours >= 24;
+
   return (
     <>
     <div className="p-modal-stack">
@@ -877,20 +883,23 @@ const SessionModalContent = ({ ag, onUpdate }) => {
       {ag.status === 'AGENDADO' || ag.status === 'CONFIRMADO' ? (
         <>
           <p className="p-modal-note">Por favor, chegue com 15 minutos de antecedência.</p>
+          {!isCancellable && (
+            <p className="p-modal-note" style={{ color: '#ff6b7a', marginTop: '0.25rem' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '4px' }}>warning</span>
+              Sessões com menos de 24 horas para o início não podem ser canceladas pelo sistema. Entre em contato com o estúdio.
+            </p>
+          )}
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
             <button
-              className="p-btn-primary"
-              disabled={loading}
-              onClick={() => handleUpdate('REALIZADO')}
-              style={{ flex: 1 }}
-            >
-              Marcar como Realizada
-            </button>
-            <button
               className="p-btn-secondary"
-              disabled={loading}
+              disabled={loading || !isCancellable}
+              title={!isCancellable ? "Prazo mínimo de 24h para cancelamento excedido." : "Cancelar Sessão"}
               onClick={() => handleUpdate('CANCELADO')}
-              style={{ flex: 1 }}
+              style={{ 
+                flex: 1, 
+                opacity: !isCancellable ? 0.5 : 1, 
+                cursor: !isCancellable ? 'not-allowed' : 'pointer' 
+              }}
             >
               Cancelar Sessão
             </button>
