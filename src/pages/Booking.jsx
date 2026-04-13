@@ -80,16 +80,36 @@ const Booking = () => {
         }
     }, [location.search])
 
-    const days = [
-        { day: '1', active: false }, { day: '2', active: true }, { day: '3', active: true }, { day: '4', active: true },
-        { day: '5', active: true }, { day: '6', active: true }, { day: '7', active: true }, { day: '8', active: false },
-        { day: '9', active: true }, { day: '10', active: true }, { day: '11', active: true }, { day: '12', active: true, content: '12', isDot: false },
-        { day: '13', active: true }, { day: '14', active: true }, { day: '15', active: false }, { day: '16', active: true },
-        { day: '17', active: true }, { day: '18', active: true }, { day: '19', active: true }, { day: '20', active: true },
-        { day: '21', active: true }, { day: '22', active: false }, { day: '23', active: true }, { day: '24', active: true },
-        { day: '25', active: true }, { day: '26', active: true }, { day: '27', active: true }, { day: '28', active: true },
-        { day: '29', active: false }, { day: '30', active: true }, { day: '31', active: true }
-    ]
+    const brTime = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+    const currentMonth = brTime.getMonth();
+    const currentYear = brTime.getFullYear();
+    const todayDate = brTime.getDate();
+    const currentHourBr = brTime.getHours();
+
+    const monthNames = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+    const currentMonthName = monthNames[currentMonth];
+
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+    const startPadding = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
+    const prevMonthDaysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+    const emptyDays = Array.from({ length: startPadding }, (_, i) => prevMonthDaysInMonth - startPadding + i + 1);
+
+    const days = Array.from({ length: daysInMonth }, (_, i) => {
+        const d = i + 1;
+        const dayOfWeek = new Date(currentYear, currentMonth, d).getDay();
+        let active = true;
+        if (dayOfWeek === 0) active = false; // Domingos fechados
+        if (d < todayDate) active = false; // Dias passados bloqueados
+
+        return {
+            day: d.toString(),
+            active,
+            isDot: d === todayDate,
+            content: d.toString()
+        };
+    });
 
     const timeSlots = Array.from({ length: 12 }, (_, i) => {
         const hour = i + 9;
@@ -191,13 +211,14 @@ const Booking = () => {
                 }
             }
 
-            const formattedDate = `2026-03-${bookingState.day.padStart(2, '0')}`
-            let isoTime = '12:00:00'
+            const mm = (currentMonth + 1).toString().padStart(2, '0');
+            const formattedDate = `${currentYear}-${mm}-${bookingState.day.padStart(2, '0')}`;
+            let isoTime = '12:00:00';
             if (bookingState.time) {
                 isoTime = `${bookingState.time}:00`;
             }
 
-            const dataHora = `${formattedDate}T${isoTime}`
+            const dataHora = `${formattedDate}T${isoTime}`;
 
             const artistaSelecionado = artistsOptions.find(a => a.name === bookingState.artist)
 
@@ -372,14 +393,14 @@ const Booking = () => {
                                 <div className="calendar-panel">
                                     <div className="calendar-nav">
                                         <button><span className="material-symbols-outlined">chevron_left</span></button>
-                                        <span>MARÇO DE 2026</span>
+                                        <span>{`${currentMonthName} DE ${currentYear}`}</span>
                                         <button><span className="material-symbols-outlined">chevron_right</span></button>
                                     </div>
                                     <div className="calendar-weekdays">
                                         <span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span><span>DOM</span>
                                     </div>
                                     <div className="calendar-days">
-                                        <div className="calendar-day empty">28</div><div className="calendar-day empty">29</div><div className="calendar-day empty">30</div><div className="calendar-day empty">31</div>
+                                        {emptyDays.map((d, i) => <div key={`empty-${i}`} className="calendar-day empty">{d}</div>)}
                                         {days.map((d, i) => (
                                             <div
                                                 key={i}
@@ -394,9 +415,9 @@ const Booking = () => {
                                         <h4>HORÁRIO PREFERENCIAL</h4>
                                         <div className="time-periods-grid">
                                             {timeSlots.map(ts => {
-                                                const currentHour = new Date().getHours();
+                                                const currentHour = currentHourBr;
                                                 const slotHour = parseInt(ts.label.split(':')[0], 10);
-                                                const isToday = bookingState.day === new Date().getDate().toString();
+                                                const isToday = bookingState.day === todayDate.toString();
                                                 const isPast = isToday && slotHour <= currentHour;
 
                                                 return (
