@@ -33,10 +33,7 @@ const AdminDashboard = () => {
 
   const updateBookingStatus = async (id, status) => {
     try {
-      const booking = bookings.find(b => b.id === id)
-      const updatedBooking = { ...booking, status }
-      
-      await agendamentoService.update(id, updatedBooking)
+      await agendamentoService.updateStatus(id, { status })
       
       const updatedBookings = bookings.map(b =>
         b.id === id ? { ...b, status } : b
@@ -44,7 +41,8 @@ const AdminDashboard = () => {
       setBookings(updatedBookings)
     } catch (error) {
       console.error('Erro ao atualizar status:', error)
-      alert('Erro ao atualizar status do agendamento')
+      const errorMsg = error.response?.data?.message || 'Erro ao atualizar status do agendamento'
+      alert(errorMsg)
     }
   }
 
@@ -88,55 +86,71 @@ const AdminDashboard = () => {
               <p className="text-gray">Nenhum agendamento encontrado.</p>
             ) : (
               <div className="bookings-grid">
-                {bookings.map(booking => (
-                  <div key={booking.id} className="card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
-                        <h4 className="text-primary">{booking.nome}</h4>
-                        <p className="text-light">{booking.email}</p>
-                        <p className="text-light">{booking.telefone}</p>
-                        <p className="text-gray">Serviço: {booking.servico}</p>
-                        <p className="text-gray">Data: {new Date(booking.dataHora || booking.data).toLocaleString('pt-BR')}</p>
-                        {booking.descricao && (
-                          <p className="text-gray">Descrição: {booking.descricao}</p>
-                        )}
+                {bookings.map(booking => {
+                  const statusColors = {
+                    'AGENDADO': '#f39c12',
+                    'CONFIRMADO': '#3498db',
+                    'EM_ANDAMENTO': '#9b59b6',
+                    'REALIZADO': '#2ecc71',
+                    'FINALIZADO': '#8e44ad',
+                    'CANCELADO': '#e74c3c'
+                  };
+
+                  return (
+                    <div key={booking.id} className="card">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                          <h4 className="text-primary">{booking.cliente?.fullName || booking.cliente?.nome || 'Cliente não identificado'}</h4>
+                          <p className="text-light">{booking.cliente?.email || '—'}</p>
+                          <p className="text-light">{booking.cliente?.telefone || '—'}</p>
+                          <p className="text-gray">Serviço: {booking.servico}</p>
+                          <p className="text-gray">Data: {new Date(booking.dataHora || booking.data).toLocaleString('pt-BR')}</p>
+                          {booking.descricao && (
+                            <p className="text-gray">Descrição: {booking.descricao}</p>
+                          )}
+                        </div>
+                        <span className="status" style={{
+                          padding: '0.25rem 0.6rem',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          fontWeight: 'bold',
+                          color: '#fff',
+                          backgroundColor: statusColors[booking.status] || '#7f8c8d'
+                        }}>
+                          {booking.status || 'DESCONHECIDO'}
+                        </span>
                       </div>
-                      <span className={`status ${booking.status || 'pendente'}`} style={{
-                        padding: '0.25rem 0.5rem',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        backgroundColor: booking.status === 'confirmado' ? 'green' : 
-                                       booking.status === 'cancelado' ? 'red' : 'orange'
-                      }}>
-                        {booking.status || 'Pendente'}
-                      </span>
+                      
+                      <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {booking.status !== 'CONFIRMADO' && booking.status !== 'FINALIZADO' && booking.status !== 'CANCELADO' && (
+                          <button 
+                            className="btn" 
+                            style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}
+                            onClick={() => updateBookingStatus(booking.id, 'CONFIRMADO')}
+                          >
+                            Confirmar
+                          </button>
+                        )}
+                        {booking.status !== 'CANCELADO' && booking.status !== 'FINALIZADO' && (
+                          <button 
+                            className="btn btn-outline" 
+                            style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}
+                            onClick={() => updateBookingStatus(booking.id, 'CANCELADO')}
+                          >
+                            Cancelar
+                          </button>
+                        )}
+                        <button 
+                          className="btn btn-outline" 
+                          style={{ fontSize: '0.8rem', padding: '0.5rem 1rem', borderColor: 'red', color: 'red' }}
+                          onClick={() => deleteBooking(booking.id)}
+                        >
+                          Excluir
+                        </button>
+                      </div>
                     </div>
-                    
-                    <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <button 
-                        className="btn" 
-                        style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}
-                        onClick={() => updateBookingStatus(booking.id, 'confirmado')}
-                      >
-                        Confirmar
-                      </button>
-                      <button 
-                        className="btn btn-outline" 
-                        style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}
-                        onClick={() => updateBookingStatus(booking.id, 'cancelado')}
-                      >
-                        Cancelar
-                      </button>
-                      <button 
-                        className="btn btn-outline" 
-                        style={{ fontSize: '0.8rem', padding: '0.5rem 1rem', borderColor: 'red', color: 'red' }}
-                        onClick={() => deleteBooking(booking.id)}
-                      >
-                        Excluir
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -151,15 +165,15 @@ const AdminDashboard = () => {
               </div>
               <div className="card-equal">
                 <div className="icon-circle">
-                  {bookings.filter(b => b.status === 'confirmado').length}
+                  {bookings.filter(b => b.status === 'CONFIRMADO').length}
                 </div>
                 <h3 className="text-primary">Confirmados</h3>
               </div>
               <div className="card-equal">
                 <div className="icon-circle">
-                  {bookings.filter(b => !b.status || b.status === 'pendente').length}
+                  {bookings.filter(b => (!b.status || b.status === 'AGENDADO')).length}
                 </div>
-                <h3 className="text-primary">Pendentes</h3>
+                <h3 className="text-primary">Agendados</h3>
               </div>
             </div>
           </div>
