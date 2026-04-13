@@ -460,10 +460,40 @@ const Profile = () => {
               ) : (
                 <div className="gallery-layout">
                   {colecao.map((ag, i) => (
-                    <div key={ag.id} className="gallery-item" onClick={() => openModal('Visualização', <div style={{padding:'2rem',textAlign:'center',color:'rgba(255,255,255,0.6)'}}>{ag.servico} — {formatDate(ag.dataHora)}</div>)}>
-                      <div style={{ width: '100%', height: '100%', background: 'rgba(255,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.3)' }}>ink_pen</span>
-                      </div>
+                    <div 
+                      key={ag.id} 
+                      className="gallery-item" 
+                      onClick={() => openModal('Tattoo Finalizada', (
+                        <div style={{ padding: '0.5rem', textAlign: 'center', color: '#fff' }}>
+                          <img 
+                            src={ag.imagemReferenciaUrl || getFallbackImage(ag.servico)} 
+                            alt={ag.servico} 
+                            style={{ width: '100%', maxHeight: '40vh', borderRadius: '8px', objectFit: 'contain', backgroundColor: 'rgba(0,0,0,0.5)' }} 
+                          />
+                          <h3 style={{ marginTop: '1rem', color: '#e63946', fontSize: '1.4rem' }}>{ag.servico}</h3>
+                          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                            Obra de {ag.artista?.nome || (ag.servico?.match(/com\s+(.+)$/i)?.[1]) || 'Artista Studio'}
+                          </p>
+                          
+                          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div style={{ color: '#ffb900', fontSize: '1.4rem', marginBottom: '0.5rem', letterSpacing: '4px' }}>
+                              {'★'.repeat(ag.avaliacao || 0)}{'☆'.repeat(5 - (ag.avaliacao || 0))}
+                            </div>
+                            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontStyle: 'italic', lineHeight: '1.5' }}>
+                              "{ag.observacoes || 'Sessão finalizada com muito profissionalismo!'}"
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    >
+                      <div style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        backgroundImage: `url("${ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}")`, 
+                        backgroundSize: 'cover', 
+                        backgroundPosition: 'center',
+                        borderRadius: 'inherit'
+                      }}></div>
                       <div className="gallery-overlay"><span className="material-symbols-outlined">zoom_in</span></div>
                     </div>
                   ))}
