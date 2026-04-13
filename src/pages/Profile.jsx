@@ -357,10 +357,10 @@ const Profile = () => {
               onClick={() => setAvatarModalOpen(true)} 
               style={{ 
                 cursor: 'pointer',
-                backgroundImage: user.fotoUrl ? `url(${user.fotoUrl})` : 'none',
+                backgroundImage: (user.fotoUrl || user.foto || user.fotoPerfil) ? `url(${user.fotoUrl || user.foto || user.fotoPerfil})` : 'none',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                color: user.fotoUrl ? 'transparent' : '#fff'
+                color: (user.fotoUrl || user.foto || user.fotoPerfil) ? 'transparent' : '#fff'
               }}
             >
               {user.nome?.charAt(0)?.toUpperCase() || user.fullName?.charAt(0)?.toUpperCase() || 'U'}

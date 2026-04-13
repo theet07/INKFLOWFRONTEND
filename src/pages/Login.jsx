@@ -44,8 +44,17 @@ const Login = () => {
 
         if (data.success) {
           localStorage.setItem('token', data.token)
-          localStorage.setItem('user', JSON.stringify(data.user))
-          navigate(data.user.isAdmin ? '/admin' : '/agendamento')
+          const loggedUser = { ...data.user }
+          
+          // Compatibiliza o nome das chaves da foto do backend pro frontend
+          if (loggedUser.foto && !loggedUser.fotoUrl) {
+            loggedUser.fotoUrl = loggedUser.foto
+          } else if (loggedUser.fotoPerfil && !loggedUser.fotoUrl) {
+            loggedUser.fotoUrl = loggedUser.fotoPerfil
+          }
+
+          localStorage.setItem('user', JSON.stringify(loggedUser))
+          navigate(loggedUser.isAdmin ? '/admin' : '/agendamento')
         } else {
           alert(data.message || 'Email ou senha incorretos!')
         }
