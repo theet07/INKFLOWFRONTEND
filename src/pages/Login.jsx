@@ -26,15 +26,6 @@ const Login = () => {
 
     try {
       if (isLogin) {
-        // Login hardcoded para tatuador
-        if (formData.email === 'tatuador@inkflow.com' && formData.senha === '123456') {
-          localStorage.setItem('userType', 'artist')
-          localStorage.setItem('token', 'artist-demo-token')
-          localStorage.setItem('user', JSON.stringify({ nome: 'Elias Thorne', email: formData.email, isArtist: true }))
-          navigate('/artist-dashboard')
-          return
-        }
-
         const response = await fetch(`${API_URL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -53,8 +44,20 @@ const Login = () => {
             loggedUser.fotoUrl = loggedUser.fotoPerfil
           }
 
+          // Salva user completo no localStorage
           localStorage.setItem('user', JSON.stringify(loggedUser))
-          navigate(loggedUser.isAdmin ? '/admin' : '/agendamento')
+
+          // Hierarquia de redirecionamento: Admin > Artista > Cliente
+          if (loggedUser.isAdmin) {
+            localStorage.setItem('userType', 'admin')
+            navigate('/admin')
+          } else if (loggedUser.isArtist || loggedUser.role === 'ROLE_ARTISTA' || loggedUser.artistaId) {
+            localStorage.setItem('userType', 'artist')
+            navigate('/artist-dashboard')
+          } else {
+            localStorage.setItem('userType', 'client')
+            navigate('/agendamento')
+          }
         } else {
           alert(data.message || 'Email ou senha incorretos!')
         }
