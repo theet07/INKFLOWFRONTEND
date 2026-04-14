@@ -125,15 +125,15 @@ const SettingsTab = ({ showToast }) => {
             <div className="ad-settings-form-grid">
               <div>
                 <label className="ad-form-label">Nome Artístico</label>
-                <input className="ad-form-input" type="text" value={artistName} onChange={e => setArtistName(e.target.value)} />
+                <input className="ad-form-input" type="text" value={artistName || ''} onChange={e => setArtistName(e.target.value)} autoComplete="off" />
               </div>
               <div>
                 <label className="ad-form-label">E-mail Público</label>
-                <input className="ad-form-input" type="email" value={artistEmail} onChange={e => setArtistEmail(e.target.value)} />
+                <input className="ad-form-input" type="email" value={artistEmail || ''} onChange={e => setArtistEmail(e.target.value)} autoComplete="off" />
               </div>
               <div className="ad-form-full">
                 <label className="ad-form-label">Bio / Descrição</label>
-                <textarea className="ad-form-textarea" rows={4} value={artistBio} onChange={e => setArtistBio(e.target.value)} />
+                <textarea className="ad-form-textarea" rows={4} value={artistBio || ''} onChange={e => setArtistBio(e.target.value)} autoComplete="off" />
               </div>
               <div className="ad-form-full">
                 <label className="ad-form-label">Tags de Especialidade</label>
@@ -192,9 +192,9 @@ const SettingsTab = ({ showToast }) => {
                   <span className={`ad-schedule-day-label ${!day.active ? 'paused' : ''}`}>{day.day}</span>
                   {day.active ? (
                     <div className="ad-schedule-time-inputs">
-                      <input className="ad-schedule-time-input" type="text" value={day.start} onChange={e => updateScheduleTime(i, 'start', e.target.value)} />
+                      <input className="ad-schedule-time-input" type="text" value={day.start || ''} onChange={e => updateScheduleTime(i, 'start', e.target.value)} autoComplete="off" />
                       <span style={{ color: 'var(--ad-on-surface-variant)', fontSize: '0.75rem' }}>—</span>
-                      <input className="ad-schedule-time-input" type="text" value={day.end} onChange={e => updateScheduleTime(i, 'end', e.target.value)} />
+                      <input className="ad-schedule-time-input" type="text" value={day.end || ''} onChange={e => updateScheduleTime(i, 'end', e.target.value)} autoComplete="off" />
                     </div>
                   ) : (
                     <div className="ad-schedule-paused">PAUSADO</div>

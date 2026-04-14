@@ -2520,7 +2520,7 @@
 
 .ad-form-input {
   width: 100%;
-  background: #000;
+  background-color: #000 !important;
   border: none;
   padding: 14px;
   color: white;
@@ -2529,13 +2529,24 @@
   border-radius: 2px;
   transition: box-shadow 0.2s;
   font-family: var(--ad-font-body);
+  color-scheme: dark;
+  -webkit-appearance: none;
 }
 
 .ad-form-input:focus { outline: none; box-shadow: 0 0 0 1px var(--ad-primary); }
 
+.ad-form-input:-webkit-autofill,
+.ad-form-input:-webkit-autofill:hover,
+.ad-form-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #000 inset !important;
+  -webkit-text-fill-color: white !important;
+  caret-color: white;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .ad-form-textarea {
   width: 100%;
-  background: #000;
+  background-color: #000 !important;
   border: none;
   padding: 14px;
   color: white;
@@ -2545,9 +2556,18 @@
   resize: vertical;
   font-family: var(--ad-font-body);
   transition: box-shadow 0.2s;
+  color-scheme: dark;
 }
 
 .ad-form-textarea:focus { outline: none; box-shadow: 0 0 0 1px var(--ad-primary); }
+
+.ad-form-textarea:-webkit-autofill,
+.ad-form-textarea:-webkit-autofill:hover,
+.ad-form-textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #000 inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
 
 .ad-settings-form-grid {
   display: grid;
@@ -2656,7 +2676,7 @@
 
 .ad-schedule-time-input {
   width: 56px;
-  background: #000;
+  background-color: #000 !important;
   border: none;
   text-align: center;
   padding: 8px;
@@ -2664,9 +2684,19 @@
   font-size: 0.75rem;
   border-radius: 2px;
   font-family: var(--ad-font-body);
+  color-scheme: dark;
+  -webkit-appearance: none;
 }
 
 .ad-schedule-time-input:focus { outline: none; box-shadow: 0 0 0 1px var(--ad-primary); }
+
+.ad-schedule-time-input:-webkit-autofill,
+.ad-schedule-time-input:-webkit-autofill:hover,
+.ad-schedule-time-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #000 inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
 
 .ad-schedule-paused {
   font-size: 10px;
