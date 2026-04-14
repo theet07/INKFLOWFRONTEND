@@ -57,14 +57,20 @@ const Booking = () => {
         { name: 'FLORAL', img: '/assets/portifolio_novo/Tattoo-Cobra-Floral.webp' }
     ]
 
-    const artistsOptions = [
-        { id: 1002, name: 'LUCAS M.', role: 'Especialista Realismo', img: '/assets/portifolio_tatuadores/Tatuador_1.png', specialties: ['REALISTA'] },
-        { id: 1003, name: 'LILLY K.', role: 'Realismo & Fine Line', img: '/assets/portifolio_tatuadores/Tatuadora_3.png', specialties: ['REALISTA'] },
-        { id: 1004, name: 'RAFAEL S.', role: 'Blackwork & Ornamental', img: '/assets/portifolio_tatuadores/Tatuador_2.png', specialties: ['BLACKWORK', 'MAORI'] },
-        { id: 1005, name: 'CAMILA R.', role: 'Fine Line & Floral', img: '/assets/portifolio_tatuadores/Tatuadora_5.png', specialties: ['FLORAL'] },
-        { id: 1006, name: 'ANDRÉ V.', role: 'Oriental & Geek', img: '/assets/portifolio_tatuadores/Tatuador_4.png', specialties: ['ORIENTAL', 'GEEK'] },
-        { id: 1007, name: 'ELENA M.', role: 'Geek & Floral', img: '/assets/portifolio_tatuadores/Tatuadora_6.png', specialties: ['GEEK', 'FLORAL'] }
-    ]
+    const [artistsOptions, setArtistsOptions] = useState([])
+    
+    useEffect(() => {
+        artistaService.getAll().then(res => {
+            const mapped = res.data.map(a => ({
+                id: a.id,
+                name: a.nome,
+                role: a.role || 'Artista Convidado',
+                img: a.fotoUrl || '/assets/avatar-placeholder.png',
+                specialties: (a.role || '').toUpperCase().split(',').map(s => s.trim())
+            }))
+            setArtistsOptions(mapped)
+        }).catch(err => console.error("Erro ao puxar artistas agendamento:", err))
+    }, [])
 
     const location = useLocation()
 
@@ -72,13 +78,13 @@ const Booking = () => {
         const params = new URLSearchParams(location.search)
         const artistaId = params.get('artistaId')
         
-        if (artistaId) {
+        if (artistaId && artistsOptions.length > 0) {
             const foundArtist = artistsOptions.find(a => a.id.toString() === artistaId)
             if (foundArtist) {
                 setBookingState(prev => ({ ...prev, artist: foundArtist.name }))
             }
         }
-    }, [location.search])
+    }, [location.search, artistsOptions])
 
     const brTime = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
     const currentMonth = brTime.getMonth();
