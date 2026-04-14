@@ -1,74 +1,118 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { agendamentoService } from '../../services/inkflowApi'
+
+const formatDate = (dataHora) => {
+  if (!dataHora) return ''
+  const d = new Date(dataHora)
+  const day = d.getDate()
+  const months = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ']
+  return `${day} ${months[d.getMonth()]}`
+}
+
+const formatTime = (dataHora) => {
+  if (!dataHora) return ''
+  const d = new Date(dataHora)
+  return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+}
+
+const getTimePeriod = (dataHora) => {
+  if (!dataHora) return ''
+  const h = new Date(dataHora).getHours()
+  return h < 12 ? 'AM' : 'PM'
+}
+
+const statusBadgeClass = {
+  'AGENDADO': 'ad-badge-yellow',
+  'CONFIRMADO': 'ad-badge-green',
+  'EM_ANDAMENTO': 'ad-badge-blue',
+  'REALIZADO': 'ad-badge-purple',
+  'FINALIZADO': 'ad-badge-teal',
+  'CANCELADO': 'ad-badge-red',
+}
+
+const statusLabel = {
+  'AGENDADO': 'Agendado',
+  'CONFIRMADO': 'Confirmado',
+  'EM_ANDAMENTO': 'Em Andamento',
+  'REALIZADO': 'Realizado',
+  'FINALIZADO': 'Finalizado',
+  'CANCELADO': 'Cancelado',
+}
 
 const DashboardTab = ({ showToast, openDrawer }) => {
+  const [agendamentos, setAgendamentos] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const handleActionBtn = (e, action) => {
-    e.stopPropagation()
-    showToast(action)
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let res
+        if (user.artistaId || user.id) {
+          try {
+            res = await agendamentoService.getByArtista(user.artistaId || user.id)
+          } catch {
+            // Fallback: se o endpoint por artista falhar, busca todos
+            res = await agendamentoService.getAll()
+          }
+        } else {
+          res = await agendamentoService.getAll()
+        }
+        setAgendamentos(Array.isArray(res.data) ? res.data : [])
+      } catch (err) {
+        console.error('Erro ao carregar agendamentos do artista:', err)
+        showToast('Erro ao carregar agenda', true)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const handleStatusUpdate = async (agId, novoStatus, clienteNome) => {
+    try {
+      await agendamentoService.updateStatus(agId, { status: novoStatus })
+      setAgendamentos(prev => prev.map(a => a.id === agId ? { ...a, status: novoStatus } : a))
+      showToast(`${clienteNome} → ${statusLabel[novoStatus] || novoStatus}`)
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data || 'Erro ao atualizar status'
+      showToast(typeof msg === 'string' ? msg : 'Erro ao atualizar status', true)
+    }
   }
 
-  const handleAccept = (e, clientName) => {
-    e.stopPropagation()
-    showToast(`Solicitação de ${clientName} aceita!`)
-  }
+  // Filtros
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
-  const handleDecline = (e, clientName) => {
-    e.stopPropagation()
-    showToast(`Solicitação de ${clientName} recusada.`, true)
-  }
+  const todayAgenda = agendamentos
+    .filter(a => {
+      if (!a.dataHora) return false
+      const d = new Date(a.dataHora)
+      d.setHours(0, 0, 0, 0)
+      return d.getTime() === today.getTime() && a.status !== 'CANCELADO'
+    })
+    .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora))
 
-  const handleTableRowClick = (e, clientName) => {
-    if (e.target.closest('button')) return
-    openDrawer(clientName)
-  }
+  const pendentes = agendamentos.filter(a => a.status === 'AGENDADO').length
+  const confirmados = agendamentos.filter(a => a.status === 'CONFIRMADO' || a.status === 'EM_ANDAMENTO').length
+  const concluidos = agendamentos.filter(a => a.status === 'REALIZADO' || a.status === 'FINALIZADO').length
+
+  const recentBookings = [...agendamentos]
+    .filter(a => a.status !== 'CANCELADO')
+    .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+    .slice(0, 8)
+
+  const getClientName = (ag) => ag.cliente?.fullName || ag.cliente?.nome || 'Cliente'
+  const getClientEmail = (ag) => ag.cliente?.email || ''
 
   const handleNewSession = () => showToast('Abrindo formulário de nova sessão...')
 
-  const todayAgenda = [
-    {
-      time: '10:00', period: 'AM', name: 'Marcus Vane',
-      desc: 'Realismo Manga • 4h', status: 'Confirmado',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCLosEgOfR996MZgw8U40BofUpn5KmZd5naxciO1RxsHR_EnzwT9NxoVrqfldIO5CBJi9nAotFwGLfkbQKBe-ifK7qc2f-88gxEVtCgHr_Rx9FeqN0w_qeP-bA-WJPVY__nTU1V5Q_hO1WrCOqq-l33NlOEJvz-iTexOUR4pX-ARSc9hxbC-LbfSriA0u4p8SEVYemwo62nnSIAndFsax6XhZ64mQ-ZJzdWBw3tyZKS60V_DLkfItMXy5fQGfA1V4dCZHvCyWZYC9g',
-      primaryBorder: true
-    },
-    {
-      time: '02:30', period: 'PM', name: 'Sienna Cole',
-      desc: 'Linha Fina Script • 1.5h', status: 'Confirmado',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAB5HUmNuLmwR2Q5kTDgXK6m2d6gDTreEbbJ02ge0NklbvHeBYork9Eg7JwoWmwvVyG1AhQluK96NtLJxpdia0oGVjuheGbQlL-g01FlKMMft3gVSSsUHjNQ-9k42MSa5tzDz0imYshpNFe32mgmjBdNMJst4W71E9OzHfC96FzCiZePItU_ssYb4p_0FghTr61H7EijQTsIJprIJUk2r4gyhVKBIQ8OXKMDJ3sMGQOtWcN3-qwUMTeyB6mucWk9tuMEDGBT324INQ',
-    },
-    {
-      time: '05:00', period: 'PM', name: 'Julian Reed',
-      desc: 'Tradicional Flash • 2h', status: 'Confirmado',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBwZ1MWlsX9D3Qxd_3FulhGvtW-RnWLa2Pnyf5haq39djNgEvfw-wbpLYlyUf6LOgZkdcrMAY3nBDgpVKKm9MclPMUVCUhTn-7q0dVNVOaMaWs5reSfkUqOMTh2wpRcaiu3fYWFxxrvvD75t32jHlc9t_mLGUYpJsHoNn5WclQwPskE6BPOLCJc9bpwn7rvmLk4cQla3TJUm2hr-aWvi6qUMEFI2rI3saLyr-sU-g8nehl_u9_C33_6xJsgKkU4srwrfTurTNsFSXc',
-    },
-  ]
-
-  const tableRows = [
-    {
-      name: 'Elena Rossi', email: 'elenar@example.com',
-      date: '24 OUT', time: '11:00',
-      style: 'Neo-Tradicional', area: 'Antebraço',
-      status: 'Pendente', badgeClass: 'ad-badge-yellow',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAvysmsMMs6kAZAOLzyGlpnw8IOhEFDjT_dPp2TyzQiqqoBOROzsujR855nm483E0zxN3dMOIeUGi0JQtVjZVDoUdBcGLGOSKlIObX59qF87AngqouHea8WGgOtwfRCSiLGIs38zKZVipjspHVvgTleAPy-RNa-DuNngtVm7NclXS4s2h4mNAX53Vd6mAh3YUJmbsaJsCRDBtpkmWfbSq6_wUKN8-6u6Xs3iz-vaKpi6MfSYgLlDVUt6nG4xtgJMNEzQt3FgOhIOyo',
-      hasPendingActions: true,
-    },
-    {
-      name: 'Dominic Thorne', email: 'dom.t@web.me',
-      date: '26 OUT', time: '15:00',
-      style: 'Blackwork Geométrico', area: 'Escápula',
-      status: 'Confirmado', badgeClass: 'ad-badge-green',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCUowRouJ5D9txEpmNUYLG6kgtuZ66V1-OadOkYSFUjkrMB7Uy6c7WNe1vzPS1e9idl8uxNuMCMRlKhieV0Bf0wZEEHJQwqAf3H02QWZB1ZiNUMRHtr-eJdxcFp98bP0pkqOxVQB3fNndPhcjRFTI3Q_BUSf43wej6Db3skRWievLJwYKkDw3pOGc3UcPRy_IVicQwym-I5EtLxIw3Fhp4j7rGR2nhMlmYT-JTE9AoUIsgklRaohB7AuWpO_lZkowatTH4259-Faew',
-      hasPendingActions: false,
-    },
-    {
-      name: 'Clara West', email: 'clara.w@inkmail.com',
-      date: '28 OUT', time: '13:00',
-      style: 'Lettering', area: 'Costela',
-      status: 'Cancelado', badgeClass: 'ad-badge-red',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDr-p8KaFfH1vT_YIsETVkeJXtrDyk9lEN8J0G5jqAsF29wvE_8mUFUo48YhNdr9bdLmr1IPmjT3fTbaxd_k7OpM5TtCi_T1JJKqYnXwKjpLC7D4tX5bixZC-Y9RPjL7uRnT8oo7hflIizyEu5yseLs96UxZJluqP2GG_dbysSPKAPKTvgw17TwhL3RwWrntPfUX0Nu5YxLcgNapWANedJWQysJ-MeJD73EsCycve82jZxfrzJs7h6DwMGQvbK9YC-c01uWy57KucY',
-      hasPendingActions: false,
-    },
-  ]
+  // Próximo status possível para ações rápidas
+  const getNextStatus = (current) => {
+    const flow = { 'AGENDADO': 'CONFIRMADO', 'CONFIRMADO': 'EM_ANDAMENTO', 'EM_ANDAMENTO': 'REALIZADO' }
+    return flow[current] || null
+  }
 
   return (
     <>
@@ -94,7 +138,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
         <div className="ad-card-highlight">
           <div className="ad-card-highlight-bg">
             <img
-              alt="close up of detailed black ink tattoo art"
+              alt="tattoo art"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcwMBoogvZI_cuzbWkJsJ-H3csKEkUzGPrTnBccbSByv9y0lN_JIf4HjArRRW1PQAT-pZgiG_ER61m0fY6Wxa5ueTP2zOCTYvsvcR4gWVxWrbyWahDzJK9FDiAN-8e5xzBBbk1VvX1UL3-AEDiZSwcZLR2y08Aa-O9kpnmRfDiWYOpH0X_yLWvrt27XW52E0qko1GBvirlrW1w9e6IuOchdJQVsaG8NkpqqsAkhJxbmVGh50QOQd-aWTWQLR_AYuQFIK-bUbPFvV8"
             />
             <div className="ad-card-highlight-overlay"></div>
@@ -104,8 +148,8 @@ const DashboardTab = ({ showToast, openDrawer }) => {
             <span className="material-symbols-outlined ad-card-icon">pending_actions</span>
           </div>
           <div className="ad-card-bottom">
-            <h3 className="ad-card-number">14</h3>
-            <p className="ad-card-subtitle">+3 desde ontem</p>
+            <h3 className="ad-card-number">{loading ? '...' : pendentes}</h3>
+            <p className="ad-card-subtitle">aguardando confirmação</p>
           </div>
         </div>
 
@@ -115,7 +159,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
             <span className="material-symbols-outlined ad-card-icon-muted">event_available</span>
           </div>
           <div>
-            <h3 className="ad-card-number-md">28</h3>
+            <h3 className="ad-card-number-md">{loading ? '...' : confirmados}</h3>
             <p className="ad-card-subtitle-muted">Agenda Ativa</p>
           </div>
         </div>
@@ -126,7 +170,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
             <span className="material-symbols-outlined ad-card-icon-muted">check_circle</span>
           </div>
           <div>
-            <h3 className="ad-card-number-md">42</h3>
+            <h3 className="ad-card-number-md">{loading ? '...' : concluidos}</h3>
             <p className="ad-card-subtitle-muted">Sessões Concluídas</p>
           </div>
         </div>
@@ -147,16 +191,16 @@ const DashboardTab = ({ showToast, openDrawer }) => {
           <div className="ad-rating-divider"></div>
           <div className="ad-rating-stats">
             <div className="ad-stat-item">
-              <p className="ad-stat-value">128</p>
-              <p className="ad-stat-label">Total de Avaliações</p>
+              <p className="ad-stat-value">{agendamentos.length}</p>
+              <p className="ad-stat-label">Total Sessões</p>
             </div>
             <div className="ad-stat-item">
-              <p className="ad-stat-value">98%</p>
-              <p className="ad-stat-label">Satisfação</p>
+              <p className="ad-stat-value">{todayAgenda.length}</p>
+              <p className="ad-stat-label">Hoje</p>
             </div>
             <div className="ad-stat-item">
-              <p className="ad-stat-value">12</p>
-              <p className="ad-stat-label">Designs Salvos</p>
+              <p className="ad-stat-value">{concluidos}</p>
+              <p className="ad-stat-label">Concluídas</p>
             </div>
           </div>
         </div>
@@ -166,100 +210,131 @@ const DashboardTab = ({ showToast, openDrawer }) => {
       <section className="ad-section">
         <div className="ad-section-header">
           <h2 className="ad-section-title">Agenda de Hoje</h2>
-          <button className="ad-link-btn" onClick={(e) => handleActionBtn(e, 'Ver Agenda Completa')}>
-            Ver Agenda Completa
-          </button>
         </div>
-        <div className="ad-agenda-scroll no-scrollbar">
-          {todayAgenda.map((item) => (
-            <div
-              key={item.name}
-              className="ad-agenda-card"
-              onClick={(e) => handleActionBtn(e, `Ver Sessão: ${item.name}`)}
-            >
-              <div className="ad-agenda-time">
-                <p className="ad-agenda-time-value">{item.time}</p>
-                <p className="ad-agenda-time-period">{item.period}</p>
+        {loading ? (
+          <div style={{ color: 'rgba(255,255,255,0.4)', padding: '2rem', textAlign: 'center' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem', animation: 'spin 1s linear infinite' }}>progress_activity</span>
+            Carregando agenda...
+          </div>
+        ) : todayAgenda.length === 0 ? (
+          <div style={{ color: 'rgba(255,255,255,0.4)', padding: '2rem', textAlign: 'center' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>event_busy</span>
+            Nenhuma sessão agendada para hoje.
+          </div>
+        ) : (
+          <div className="ad-agenda-scroll no-scrollbar">
+            {todayAgenda.map((ag) => (
+              <div
+                key={ag.id}
+                className="ad-agenda-card"
+                onClick={() => openDrawer(getClientName(ag))}
+              >
+                <div className="ad-agenda-time">
+                  <p className="ad-agenda-time-value">{formatTime(ag.dataHora)}</p>
+                  <p className="ad-agenda-time-period">{getTimePeriod(ag.dataHora)}</p>
+                </div>
+                <div className="ad-agenda-avatar">
+                  <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.9rem' }}>
+                    {getClientName(ag).charAt(0).toUpperCase()}
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p className="ad-agenda-name">{getClientName(ag)}</p>
+                  <p className="ad-agenda-desc">{ag.servico || 'Sessão'}</p>
+                  <span className={`ad-badge ${statusBadgeClass[ag.status] || ''}`}>{statusLabel[ag.status] || ag.status}</span>
+                </div>
+                {getNextStatus(ag.status) && (
+                  <button 
+                    className="ad-action-accept" 
+                    style={{ minWidth: '32px', height: '32px', flexShrink: 0 }}
+                    title={`Avançar para ${statusLabel[getNextStatus(ag.status)]}`}
+                    onClick={(e) => { e.stopPropagation(); handleStatusUpdate(ag.id, getNextStatus(ag.status), getClientName(ag)) }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>arrow_forward</span>
+                  </button>
+                )}
               </div>
-              <div className={`ad-agenda-avatar ${item.primaryBorder ? 'primary-border' : ''}`}>
-                <img src={item.img} alt={item.name} />
-              </div>
-              <div>
-                <p className="ad-agenda-name">{item.name}</p>
-                <p className="ad-agenda-desc">{item.desc}</p>
-                <span className="ad-badge">{item.status}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* Recent Inquiries Table */}
+      {/* Recent Bookings Table */}
       <section className="ad-section">
         <div className="ad-section-header">
-          <h2 className="ad-section-title">Solicitações Recentes</h2>
-          <div className="ad-table-actions">
-            <button className="ad-filter-btn" onClick={(e) => handleActionBtn(e, 'Filtros abertos')}>Filtrar</button>
-            <button className="ad-filter-btn" onClick={(e) => handleActionBtn(e, 'Exportando dados...')}>Exportar</button>
-          </div>
+          <h2 className="ad-section-title">Agendamentos Recentes</h2>
         </div>
-        <div className="ad-table-wrapper">
-          <table className="ad-table">
-            <thead>
-              <tr>
-                <th>Cliente</th>
-                <th>Sessão</th>
-                <th>Estilo / Área</th>
-                <th className="text-center">Status</th>
-                <th className="text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tableRows.map((row) => (
-                <tr key={row.name} onClick={(e) => handleTableRowClick(e, row.name)}>
-                  <td>
-                    <div className="ad-client-cell">
-                      <div className="ad-client-avatar">
-                        <img src={row.img} alt={row.name} />
-                      </div>
-                      <div>
-                        <p className="ad-client-name">{row.name}</p>
-                        <p className="ad-client-email">{row.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <p className="ad-session-date">{row.date}</p>
-                    <p className="ad-session-time">{row.time}</p>
-                  </td>
-                  <td>
-                    <p className="ad-style-name">{row.style}</p>
-                    <p className="ad-style-area">{row.area}</p>
-                  </td>
-                  <td className="text-center">
-                    <span className={`ad-badge ${row.badgeClass}`}>{row.status}</span>
-                  </td>
-                  <td className="text-right">
-                    {row.hasPendingActions ? (
-                      <div className="ad-row-actions">
-                        <button className="ad-action-accept" onClick={(e) => handleAccept(e, row.name)}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>check</span>
-                        </button>
-                        <button className="ad-action-decline" onClick={(e) => handleDecline(e, row.name)}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>close</span>
-                        </button>
-                      </div>
-                    ) : (
-                      <button className="ad-more-btn" onClick={(e) => handleActionBtn(e, `Mais opções: ${row.name}`)}>
-                        <span className="material-symbols-outlined">more_vert</span>
-                      </button>
-                    )}
-                  </td>
+        {loading ? (
+          <div style={{ color: 'rgba(255,255,255,0.4)', padding: '2rem', textAlign: 'center' }}>Carregando...</div>
+        ) : recentBookings.length === 0 ? (
+          <div style={{ color: 'rgba(255,255,255,0.4)', padding: '2rem', textAlign: 'center' }}>Nenhum agendamento encontrado.</div>
+        ) : (
+          <div className="ad-table-wrapper">
+            <table className="ad-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Sessão</th>
+                  <th>Serviço</th>
+                  <th className="text-center">Status</th>
+                  <th className="text-right">Ações</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {recentBookings.map((ag) => {
+                  const clientName = getClientName(ag)
+                  const nextStatus = getNextStatus(ag.status)
+                  return (
+                    <tr key={ag.id} onClick={() => openDrawer(clientName)}>
+                      <td>
+                        <div className="ad-client-cell">
+                          <div className="ad-client-avatar">
+                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.75rem' }}>
+                              {clientName.charAt(0).toUpperCase()}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="ad-client-name">{clientName}</p>
+                            <p className="ad-client-email">{getClientEmail(ag)}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <p className="ad-session-date">{formatDate(ag.dataHora)}</p>
+                        <p className="ad-session-time">{formatTime(ag.dataHora)}</p>
+                      </td>
+                      <td>
+                        <p className="ad-style-name">{ag.servico || 'Tatuagem'}</p>
+                        <p className="ad-style-area">{ag.regiao || '—'}</p>
+                      </td>
+                      <td className="text-center">
+                        <span className={`ad-badge ${statusBadgeClass[ag.status] || ''}`}>{statusLabel[ag.status] || ag.status}</span>
+                      </td>
+                      <td className="text-right">
+                        {nextStatus ? (
+                          <div className="ad-row-actions">
+                            <button className="ad-action-accept" title={`Avançar para ${statusLabel[nextStatus]}`} onClick={(e) => { e.stopPropagation(); handleStatusUpdate(ag.id, nextStatus, clientName) }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>arrow_forward</span>
+                            </button>
+                            {ag.status === 'AGENDADO' && (
+                              <button className="ad-action-decline" title="Cancelar" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(ag.id, 'CANCELADO', clientName) }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>close</span>
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <button className="ad-more-btn" onClick={(e) => { e.stopPropagation(); showToast(`${clientName}: ${statusLabel[ag.status] || ag.status}`) }}>
+                            <span className="material-symbols-outlined">more_vert</span>
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </>
   )

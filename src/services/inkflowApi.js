@@ -34,6 +34,7 @@ export const agendamentoService = {
   getAll: () => api.get('/agendamentos'),
   getById: (id) => api.get(`/agendamentos/${id}`),
   getByCliente: (clienteId) => api.get(`/agendamentos/cliente/${clienteId}`),
+  getByArtista: (artistaId) => api.get(`/agendamentos/artista/${artistaId}`),
   getByStatus: (status) => api.get(`/agendamentos/status/${status}`),
   create: (agendamento) => api.post('/agendamentos', agendamento),
   update: (id, agendamento) => api.put(`/agendamentos/${id}`, agendamento),

@@ -127,8 +127,8 @@ const ArtistDashboard = () => {
           </button>
           <div className="ad-user-info">
             <div className="ad-user-text">
-              <p className="ad-user-name">Elias Thorne</p>
-              <p className="ad-user-role">Artista Sênior</p>
+              <p className="ad-user-name">{JSON.parse(localStorage.getItem('user') || '{}').nome || JSON.parse(localStorage.getItem('user') || '{}').fullName || 'Artista'}</p>
+              <p className="ad-user-role">Artista</p>
             </div>
             <button className="ad-icon-btn" onClick={handleLogout} title="Sair">
               <span className="material-symbols-outlined" style={{ fontSize: '1.875rem' }}>account_circle</span>
