@@ -125,6 +125,73 @@ const Artists = () => {
                         <p className="text-sm text-outline mt-2">Tente ajustar sua busca ou filtros.</p>
                     </div>
                 ) : (
+                    <>
+                    {/* Featured Artist — Destaque da Semana */}
+                    {artists.length > 0 && currentFilter === 'all' && searchTerm === '' && (() => {
+                        const featured = artists[Math.floor(Date.now() / 86400000) % artists.length]; // rotaciona por dia
+                        return (
+                            <section className="mb-16">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <span className="material-symbols-outlined text-primary text-2xl" style={{fontVariationSettings: "'FILL' 1"}}>auto_awesome</span>
+                                    <h2 className="font-headline text-xl font-black uppercase tracking-widest text-white">Destaque da Semana</h2>
+                                </div>
+                                <div 
+                                    className="group relative w-full overflow-hidden rounded-2xl border border-white/5 cursor-pointer"
+                                    style={{ height: 'clamp(320px, 45vw, 480px)' }}
+                                    onClick={() => handleAgendar(featured.id)}
+                                >
+                                    <img 
+                                        className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 group-hover:opacity-50 transition-all duration-1000" 
+                                        src={featured.fotoUrl || getFallbackImage(featured.role)} 
+                                        alt={featured.nome}
+                                    />
+                                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.1) 100%)' }}></div>
+                                    
+                                    <div className="absolute inset-0 flex items-center z-10 px-8 md:px-14">
+                                        <div className="max-w-lg">
+                                            <span className="text-[10px] uppercase tracking-[0.4em] text-primary font-bold block mb-3">
+                                                <span className="material-symbols-outlined text-sm align-middle mr-1" style={{fontVariationSettings: "'FILL' 1"}}>verified</span>
+                                                Artista em Destaque
+                                            </span>
+                                            <h2 className="font-headline text-4xl md:text-5xl font-black text-white uppercase tracking-tight leading-[1.1] mb-3">
+                                                Conheça o traço de<br/><span className="text-primary">{featured.nome}</span>
+                                            </h2>
+                                            <p className="text-sm text-on-surface-variant mb-2 max-w-md leading-relaxed">
+                                                {featured.role || 'Artista Exclusivo'} — Estilo único e sessões sob medida para transformar sua ideia em arte permanente.
+                                            </p>
+                                            <div className="flex items-center gap-2 mb-6">
+                                                <span className="material-symbols-outlined text-primary text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                                                <span className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant">5.0 • Agenda Aberta</span>
+                                            </div>
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); handleAgendar(featured.id); }}
+                                                className="px-8 py-4 text-black font-headline font-black uppercase tracking-widest text-xs rounded-lg shadow-xl transition-all hover:brightness-110 active:scale-[0.97] bg-gradient-to-r from-primary to-primary-container"
+                                            >
+                                                <span className="material-symbols-outlined text-sm align-middle mr-2">calendar_month</span>
+                                                Agendar com {featured.nome?.split(' ')[0]}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Avatar flutuante no canto */}
+                                    <div className="absolute bottom-6 right-6 md:right-10 z-10 hidden md:flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-3 rounded-full border border-white/10">
+                                        <div className="w-10 h-10 rounded-full border border-primary overflow-hidden">
+                                            <img 
+                                                className="w-full h-full object-cover" 
+                                                src={featured.fotoUrl || '/assets/avatar-placeholder.png'} 
+                                                onError={(e) => { e.target.src = '/assets/avatar-placeholder.png' }}
+                                                alt="avatar"
+                                            />
+                                        </div>
+                                        <div>
+                                            <span className="text-xs font-bold text-white block">{featured.nome}</span>
+                                            <span className="text-[9px] uppercase tracking-widest text-on-surface-variant">{featured.role?.split(',')[0] || 'Resident'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        );
+                    })()}
                     /* Artist Grid */
                     <div className="grid gap-10" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
                         {filteredArtists.map((artist, idx) => {
@@ -172,6 +239,7 @@ const Artists = () => {
                             );
                         })}
                     </div>
+                    </>
                 )}
             </main>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { agendamentoService, clienteService } from '../services/inkflowApi'
+import { agendamentoService, clienteService, artistaService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
 import './Booking.css'
 
@@ -60,14 +60,30 @@ const Booking = () => {
     const [artistsOptions, setArtistsOptions] = useState([])
     
     useEffect(() => {
+        const styleKeywords = {
+            'REALISTA': ['realis', 'realismo', 'realista'],
+            'BLACKWORK': ['blackwork', 'black work', 'preto'],
+            'GEEK': ['geek', 'anime', 'nerd', 'pop'],
+            'ORIENTAL': ['oriental', 'japonês', 'japones', 'irezumi'],
+            'MAORI': ['maori', 'tribal', 'ornamental', 'polinés'],
+            'FLORAL': ['floral', 'botâni', 'botanical']
+        }
+
         artistaService.getAll().then(res => {
-            const mapped = res.data.map(a => ({
-                id: a.id,
-                name: a.nome,
-                role: a.role || 'Artista Convidado',
-                img: a.fotoUrl || '/assets/avatar-placeholder.png',
-                specialties: (a.role || '').toUpperCase().split(',').map(s => s.trim())
-            }))
+            const mapped = res.data.map(a => {
+                const roleLower = (a.role || '').toLowerCase()
+                const matched = Object.entries(styleKeywords)
+                    .filter(([, keywords]) => keywords.some(kw => roleLower.includes(kw)))
+                    .map(([style]) => style)
+
+                return {
+                    id: a.id,
+                    name: a.nome,
+                    role: a.role || 'Artista Convidado',
+                    img: a.fotoUrl || '/assets/avatar-placeholder.png',
+                    specialties: matched.length > 0 ? matched : ['GERAL']
+                }
+            })
             setArtistsOptions(mapped)
         }).catch(err => console.error("Erro ao puxar artistas agendamento:", err))
     }, [])
