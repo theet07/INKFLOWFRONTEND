@@ -2675,13 +2675,14 @@
 }
 
 .ad-schedule-time-input {
-  width: 56px;
+  width: 72px;
+  min-width: 72px;
   background-color: #000 !important;
   border: none;
   text-align: center;
-  padding: 8px;
+  padding: 8px 4px;
   color: white;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   border-radius: 2px;
   font-family: var(--ad-font-body);
   color-scheme: dark;
