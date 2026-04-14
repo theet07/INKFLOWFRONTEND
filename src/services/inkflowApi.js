@@ -47,6 +47,13 @@ export const artistaService = {
   getById: (id) => api.get(`/artistas/${id}`),
 };
 
+export const portfolioService = {
+  getByArtista: (artistaId) => api.get(`/portfolio/artista/${artistaId}`),
+  create: (data) => api.post('/portfolio', data),
+  upload: (formData) => api.post('/portfolio/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  delete: (id) => api.delete(`/portfolio/${id}`),
+};
+
 export const testConnection = () => api.get('/test');
 
 export default api;
