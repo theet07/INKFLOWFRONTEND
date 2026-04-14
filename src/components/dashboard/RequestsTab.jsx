@@ -1,79 +1,113 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { agendamentoService } from '../../services/inkflowApi'
+
+const formatDate = (dataHora) => {
+  if (!dataHora) return ''
+  const d = new Date(dataHora)
+  const day = d.getDate()
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+  return `${day} ${months[d.getMonth()]}, ${d.getFullYear()}`
+}
+
+const formatFullDate = (dataHora) => {
+  if (!dataHora) return ''
+  const d = new Date(dataHora)
+  return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+const formatWeekday = (dataHora) => {
+  if (!dataHora) return ''
+  const d = new Date(dataHora)
+  return d.toLocaleDateString('pt-BR', { weekday: 'long' }).replace(/^\w/, c => c.toUpperCase())
+}
+
+const formatTime = (dataHora) => {
+  if (!dataHora) return ''
+  return new Date(dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+}
+
+const statusConfig = {
+  'AGENDADO': { label: 'PENDENTE', badgeClass: 'ad-badge-yellow' },
+  'CONFIRMADO': { label: 'CONFIRMADO', badgeClass: 'ad-badge-green' },
+  'EM_ANDAMENTO': { label: 'EM ANDAMENTO', badgeClass: 'ad-badge-blue' },
+  'REALIZADO': { label: 'REALIZADO', badgeClass: 'ad-badge-purple' },
+  'FINALIZADO': { label: 'FINALIZADO', badgeClass: 'ad-badge-teal' },
+  'CANCELADO': { label: 'CANCELADO', badgeClass: 'ad-badge-red' },
+}
 
 const RequestsTab = ({ showToast }) => {
   const [filter, setFilter] = useState('all')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [drawerClient, setDrawerClient] = useState(null)
+  const [agendamentos, setAgendamentos] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const rows = [
-    {
-      id: 1, name: 'Mariana Silva', handle: '@mari_art', status: 'pendente',
-      date: '24 Out, 2023', time: '14:30', style: 'Blackwork Geometric', area: 'Antebraço Direito',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBZmY1JVWwwDdgPXWpV4BYCumkOL5NaNb4TWuYe5ERwtpHvZaIlMsK30oRFLWRcmGa415b-YS31r0BkutvAUs0ZVjevXtFQfoK4Yrw9cFmW6WslS1MNDuF5NEfOSFFFYq67-Q02LGP4UapkjoA1KdH4mfXAiBlPSEfhD0XPNzyzfrtOBf-DjFgpn2QAvvXFcyWZxM8Qw1Kl_fb24b5RegjeQqkwpIOIGGMfbNWhJnWyzhwqfExYQGj04VUzHRDy1j4SWFx3aFOHhbo',
-      drawerImg: 'https://lh3.googleusercontent.com/aida-public/AB6AXuALjP5C_VoOFNDzZZ5U1gZXVpT4VmTFvdCTd_x7EHP0bI2bivR1qhNsXTqERWrRuz9B6w0XDGNb6kGafNLtGH_Z088wofDyCauei2MCuRFd1vb66NzKHJS6rWol3jbIcbwVuzqHy46mj5U-VPrXn6EAnJmkTe2k6UK5uaaGRZJAjhS4BXE0YBGbDddOKmXb6rjeozj3-NMvO86MgY5DdQ3Wmnl9dQbiZFrM9Z4gQsP8_OzbUnlX7oRyQJPM95GOw5zrl22Uo-VD0O8',
-      refImg: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGylAVG9dB3gVfnI_Du5xI_UbukzL5e3APUjuEHq4nMm7L1Je5uL6Qq_fFMYlSnO4dbhUxYeurVmydQ07r7yL7R59qPllkT50ojSN2mrAjzQl1H1l-D2nTnhSynhmVJAjI2TrcMWJcdASDfD-qBslhLmFDU42406qd2S3RrRHtJp9IXtWWFT3rkir-BZLE9KS5CTihO4Xq1NY4d6UwH1qWqrUtKzBphNIB2nKfmMx2wq5DkZ2QNOK3FcNzwZXrjYvojM48Zkhchck',
-      description: '"Gostaria de uma mariposa em estilo Fine Line com elementos geométricos (círculos e linhas finas) ao redor. O local seria o antebraço direito, cobrindo uma pequena cicatriz."',
-      size: '15x10cm', region: 'Antebraço',
-      fullDate: '24 de Outubro, 2023', weekday: 'Terça-feira',
-      tags: [{ label: 'First-timer', color: 'primary' }, { label: 'Colorwork', color: 'purple' }],
-    },
-    {
-      id: 2, name: 'Ricardo Mendes', handle: '@rick_tattoo', status: 'confirmado',
-      date: '25 Out, 2023', time: '10:00', style: 'Realismo', area: 'Costas',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDBpiQdOdevxRaj1fzoEHKXv5de-nvDd3sQIvzY4euKSfEXCwrAHGtQv2n-dm_zp8_0GbsQGfRWepYRMPpWHluvsql9r1eEvl-uuSC2SGpXKBjcjMhdic3xoh4WHN31Gbvdm27BxGMu1UGE3UdA3JGYe03zsKk9MbkPgszwFBl9AobPF1vDTkrVtquGKTB1ymWXkJZ7MZoQeth7cVM6jz-rlI92AMWVrLw5Z7VSizzs9d0gMwfvth1wqDtJDwLIP8B48CqQuGoG6Ok',
-      drawerImg: 'https://lh3.googleusercontent.com/aida-public/AB6AXuALjP5C_VoOFNDzZZ5U1gZXVpT4VmTFvdCTd_x7EHP0bI2bivR1qhNsXTqERWrRuz9B6w0XDGNb6kGafNLtGH_Z088wofDyCauei2MCuRFd1vb66NzKHJS6rWol3jbIcbwVuzqHy46mj5U-VPrXn6EAnJmkTe2k6UK5uaaGRZJAjhS4BXE0YBGbDddOKmXb6rjeozj3-NMvO86MgY5DdQ3Wmnl9dQbiZFrM9Z4gQsP8_OzbUnlX7oRyQJPM95GOw5zrl22Uo-VD0O8',
-      refImg: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGylAVG9dB3gVfnI_Du5xI_UbukzL5e3APUjuEHq4nMm7L1Je5uL6Qq_fFMYlSnO4dbhUxYeurVmydQ07r7yL7R59qPllkT50ojSN2mrAjzQl1H1l-D2nTnhSynhmVJAjI2TrcMWJcdASDfD-qBslhLmFDU42406qd2S3RrRHtJp9IXtWWFT3rkir-BZLE9KS5CTihO4Xq1NY4d6UwH1qWqrUtKzBphNIB2nKfmMx2wq5DkZ2QNOK3FcNzwZXrjYvojM48Zkhchck',
-      description: '"Retrato realista do meu pet em preto e cinza, com sombreamento suave. Tenho fotos em alta resolução."',
-      size: '25x20cm', region: 'Costas',
-      fullDate: '25 de Outubro, 2023', weekday: 'Quarta-feira',
-      tags: [{ label: 'Retorno', color: 'primary' }],
-    },
-    {
-      id: 3, name: 'Fernanda Costa', handle: '@nanda_c', status: 'cancelado',
-      date: '26 Out, 2023', time: '18:00', style: 'Fine Line', area: 'Costelas',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB2EWVgd1KciAtFFSRES0ekHmpRspk8pac-H4LQ9oVeCqsA1-hdqI7vSu3-SYsVHpT1Ux_01dzmLo5iSRKQYEqJMqYJNvWETZq8rMi6IGCfjFwLSubav9p0hy5j_9mlK5wVJe_7hT7IeZQr68tNNIBqUAhWuwxzpPcwVagbZIeuxrlaWZkkhNIwOX8CAImGjGDRH54axZwwidDJYccBRnqj6LaM9Se9i0fiIam0oh53VTmZtPAZAma8AFBdbbuaIbdWDApHW-CiWEY',
-      drawerImg: 'https://lh3.googleusercontent.com/aida-public/AB6AXuALjP5C_VoOFNDzZZ5U1gZXVpT4VmTFvdCTd_x7EHP0bI2bivR1qhNsXTqERWrRuz9B6w0XDGNb6kGafNLtGH_Z088wofDyCauei2MCuRFd1vb66NzKHJS6rWol3jbIcbwVuzqHy46mj5U-VPrXn6EAnJmkTe2k6UK5uaaGRZJAjhS4BXE0YBGbDddOKmXb6rjeozj3-NMvO86MgY5DdQ3Wmnl9dQbiZFrM9Z4gQsP8_OzbUnlX7oRyQJPM95GOw5zrl22Uo-VD0O8',
-      refImg: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGylAVG9dB3gVfnI_Du5xI_UbukzL5e3APUjuEHq4nMm7L1Je5uL6Qq_fFMYlSnO4dbhUxYeurVmydQ07r7yL7R59qPllkT50ojSN2mrAjzQl1H1l-D2nTnhSynhmVJAjI2TrcMWJcdASDfD-qBslhLmFDU42406qd2S3RrRHtJp9IXtWWFT3rkir-BZLE9KS5CTihO4Xq1NY4d6UwH1qWqrUtKzBphNIB2nKfmMx2wq5DkZ2QNOK3FcNzwZXrjYvojM48Zkhchck',
-      description: '"Quero uma frase em letra cursiva fina na costela. Algo minimalista e delicado."',
-      size: '12x3cm', region: 'Costelas',
-      fullDate: '26 de Outubro, 2023', weekday: 'Quinta-feira',
-      tags: [{ label: 'First-timer', color: 'primary' }],
-    },
-  ]
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
 
-  const statusConfig = {
-    pendente: { label: 'PENDENTE', badgeClass: 'ad-badge-yellow' },
-    confirmado: { label: 'CONFIRMADO', badgeClass: 'ad-badge-green' },
-    cancelado: { label: 'CANCELADO', badgeClass: 'ad-badge-red' },
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let res
+        if (user.artistaId || user.id) {
+          try {
+            res = await agendamentoService.getByArtista(user.artistaId || user.id)
+          } catch {
+            res = await agendamentoService.getAll()
+          }
+        } else {
+          res = await agendamentoService.getAll()
+        }
+        setAgendamentos(Array.isArray(res.data) ? res.data : [])
+      } catch (err) {
+        console.error('Erro ao carregar solicitações:', err)
+        showToast('Erro ao carregar solicitações', true)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const getClientName = (ag) => ag.cliente?.fullName || ag.cliente?.nome || 'Cliente'
+  const getClientEmail = (ag) => ag.cliente?.email || ''
 
   const filters = [
     { key: 'all', label: 'Todos' },
-    { key: 'pendente', label: 'Pendente' },
-    { key: 'confirmado', label: 'Confirmado' },
-    { key: 'cancelado', label: 'Cancelado' },
+    { key: 'AGENDADO', label: 'Pendente' },
+    { key: 'CONFIRMADO', label: 'Confirmado' },
+    { key: 'CANCELADO', label: 'Cancelado' },
   ]
 
-  const filteredRows = filter === 'all' ? rows : rows.filter(r => r.status === filter)
+  const filteredRows = filter === 'all' ? agendamentos : agendamentos.filter(a => a.status === filter)
 
-  const handleAccept = (e, row) => {
-    e.stopPropagation()
-    showToast(`Solicitação de ${row.name} confirmada!`)
+  const handleStatusUpdate = async (agId, novoStatus, clienteNome) => {
+    try {
+      await agendamentoService.updateStatus(agId, { status: novoStatus })
+      setAgendamentos(prev => prev.map(a => a.id === agId ? { ...a, status: novoStatus } : a))
+      if (novoStatus === 'CONFIRMADO') {
+        showToast(`Solicitação de ${clienteNome} confirmada!`)
+      } else {
+        showToast(`Solicitação de ${clienteNome} recusada.`, true)
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data || 'Erro ao atualizar status'
+      showToast(typeof msg === 'string' ? msg : 'Erro ao atualizar status', true)
+    }
   }
 
-  const handleDecline = (e, row) => {
+  const handleAccept = (e, ag) => {
     e.stopPropagation()
-    showToast(`Solicitação de ${row.name} recusada.`, true)
+    handleStatusUpdate(ag.id, 'CONFIRMADO', getClientName(ag))
   }
 
-  const handleOptions = (e, row) => {
+  const handleDecline = (e, ag) => {
     e.stopPropagation()
-    showToast(`Abrindo opções para ${row.name}`)
+    handleStatusUpdate(ag.id, 'CANCELADO', getClientName(ag))
   }
 
-  const handleRowClick = (e, row) => {
+  const handleRowClick = (e, ag) => {
     if (e.target.closest('button')) return
-    setDrawerClient(row)
+    setDrawerClient(ag)
     setDrawerOpen(true)
   }
 
@@ -83,13 +117,26 @@ const RequestsTab = ({ showToast }) => {
   }
 
   const handleDrawerAccept = () => {
-    showToast(`Solicitação de ${drawerClient.name} Aceita!`)
+    if (!drawerClient) return
+    handleStatusUpdate(drawerClient.id, 'CONFIRMADO', getClientName(drawerClient))
     closeDrawer()
   }
 
   const handleDrawerDecline = () => {
-    showToast(`Solicitação de ${drawerClient.name} Recusada.`, true)
+    if (!drawerClient) return
+    handleStatusUpdate(drawerClient.id, 'CANCELADO', getClientName(drawerClient))
     closeDrawer()
+  }
+
+  const getSizeLabel = (ag) => {
+    if (ag.largura && ag.altura) return `${ag.largura}x${ag.altura}cm`
+    if (ag.largura) return `${ag.largura}cm`
+    return '—'
+  }
+
+  const getTags = (ag) => {
+    if (!ag.tags) return []
+    return ag.tags.split(',').map(t => t.trim()).filter(Boolean)
   }
 
   return (
@@ -112,70 +159,85 @@ const RequestsTab = ({ showToast }) => {
 
       {/* Table */}
       <div className="ad-req-table-container">
-        <table className="ad-req-table">
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Data e Hora</th>
-              <th>Tipo de Tattoo</th>
-              <th>Região</th>
-              <th>Status</th>
-              <th className="ad-req-th-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRows.map(row => (
-              <tr
-                key={row.id}
-                className="ad-req-row"
-                onClick={(e) => handleRowClick(e, row)}
-              >
-                <td>
-                  <div className="ad-req-client-cell">
-                    <div className="ad-req-client-img">
-                      <img src={row.img} alt={row.name} />
-                    </div>
-                    <div>
-                      <p className="ad-req-client-name">{row.name}</p>
-                      <p className="ad-req-client-handle">{row.handle}</p>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <p className="ad-req-date">{row.date}</p>
-                  <p className="ad-req-time">{row.time}</p>
-                </td>
-                <td>
-                  <span className="ad-req-style-tag">{row.style}</span>
-                </td>
-                <td className="ad-req-area">{row.area}</td>
-                <td>
-                  <span className={`ad-badge ${statusConfig[row.status].badgeClass}`}>
-                    {statusConfig[row.status].label}
-                  </span>
-                </td>
-                <td className="ad-req-td-right">
-                  <div className="ad-req-actions">
-                    {row.status === 'pendente' ? (
-                      <>
-                        <button className="ad-req-action-accept" onClick={(e) => handleAccept(e, row)}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>check</span>
-                        </button>
-                        <button className="ad-req-action-decline" onClick={(e) => handleDecline(e, row)}>
-                          <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>close</span>
-                        </button>
-                      </>
-                    ) : (
-                      <button className="ad-req-action-options" onClick={(e) => handleOptions(e, row)}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>more_vert</span>
-                      </button>
-                    )}
-                  </div>
-                </td>
+        {loading ? (
+          <div style={{ color: 'rgba(255,255,255,0.4)', padding: '3rem', textAlign: 'center' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem', animation: 'spin 1s linear infinite' }}>progress_activity</span>
+            Carregando solicitações...
+          </div>
+        ) : filteredRows.length === 0 ? (
+          <div style={{ color: 'rgba(255,255,255,0.4)', padding: '3rem', textAlign: 'center' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>inbox</span>
+            Nenhuma solicitação encontrada.
+          </div>
+        ) : (
+          <table className="ad-req-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Data e Hora</th>
+                <th>Tipo de Tattoo</th>
+                <th>Região</th>
+                <th>Status</th>
+                <th className="ad-req-th-right">Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredRows.map(ag => {
+                const cfg = statusConfig[ag.status] || { label: ag.status, badgeClass: '' }
+                return (
+                  <tr
+                    key={ag.id}
+                    className="ad-req-row"
+                    onClick={(e) => handleRowClick(e, ag)}
+                  >
+                    <td>
+                      <div className="ad-req-client-cell">
+                        <div className="ad-req-client-img">
+                          <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.8rem' }}>
+                            {getClientName(ag).charAt(0).toUpperCase()}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="ad-req-client-name">{getClientName(ag)}</p>
+                          <p className="ad-req-client-handle">{getClientEmail(ag)}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <p className="ad-req-date">{formatDate(ag.dataHora)}</p>
+                      <p className="ad-req-time">{formatTime(ag.dataHora)}</p>
+                    </td>
+                    <td>
+                      <span className="ad-req-style-tag">{ag.servico || 'Tatuagem'}</span>
+                    </td>
+                    <td className="ad-req-area">{ag.regiao || '—'}</td>
+                    <td>
+                      <span className={`ad-badge ${cfg.badgeClass}`}>{cfg.label}</span>
+                    </td>
+                    <td className="ad-req-td-right">
+                      <div className="ad-req-actions">
+                        {ag.status === 'AGENDADO' ? (
+                          <>
+                            <button className="ad-req-action-accept" onClick={(e) => handleAccept(e, ag)}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>check</span>
+                            </button>
+                            <button className="ad-req-action-decline" onClick={(e) => handleDecline(e, ag)}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>close</span>
+                            </button>
+                          </>
+                        ) : (
+                          <button className="ad-req-action-options" onClick={(e) => { e.stopPropagation(); showToast(`${getClientName(ag)}: ${cfg.label}`) }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>more_vert</span>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Detail Drawer */}
@@ -188,19 +250,19 @@ const RequestsTab = ({ showToast }) => {
               <div className="ad-req-drawer-header">
                 <div className="ad-req-drawer-client">
                   <div className="ad-req-drawer-avatar">
-                    <img src={drawerClient.drawerImg} alt={drawerClient.name} />
+                    <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '1.2rem' }}>
+                      {getClientName(drawerClient).charAt(0).toUpperCase()}
+                    </div>
                   </div>
                   <div>
-                    <h3 className="ad-req-drawer-name">{drawerClient.name}</h3>
+                    <h3 className="ad-req-drawer-name">{getClientName(drawerClient)}</h3>
                     <div className="ad-req-drawer-tags">
-                      {drawerClient.tags.map((tag, i) => (
-                        <span
-                          key={i}
-                          className={`ad-req-drawer-tag ${tag.color === 'purple' ? 'purple' : ''}`}
-                        >
-                          {tag.label}
-                        </span>
+                      {getTags(drawerClient).map((tag, i) => (
+                        <span key={i} className="ad-req-drawer-tag">{tag}</span>
                       ))}
+                      {getTags(drawerClient).length === 0 && (
+                        <span className="ad-req-drawer-tag">{drawerClient.servico || 'Sessão'}</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -213,20 +275,29 @@ const RequestsTab = ({ showToast }) => {
               <div className="ad-req-drawer-content">
                 <section>
                   <h4 className="ad-req-drawer-section-title">Referência e Descrição</h4>
-                  <div className="ad-req-drawer-ref-img">
-                    <img src={drawerClient.refImg} alt="Referência" />
-                  </div>
-                  <p className="ad-req-drawer-description">{drawerClient.description}</p>
+                  {drawerClient.imagemReferenciaUrl ? (
+                    <div className="ad-req-drawer-ref-img">
+                      <img src={drawerClient.imagemReferenciaUrl} alt="Referência" />
+                    </div>
+                  ) : (
+                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.3)', border: '1px dashed rgba(255,255,255,0.1)', marginBottom: '1rem' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>image</span>
+                      Sem imagem de referência
+                    </div>
+                  )}
+                  <p className="ad-req-drawer-description">
+                    {drawerClient.descricao || drawerClient.observacoes || 'Sem descrição fornecida pelo cliente.'}
+                  </p>
                 </section>
 
                 <div className="ad-req-drawer-specs">
                   <div className="ad-req-drawer-spec">
                     <h5 className="ad-req-drawer-spec-label">Tamanho</h5>
-                    <p className="ad-req-drawer-spec-value">{drawerClient.size}</p>
+                    <p className="ad-req-drawer-spec-value">{getSizeLabel(drawerClient)}</p>
                   </div>
                   <div className="ad-req-drawer-spec">
                     <h5 className="ad-req-drawer-spec-label">Região</h5>
-                    <p className="ad-req-drawer-spec-value">{drawerClient.region}</p>
+                    <p className="ad-req-drawer-spec-value">{drawerClient.regiao || '—'}</p>
                   </div>
                 </div>
 
@@ -236,12 +307,12 @@ const RequestsTab = ({ showToast }) => {
                     <div className="ad-req-drawer-schedule-left">
                       <span className="material-symbols-outlined" style={{ color: 'var(--ad-primary)' }}>calendar_today</span>
                       <div>
-                        <p className="ad-req-drawer-schedule-date">{drawerClient.fullDate}</p>
-                        <p className="ad-req-drawer-schedule-weekday">{drawerClient.weekday}</p>
+                        <p className="ad-req-drawer-schedule-date">{formatFullDate(drawerClient.dataHora)}</p>
+                        <p className="ad-req-drawer-schedule-weekday">{formatWeekday(drawerClient.dataHora)}</p>
                       </div>
                     </div>
                     <div className="ad-req-drawer-schedule-right">
-                      <p className="ad-req-drawer-schedule-date">{drawerClient.time}</p>
+                      <p className="ad-req-drawer-schedule-date">{formatTime(drawerClient.dataHora)}</p>
                       <p className="ad-req-drawer-schedule-weekday">Horário</p>
                     </div>
                   </div>
@@ -250,14 +321,22 @@ const RequestsTab = ({ showToast }) => {
             </div>
 
             {/* Drawer Footer */}
-            <div className="ad-req-drawer-footer">
-              <button className="ad-req-drawer-btn-decline" onClick={handleDrawerDecline}>
-                Recusar
-              </button>
-              <button className="ad-req-drawer-btn-accept" onClick={handleDrawerAccept}>
-                Aceitar &amp; Cotar
-              </button>
-            </div>
+            {drawerClient.status === 'AGENDADO' ? (
+              <div className="ad-req-drawer-footer">
+                <button className="ad-req-drawer-btn-decline" onClick={handleDrawerDecline}>
+                  Recusar
+                </button>
+                <button className="ad-req-drawer-btn-accept" onClick={handleDrawerAccept}>
+                  Aceitar &amp; Confirmar
+                </button>
+              </div>
+            ) : (
+              <div className="ad-req-drawer-footer">
+                <div style={{ width: '100%', textAlign: 'center', padding: '0.5rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  Status: {statusConfig[drawerClient.status]?.label || drawerClient.status}
+                </div>
+              </div>
+            )}
           </aside>
         </>
       )}
