@@ -5,12 +5,13 @@ import RequestsTab from '../components/dashboard/RequestsTab'
 import ScheduleTab from '../components/dashboard/ScheduleTab'
 import PortfolioTab from '../components/dashboard/PortfolioTab'
 import SettingsTab from '../components/dashboard/SettingsTab'
+import { agendamentoService } from '../services/inkflowApi'
 import './ArtistDashboard.css'
 
 const ArtistDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [drawerClient, setDrawerClient] = useState('Nome do Cliente')
+  const [drawerAgendamento, setDrawerAgendamento] = useState(null)
   const [toasts, setToasts] = useState([])
   const [activeTab, setActiveTab] = useState('dashboard')
   const navigate = useNavigate()
@@ -81,18 +82,45 @@ const ArtistDashboard = () => {
     return () => { document.body.style.overflow = '' }
   }, [drawerOpen])
 
-  const openDrawer = (clientName) => {
-    setDrawerClient(clientName)
+  const openDrawer = (agendamento) => {
+    console.log('Agendamento selecionado:', agendamento)
+    setDrawerAgendamento(agendamento)
     setDrawerOpen(true)
   }
 
   const closeDrawer = () => setDrawerOpen(false)
 
-  const handleDrawerAction = (action) => {
-    if (action === 'Declined') {
-      showToast(`Solicitação de ${drawerClient} recusada.`, true)
-    } else {
-      showToast(`${drawerClient} agendado com sucesso!`)
+  const getDrawerClientName = () => {
+    if (!drawerAgendamento) return 'Cliente'
+    return drawerAgendamento.cliente?.fullName || drawerAgendamento.cliente?.nome || 'Cliente'
+  }
+
+  const getDrawerSizeLabel = () => {
+    if (!drawerAgendamento) return '—'
+    if (drawerAgendamento.largura && drawerAgendamento.altura) return `${drawerAgendamento.largura}cm x ${drawerAgendamento.altura}cm`
+    if (drawerAgendamento.largura) return `${drawerAgendamento.largura}cm`
+    return '—'
+  }
+
+  const getDrawerTags = () => {
+    if (!drawerAgendamento?.tags) return []
+    if (typeof drawerAgendamento.tags !== 'string') return []
+    return drawerAgendamento.tags.split(',').map(t => t.trim()).filter(Boolean)
+  }
+
+  const handleDrawerAction = async (action) => {
+    if (!drawerAgendamento) return
+    const clientName = getDrawerClientName()
+    try {
+      if (action === 'Declined') {
+        await agendamentoService.updateStatus(drawerAgendamento.id, { status: 'CANCELADO' })
+        showToast(`Solicitação de ${clientName} recusada.`, true)
+      } else {
+        await agendamentoService.updateStatus(drawerAgendamento.id, { status: 'CONFIRMADO' })
+        showToast(`${clientName} agendado com sucesso!`)
+      }
+    } catch (err) {
+      showToast('Erro ao atualizar status', true)
     }
     closeDrawer()
   }
@@ -129,7 +157,7 @@ const ArtistDashboard = () => {
       case 'dashboard':
         return <DashboardTab showToast={showToast} openDrawer={openDrawer} />
       case 'requests':
-        return <RequestsTab showToast={showToast} />
+        return <RequestsTab showToast={showToast} openDrawer={openDrawer} />
       case 'schedule':
         return <ScheduleTab showToast={showToast} />
       case 'portfolio':
@@ -225,55 +253,99 @@ const ArtistDashboard = () => {
       <div className={`ad-drawer-overlay ${drawerOpen ? 'open' : ''}`}>
         <div className="ad-drawer-backdrop" onClick={closeDrawer} />
         <div className="ad-drawer-panel">
-          <div className="ad-drawer-header">
-            <div>
-              <span className="ad-drawer-tag">Detalhes da Solicitação</span>
-              <h2 className="ad-drawer-title">{drawerClient}</h2>
-            </div>
-            <button className="ad-drawer-close" onClick={closeDrawer}>
-              <span className="material-symbols-outlined">close</span>
-            </button>
-          </div>
-          <div className="ad-drawer-body no-scrollbar">
-            <div>
-              <p className="ad-drawer-section-label">Arte de Referência</p>
-              <div className="ad-drawer-image">
-                <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmN4GiqG1UKG5wb0rE-gwsBmNGJ_kALhiQlNaEdO-u3LfH3Cb5Cxeru88n43_CJWBz8P7xrp3GF7zpmjbVHG7mTN6KM4CJJ26O_Dt8TICmOOeGQMrWprSVLZXz4lFwui3vZH_AACVRpHbJg_pk-tXOTK2lvxDY07K-tpndiA78LpnTtLsCC1pZvlQuQbebRX-5Cw0KbU5bebeKc3UugAepm-LpIeFIckrLpx_KUuusPc9M_jMQzQcaEymXsrzldTrXIMGDjlQNjhs"
-                  alt="Arte de Referência"
-                />
+          {drawerAgendamento ? (
+            <>
+              <div className="ad-drawer-header">
+                <div>
+                  <span className="ad-drawer-tag">Detalhes da Solicitação</span>
+                  <h2 className="ad-drawer-title">{drawerAgendamento?.cliente?.fullName || drawerAgendamento?.cliente?.nome || 'Cliente'}</h2>
+                  {drawerAgendamento?.cliente?.email && (
+                    <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.25rem' }}>{drawerAgendamento.cliente.email}</p>
+                  )}
+                </div>
+                <button className="ad-drawer-close" onClick={closeDrawer}>
+                  <span className="material-symbols-outlined">close</span>
+                </button>
               </div>
-            </div>
-            <div className="ad-specs-grid">
-              <div className="ad-spec-item">
-                <p className="ad-spec-label">Tamanho Estimado</p>
-                <p className="ad-spec-value">15cm x 10cm</p>
+              <div className="ad-drawer-body no-scrollbar">
+                <div>
+                  <p className="ad-drawer-section-label">Arte de Referência</p>
+                  {drawerAgendamento?.imagemReferenciaUrl ? (
+                    <div className="ad-drawer-image">
+                      <img src={drawerAgendamento.imagemReferenciaUrl} alt="Arte de Referência" />
+                    </div>
+                  ) : (
+                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.3)', border: '1px dashed rgba(255,255,255,0.1)', marginBottom: '1rem' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>image</span>
+                      Sem imagem de referência
+                    </div>
+                  )}
+                </div>
+                <div className="ad-specs-grid">
+                  <div className="ad-spec-item">
+                    <p className="ad-spec-label">Tamanho Estimado</p>
+                    <p className="ad-spec-value">{getDrawerSizeLabel()}</p>
+                  </div>
+                  <div className="ad-spec-item">
+                    <p className="ad-spec-label">Região</p>
+                    <p className="ad-spec-value">{drawerAgendamento?.regiao || 'Não informado'}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="ad-drawer-section-label">Descrição do Pedido</p>
+                  <p className="ad-drawer-description">
+                    {drawerAgendamento?.descricao || drawerAgendamento?.observacoes || 'Sem descrição fornecida pelo cliente.'}
+                  </p>
+                </div>
+                {drawerAgendamento?.servico && (
+                  <div>
+                    <p className="ad-drawer-section-label">Serviço</p>
+                    <p className="ad-drawer-description">{drawerAgendamento.servico}</p>
+                  </div>
+                )}
+                <div className="ad-drawer-tags">
+                  {getDrawerTags().length > 0 ? (
+                    getDrawerTags().map((tag, i) => (
+                      <span key={i} className="ad-drawer-tag-item muted">{tag}</span>
+                    ))
+                  ) : drawerAgendamento?.servico ? (
+                    <span className="ad-drawer-tag-item primary">{drawerAgendamento.servico}</span>
+                  ) : null}
+                </div>
               </div>
-              <div className="ad-spec-item">
-                <p className="ad-spec-label">Região</p>
-                <p className="ad-spec-value">Antebraço</p>
+              {drawerAgendamento?.status === 'AGENDADO' ? (
+                <div className="ad-drawer-footer">
+                  <button className="ad-drawer-btn-decline" onClick={() => handleDrawerAction('Declined')}>
+                    Recusar
+                  </button>
+                  <button className="ad-drawer-btn-accept" onClick={() => handleDrawerAction('Accepted')}>
+                    Aceitar e Agendar
+                  </button>
+                </div>
+              ) : (
+                <div className="ad-drawer-footer">
+                  <div style={{ width: '100%', textAlign: 'center', padding: '0.5rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Status: {drawerAgendamento?.status || '—'}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="ad-drawer-header">
+                <div>
+                  <span className="ad-drawer-tag">Detalhes da Solicitação</span>
+                  <h2 className="ad-drawer-title">Carregando...</h2>
+                </div>
+                <button className="ad-drawer-close" onClick={closeDrawer}>
+                  <span className="material-symbols-outlined">close</span>
+                </button>
               </div>
-            </div>
-            <div>
-              <p className="ad-drawer-section-label">Descrição do Pedido</p>
-              <p className="ad-drawer-description">
-                &quot;Procuro uma peça neo-tradicional com um corvo e peônias escuras. Gostaria que o traçado fosse bem marcado, mas com uma mistura suave de cores nas pétalas. É minha primeira peça maior no braço, então estou aberto a ajustes na composição para se encaixar no fluxo do antebraço.&quot;
-              </p>
-            </div>
-            <div className="ad-drawer-tags">
-              <span className="ad-drawer-tag-item primary">Primeiro cliente</span>
-              <span className="ad-drawer-tag-item muted">Colorido</span>
-              <span className="ad-drawer-tag-item muted">Design Personalizado</span>
-            </div>
-          </div>
-          <div className="ad-drawer-footer">
-            <button className="ad-drawer-btn-decline" onClick={() => handleDrawerAction('Declined')}>
-              Recusar
-            </button>
-            <button className="ad-drawer-btn-accept" onClick={() => handleDrawerAction('Accepted')}>
-              Aceitar e Agendar
-            </button>
-          </div>
+              <div className="ad-drawer-body no-scrollbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.3)' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite' }}>progress_activity</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

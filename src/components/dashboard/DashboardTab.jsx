@@ -227,7 +227,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
               <div
                 key={ag.id}
                 className="ad-agenda-card"
-                onClick={() => openDrawer(getClientName(ag))}
+                onClick={() => { console.log('Agendamento selecionado:', ag); openDrawer(ag) }}
               >
                 <div className="ad-agenda-time">
                   <p className="ad-agenda-time-value">{formatTime(ag.dataHora)}</p>
@@ -285,7 +285,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
                   const clientName = getClientName(ag)
                   const nextStatus = getNextStatus(ag.status)
                   return (
-                    <tr key={ag.id} onClick={() => openDrawer(clientName)}>
+                    <tr key={ag.id} onClick={() => { console.log('Agendamento selecionado:', ag); openDrawer(ag) }}>
                       <td>
                         <div className="ad-client-cell">
                           <div className="ad-client-avatar">
