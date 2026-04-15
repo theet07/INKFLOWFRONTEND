@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { agendamentoService, clienteService, artistaService } from '../services/inkflowApi'
+import { agendamentoService, clienteService, artistaService, portfolioService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
 import './Booking.css'
 
@@ -244,6 +244,62 @@ const Booking = () => {
 
             const artistaSelecionado = artistsOptions.find(a => a.name === bookingState.artist)
 
+            // Upload da imagem de referência (se existir)
+            let imagemUrl = null
+            if (formData.imagemReferenciaFile) {
+                console.log('[Booking] Arquivo de referência detectado:', formData.imagemReferenciaFile.name, formData.imagemReferenciaFile.size, 'bytes')
+                
+                const uploadData = new FormData()
+                uploadData.append('file', formData.imagemReferenciaFile)
+
+                // Tentativa 1: Upload via endpoint do cliente (o usuário logado tem permissão)
+                try {
+                    const user = JSON.parse(localStorage.getItem('user') || '{}')
+                    if (user && user.id) {
+                        console.log('[Booking] Tentando upload via /clientes/' + user.id + '/foto ...')
+                        const uploadResponse = await clienteService.uploadFoto(user.id, uploadData)
+                        console.log('[Booking] Resposta do upload (cliente):', uploadResponse.data)
+                        console.log('[Booking] Tipo da resposta:', typeof uploadResponse.data)
+                        
+                        if (typeof uploadResponse.data === 'string' && uploadResponse.data.startsWith('http')) {
+                            imagemUrl = uploadResponse.data
+                        } else if (uploadResponse.data && typeof uploadResponse.data === 'object') {
+                            imagemUrl = uploadResponse.data.url || uploadResponse.data.imageUrl || uploadResponse.data.fotoUrl || uploadResponse.data.foto || null
+                        }
+                        console.log('[Booking] URL extraída (cliente):', imagemUrl)
+                    }
+                } catch (uploadErr1) {
+                    console.warn('[Booking] Falha no upload via /clientes/foto:', uploadErr1.response?.status, uploadErr1.response?.data || uploadErr1.message)
+                }
+
+                // Tentativa 2 (fallback): Upload via endpoint de portfolio
+                if (!imagemUrl) {
+                    try {
+                        console.log('[Booking] Tentando upload via /portfolio/upload ...')
+                        const uploadData2 = new FormData()
+                        uploadData2.append('file', formData.imagemReferenciaFile)
+                        const uploadResponse2 = await portfolioService.upload(uploadData2)
+                        console.log('[Booking] Resposta do upload (portfolio):', uploadResponse2.data)
+                        console.log('[Booking] Tipo da resposta:', typeof uploadResponse2.data)
+                        
+                        if (typeof uploadResponse2.data === 'string' && uploadResponse2.data.startsWith('http')) {
+                            imagemUrl = uploadResponse2.data
+                        } else if (uploadResponse2.data && typeof uploadResponse2.data === 'object') {
+                            imagemUrl = uploadResponse2.data.url || uploadResponse2.data.imageUrl || uploadResponse2.data.fotoUrl || null
+                        }
+                        console.log('[Booking] URL extraída (portfolio):', imagemUrl)
+                    } catch (uploadErr2) {
+                        console.warn('[Booking] Falha no upload via /portfolio/upload:', uploadErr2.response?.status, uploadErr2.response?.data || uploadErr2.message)
+                    }
+                }
+
+                if (!imagemUrl) {
+                    console.error('[Booking] ⚠️ Nenhum endpoint de upload funcionou. imagemReferenciaUrl será null.')
+                } else {
+                    console.log('[Booking] ✅ Upload bem-sucedido! URL final:', imagemUrl)
+                }
+            }
+
             const novoAgendamento = {
                 cliente: { id: clienteId },
                 artista: artistaSelecionado ? { id: artistaSelecionado.id } : null,
@@ -254,10 +310,13 @@ const Booking = () => {
                 largura: formData.largura ? parseFloat(formData.largura) : null,
                 altura: formData.altura ? parseFloat(formData.altura) : null,
                 tags: formData.tags.length > 0 ? formData.tags.join(",") : null,
-                imagemReferenciaUrl: null
+                imagemReferenciaUrl: imagemUrl
             }
 
+            console.log('[Booking] Payload final do agendamento:', JSON.stringify(novoAgendamento, null, 2))
+
             await agendamentoService.create(novoAgendamento)
+
 
             showToast('Agendamento Confirmado! Entraremos em contato em breve.', 'success')
 

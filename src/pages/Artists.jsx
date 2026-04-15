@@ -192,7 +192,6 @@ const Artists = () => {
                             </section>
                         );
                     })()}
-                    /* Artist Grid */
                     <div className="grid gap-10" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
                         {filteredArtists.map((artist, idx) => {
                             const [mainStyle, subStyle] = (artist.role || '').split(',').map(s => s.trim());

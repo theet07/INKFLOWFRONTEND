@@ -15,6 +15,48 @@ const ArtistDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const navigate = useNavigate()
 
+  // Segurança de rota: apenas artistas podem acessar este dashboard
+  useEffect(() => {
+    const userType = localStorage.getItem('userType')
+    const userData = localStorage.getItem('user')
+
+    // Se não há sessão, limpa tudo e manda pro login
+    if (!userData || !userType) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      localStorage.removeItem('userType')
+      navigate('/login', { replace: true })
+      return
+    }
+
+    // Se é cliente tentando acessar, expulsa para agendamento
+    if (userType === 'client') {
+      navigate('/agendamento', { replace: true })
+      return
+    }
+
+    // Se não é artista nem admin, manda pro login
+    if (userType !== 'artist' && userType !== 'admin') {
+      navigate('/login', { replace: true })
+    }
+  }, [navigate])
+
+  // Persistência de sessão ao usar setas do browser (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      const userData = localStorage.getItem('user')
+      const userType = localStorage.getItem('userType')
+      if (!userData || !userType) {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        localStorage.removeItem('userType')
+        navigate('/login', { replace: true })
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [navigate])
+
   const showToast = useCallback((message, isError = false) => {
     const id = Date.now() + Math.random()
     setToasts(prev => [...prev, { id, message, isError, removing: false }])

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { formatPhone } from '../utils/formatPhone'
 import './Login.css'
@@ -17,7 +17,19 @@ const Login = () => {
     nome: '',
     telefone: ''
   })
+  const [toasts, setToasts] = useState([])
   const navigate = useNavigate()
+
+  const showToast = useCallback((message, type = 'info') => {
+    const id = Date.now() + Math.random()
+    setToasts(prev => [...prev, { id, message, type, removing: false }])
+    setTimeout(() => {
+      setToasts(prev => prev.map(t => t.id === id ? { ...t, removing: true } : t))
+      setTimeout(() => {
+        setToasts(prev => prev.filter(t => t.id !== id))
+      }, 400)
+    }, 4500)
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -34,9 +46,8 @@ const Login = () => {
         const data = await response.json()
 
         if (data.success) {
-          localStorage.setItem('token', data.token)
           const loggedUser = { ...data.user }
-          
+
           // Compatibiliza o nome das chaves da foto do backend pro frontend
           if (loggedUser.foto && !loggedUser.fotoUrl) {
             loggedUser.fotoUrl = loggedUser.foto
@@ -44,14 +55,32 @@ const Login = () => {
             loggedUser.fotoUrl = loggedUser.fotoPerfil
           }
 
-          // Salva user completo no localStorage
+          const isArtistAccount = loggedUser.isArtist || loggedUser.role === 'ROLE_ARTISTA' || loggedUser.artistaId
+          const isAdminAccount = loggedUser.isAdmin
+
+          // Login Inteligente: Artista tentando entrar pelo portal de cliente
+          if (!isArtistLogin && isArtistAccount && !isAdminAccount) {
+            showToast('Identificamos sua conta de artista. Por favor, clique em "Acessar como Tatuador" para entrar no seu painel.', 'warning')
+            setIsLoading(false)
+            return
+          }
+
+          // Login Inteligente: Cliente tentando entrar pelo portal de artista
+          if (isArtistLogin && !isArtistAccount && !isAdminAccount) {
+            showToast('Este portal é exclusivo para tatuadores. Se você é um cliente, use o login padrão.', 'error')
+            setIsLoading(false)
+            return
+          }
+
+          // Login autorizado — salva sessão
+          localStorage.setItem('token', data.token)
           localStorage.setItem('user', JSON.stringify(loggedUser))
 
           // Hierarquia de redirecionamento: Admin > Artista > Cliente
-          if (loggedUser.isAdmin) {
+          if (isAdminAccount) {
             localStorage.setItem('userType', 'admin')
             navigate('/admin')
-          } else if (loggedUser.isArtist || loggedUser.role === 'ROLE_ARTISTA' || loggedUser.artistaId) {
+          } else if (isArtistAccount) {
             localStorage.setItem('userType', 'artist')
             navigate('/artist-dashboard')
           } else {
@@ -59,11 +88,12 @@ const Login = () => {
             navigate('/agendamento')
           }
         } else {
-          alert(data.message || 'Email ou senha incorretos!')
+          showToast(data.message || 'Email ou senha incorretos!', 'error')
         }
       } else {
         if (!formData.nome || !formData.email || !formData.senha) {
-          alert('Por favor, preencha todos os campos obrigatórios.')
+          showToast('Por favor, preencha todos os campos obrigatórios.', 'error')
+          setIsLoading(false)
           return
         }
 
@@ -80,16 +110,16 @@ const Login = () => {
         })
 
         if (response.ok) {
-          alert('Cadastro realizado com sucesso! Faça login para continuar.')
+          showToast('Cadastro realizado com sucesso! Faça login para continuar.', 'success')
           setIsLogin(true)
           setFormData({ email: '', senha: '', nome: '', telefone: '' })
         } else {
-          alert('Erro ao cadastrar. Email já pode estar em uso.')
+          showToast('Erro ao cadastrar. Email já pode estar em uso.', 'error')
         }
       }
     } catch (error) {
       console.error('Erro:', error)
-      alert('Erro ao conectar com o servidor.')
+      showToast('Erro ao conectar com o servidor. Tente novamente.', 'error')
     } finally {
       setIsLoading(false)
     }
@@ -100,6 +130,11 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     })
+  }
+
+  const handlePortalSwitch = () => {
+    setIsArtistLogin(prev => !prev)
+    setFormData(prev => ({ ...prev, email: '', senha: '' }))
   }
 
   return (
@@ -114,18 +149,30 @@ const Login = () => {
 
             
             <div className="form-section">
-              <h2 className="login-title">{isLogin ? 'Iniciar sessão' : 'Criar Conta'}</h2>
+              <h2 className="login-title">
+                {isLogin
+                  ? (isArtistLogin ? 'Portal do Artista' : 'Iniciar sessão')
+                  : 'Criar Conta'}
+              </h2>
               
               {isLogin && (
                 <div className="signup-link">
-                  <span style={{color: 'white'}}>Não tem uma conta? </span>
-                  <a 
-                    href="#" 
-                    onClick={(e) => { e.preventDefault(); setIsLogin(!isLogin); }}
-                    className="link-text"
-                  >
-                    Crie uma conta.
-                  </a>
+                  {isArtistLogin ? (
+                    <span style={{color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem'}}>
+                      Acesse seu painel profissional
+                    </span>
+                  ) : (
+                    <>
+                      <span style={{color: 'white'}}>Não tem uma conta? </span>
+                      <a 
+                        href="#" 
+                        onClick={(e) => { e.preventDefault(); setIsLogin(!isLogin); }}
+                        className="link-text"
+                      >
+                        Crie uma conta.
+                      </a>
+                    </>
+                  )}
                 </div>
               )}
               
@@ -169,7 +216,7 @@ const Login = () => {
                       id="email"
                       type="email"
                       name="email"
-                      placeholder="Digite seu email"
+                      placeholder={isArtistLogin ? "Email profissional" : "Digite seu email"}
                       value={formData.email}
                       onChange={handleChange}
                       required
@@ -232,7 +279,7 @@ const Login = () => {
                       <span>{isLogin ? 'Entrando...' : 'Criando conta...'}</span>
                     </>
                   ) : (
-                    isLogin ? 'Entrar' : 'Criar Conta'
+                    isLogin ? (isArtistLogin ? 'Entrar no Painel' : 'Entrar') : 'Criar Conta'
                   )}
                 </button>
                 
@@ -244,16 +291,10 @@ const Login = () => {
                     href="#"
                     onClick={(e) => {
                       e.preventDefault()
-                      if (isArtistLogin) {
-                        setIsArtistLogin(false)
-                        setFormData({ ...formData, email: '', senha: '' })
-                      } else {
-                        setIsArtistLogin(true)
-                        setFormData({ ...formData, email: 'tatuador@inkflow.com', senha: '123456' })
-                      }
+                      handlePortalSwitch()
                     }}
                     style={{
-                      color: '#e63946',
+                      color: isArtistLogin ? 'rgba(255,255,255,0.6)' : '#e63946',
                       fontSize: '0.85rem',
                       textDecoration: 'none',
                       fontWeight: '600',
@@ -265,10 +306,10 @@ const Login = () => {
                     onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
                     onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e63946" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={isArtistLogin ? 'rgba(255,255,255,0.6)' : '#e63946'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M2 12h5l3-9 4 18 3-9h5" />
                     </svg>
-                    {isArtistLogin ? 'Voltar para login de cliente' : 'Acessar como tatuador'}
+                    {isArtistLogin ? 'Voltar para login de cliente' : 'Acessar como Tatuador'}
                   </a>
                 </div>
               )}
@@ -285,10 +326,6 @@ const Login = () => {
                   </a>
                 </div>
               )}
-              
-
-              
-
               
               {isLogin && (
                 <div className="login-footer" style={{ marginTop: '2rem', textAlign: 'center', fontSize: '0.8rem', color: '#888' }}>
@@ -334,6 +371,21 @@ const Login = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Toast Container */}
+      <div className="login-toast-container">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`login-toast login-toast--${toast.type} ${toast.removing ? 'login-toast--exit' : ''}`}
+          >
+            <span className="login-toast-icon">
+              {toast.type === 'success' ? '✓' : toast.type === 'warning' ? '⚠' : toast.type === 'error' ? '✕' : 'ℹ'}
+            </span>
+            <span className="login-toast-msg">{toast.message}</span>
+          </div>
+        ))}
       </div>
     </div>
   )
