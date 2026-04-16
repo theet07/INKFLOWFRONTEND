@@ -7,47 +7,47 @@ const Testimonials = () => {
   const testimonials = [
     {
       nome: "Maria Silva",
-      comentario: "Trabalho impecável! A tatuagem ficou exatamente como eu imaginava. Profissionalismo e cuidado em cada detalhe.",
+      comentario: "Plataforma impecável! O agendamento foi fácil e o artista super profissional. Cuidado em cada detalhe.",
       funcao: "Cliente"
     },
     {
       nome: "João Santos", 
-      comentario: "Ambiente limpo, equipamentos esterilizados e um resultado incrível. Recomendo de olhos fechados!",
+      comentario: "Sistema intuitivo, seguro e com ótimos artistas. Agendei rápido e amei o resultado. Recomendo!",
       funcao: "Cliente"
     },
     {
       nome: "Ana Costa",
-      comentario: "Atendimento excepcional desde a consulta até o pós-cuidado. Minha tatuagem cicatrizou perfeitamente!",
+      comentario: "Atendimento nota dez pela plataforma! Encontrei o portfólio ideal e agendei tudo de forma bem prática.",
       funcao: "Cliente"
     },
     {
       nome: "Carlos Mendes",
-      comentario: "Superou todas as minhas expectativas! O resultado final ficou ainda melhor do que imaginei.",
+      comentario: "Superou minhas expectativas! Agendar pela plataforma é muito rápido e passa muita confiança.",
       funcao: "Cliente"
     },
     {
       nome: "Fernanda Lima",
-      comentario: "Equipe profissional e ambiente acolhedor. Voltarei com certeza para minha próxima tatuagem!",
+      comentario: "Plataforma moderna e fácil de usar. Facilitou muito escolher meu artista e marcar o horário!",
       funcao: "Cliente"
     },
     {
       nome: "Roberto Alves",
-      comentario: "Experiência incrível do início ao fim. A arte ficou perfeita e a cicatrização foi rápida!",
+      comentario: "Experiência incrível! A plataforma é perfeita para organizar e agendar minha próxima tattoo.",
       funcao: "Cliente"
     },
     {
       nome: "Juliana Pereira",
-      comentario: "Profissionais extremamente talentosos. Minha tatuagem é uma verdadeira obra de arte!",
+      comentario: "Facilidade total! A plataforma me conectou ao artista ideal de forma muito simples e rápida.",
       funcao: "Cliente"
     },
     {
       nome: "Diego Martins",
-      comentario: "Recomendo sem hesitar! Qualidade excepcional e atendimento personalizado.",
+      comentario: "Recomendo muito! O Inkflow facilitou todo o processo de escolha e agendamento.",
       funcao: "Cliente"
     },
     {
       nome: "Camila Rodrigues",
-      comentario: "Melhor estúdio da cidade! Técnica impecável e resultado surpreendente.",
+      comentario: "Melhor plataforma de tattoo! Praticidade e resultado realmente surpreendente.",
       funcao: "Cliente"
     }
   ]
@@ -158,13 +158,14 @@ const Testimonials = () => {
                     flexDirection: 'column',
                     justifyContent: 'space-between',
                     textAlign: 'center',
-                    transition: 'box-shadow 0.6s ease-in-out'
+                    transition: 'box-shadow 0.6s ease-in-out',
+                    gap: '0.5rem'
                   }}>
-                    <div>
+                    <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                       <div style={{
                         display: 'flex',
                         justifyContent: 'center',
-                        marginBottom: '1rem'
+                        marginBottom: '0.5rem'
                       }}>
                         {[...Array(5)].map((_, i) => (
                           <span key={i} style={{
@@ -177,11 +178,12 @@ const Testimonials = () => {
                       
                       <blockquote style={{
                         color: '#d1d5db',
-                        fontSize: '1rem',
-                        lineHeight: '1.6',
-                        marginBottom: '1.5rem',
+                        fontSize: '0.95rem',
+                        lineHeight: '1.4',
+                        marginBottom: '0',
                         fontStyle: 'italic',
-                        fontWeight: '300'
+                        fontWeight: '300',
+                        padding: '0 0.25rem'
                       }}>"{testimonial.comentario}"</blockquote>
                     </div>
                     
