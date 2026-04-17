@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>THE NOIR ATELIER | InkFlow</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#0e0e0e",
+                        "surface-container-low": "#131313",
+                        "surface-container-highest": "#262626",
+                        "on-surface": "#ffffff",
+                        "outline": "#767575",
+                        "surface-container-lowest": "#000000",
+                        "surface-dim": "#0e0e0e",
+                        "surface-container-high": "#201f1f",
+                        "surface-container": "#1a1919",
+                        "surface": "#0e0e0e",
+                        "on-surface-variant": "#adaaaa",
+                        "outline-variant": "#484847",
+                        "primary-dim": "#ff7072",
+                        "inverse-on-surface": "#565555",
+                        "surface-variant": "#262626",
+                        "surface-bright": "#2c2c2c",
+                        "on-background": "#ffffff",
+                        "primary": "#ff8d8c",
+                        "surface-tint": "#ff8d8c",
+                        "primary-container": "#ff7576",
+                        "on-primary-container": "#4e000a",
+                        "on-primary": "#640010",
+                        "on-primary-fixed": "#000000",
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Epilogue", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #ff8d8c 0%, #ff7072 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #ff8d8c 0%, #ff7072 100%);
+        }
+        .ambient-glow {
+            box-shadow: 0 0 40px 0 rgba(255, 141, 140, 0.06);
+        }
+        .glass-panel {
+            background-color: rgba(38, 38, 38, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        /* Custom Animations */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .toast-animate { animation: slideUpFade 0.3s ease-out forwards; }
+        
+        /* Reveal on Scroll Animations */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.5, 0, 0, 1), transform 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Stagger delays for grid items */
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased min-h-screen flex flex-col selection:bg-primary/30 selection:text-white overflow-x-hidden">
+
+    <!-- TopNavBar -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 bg-[#0e0e0e]/80 backdrop-blur-md border-b border-transparent transition-all duration-300 font-['Epilogue'] font-bold tracking-tighter uppercase text-[#e63946]">
+        <div class="flex justify-between items-center w-full px-6 md:px-12 py-4 md:py-6 mx-auto max-w-screen-2xl transition-all duration-300" id="navbar-container">
+            <div class="text-xl md:text-2xl font-black tracking-tighter text-[#e63946] cursor-pointer">THE NOIR ATELIER</div>
+            <div class="hidden md:flex items-center gap-8 text-sm">
+                <a class="js-nav-link text-zinc-500 hover:text-zinc-200 hover:text-[#ff8d8c] transition-all duration-300 scale-95 active:scale-90" href="#">Home</a>
+                <a class="js-nav-link text-zinc-500 hover:text-zinc-200 hover:text-[#ff8d8c] transition-all duration-300 scale-95 active:scale-90" href="#">Explore</a>
+                <a class="js-nav-link text-[#ff8d8c] font-bold border-b-2 border-[#e63946] pb-1 hover:text-[#ff8d8c] transition-all duration-300 scale-95 active:scale-90" href="#">For Tattoo Artists</a>
+            </div>
+            <div class="hidden md:flex items-center gap-4">
+                <a class="js-action-btn font-body text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" data-action="Opening Login Portal...">Login</a>
+                <button class="js-action-btn bg-gradient-primary text-on-primary-fixed rounded font-body text-sm font-bold px-6 py-2 scale-95 active:scale-90 transition-transform hover:shadow-[0_0_15px_rgba(255,141,140,0.4)]" data-action="Entering Dashboard...">Enter</button>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden text-primary p-2">
+                <span class="material-symbols-outlined text-3xl">menu</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Fullscreen Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-[#0e0e0e]/95 backdrop-blur-xl z-[60] flex flex-col justify-center items-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <button id="close-menu-btn" class="absolute top-6 right-6 text-primary p-2">
+            <span class="material-symbols-outlined text-4xl">close</span>
+        </button>
+        <div class="flex flex-col gap-8 text-center font-headline uppercase tracking-widest text-2xl font-bold">
+            <a class="text-zinc-500 hover:text-primary transition-colors js-mobile-link" href="#">Home</a>
+            <a class="text-zinc-500 hover:text-primary transition-colors js-mobile-link" href="#">Explore</a>
+            <a class="text-primary transition-colors js-mobile-link" href="#">For Artists</a>
+            <div class="h-px w-12 bg-white/10 mx-auto my-4"></div>
+            <a class="text-lg text-on-surface-variant js-action-btn js-mobile-link" data-action="Opening Login Portal..." href="#">Login</a>
+            <button class="js-action-btn js-mobile-link bg-gradient-primary text-on-primary-fixed rounded text-lg font-bold px-10 py-3 mt-4" data-action="Entering Dashboard...">Enter</button>
+        </div>
+    </div>
+
+    <main class="flex-grow pt-24 md:pt-28">
+        
+        <!-- Hero Section -->
+        <section class="relative w-full min-h-[870px] flex items-center bg-surface-dim overflow-hidden reveal-on-scroll">
+            <!-- Decorative Elements -->
+            <div class="absolute inset-0 pointer-events-none">
+                <div class="absolute top-1/4 left-0 w-1/3 h-1/2 bg-primary/5 blur-[120px] rounded-full"></div>
+                <div class="absolute bottom-0 right-1/4 w-1/2 h-1/3 bg-primary-container/5 blur-[100px] rounded-full"></div>
+            </div>
+            
+            <div class="max-w-screen-2xl mx-auto px-6 md:px-12 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center relative z-10">
+                <div class="flex flex-col gap-8 max-w-2xl">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-surface-container border border-outline-variant/20 w-fit">
+                        <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+                        <span class="font-label text-xs font-semibold text-primary uppercase tracking-wider">InkFlow For Artists</span>
+                    </div>
+                    <h1 class="font-headline text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tighter text-on-surface">
+                        Sua arte, nossa gestão. <br/>
+                        <span class="text-gradient">Tatue mais, burocrateie menos.</span>
+                    </h1>
+                    <p class="font-body text-lg md:text-xl text-on-surface-variant max-w-xl leading-relaxed">
+                        A plataforma definitiva para estúdios privados. Centralize agendamentos, gerencie portfólios e elimine o caos do WhatsApp. Foco total na agulha.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button class="js-action-btn bg-gradient-primary text-on-primary-fixed rounded font-body text-base font-bold px-8 py-4 flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(255,141,140,0.4)] active:scale-95 transition-all" data-action="Redirecionando para Cadastro...">
+                            Criar Conta Grátis
+                            <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
+                        <button class="js-action-btn border border-outline-variant/30 rounded font-body text-base font-medium px-8 py-4 text-on-surface hover:bg-surface-container active:scale-95 transition-all" data-action="Carregando Demonstração de Vídeo...">
+                            Ver Demonstração
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="relative w-full h-[500px] lg:h-[700px] rounded bg-surface-container-low overflow-hidden ambient-glow border-l border-outline-variant/10">
+                    <img class="w-full h-full object-cover mix-blend-luminosity opacity-80 hover:opacity-100 transition-opacity duration-700 hover:scale-105 transform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhMn3T-nm6sbjP3vAT_DDwxg0JmTKtT8CZHnfQFaxXbkEV3qQw_RQp4W02KwMO6k5vj3YCNXVBDjIyE1xNHQk2vY4hUVPueTmaUGXx6g70LB7dIgyxTvYQB67inRWeryu6TFH2dr4XXyB7ZFvS38hygZmWBYOl1BQ1GZDlwJuwYAw1zRHcKgidX4m32HLWLrp9pPnWjigqbhs5hWfxtagFtwkLWwBN1pMvw1Y2-_9oSUAe0IkALIG4Bd_Y3o_gSnlAUbVhYpFXVxI"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-transparent to-transparent"></div>
+                    
+                    <!-- Floating Card -->
+                    <div class="absolute bottom-8 left-6 right-6 md:left-8 md:right-8 glass-panel border border-outline-variant/20 rounded p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:-translate-y-2 transition-transform duration-500">
+                        <div class="w-12 h-12 rounded bg-surface-container-highest flex items-center justify-center text-primary shrink-0">
+                            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+                        </div>
+                        <div>
+                            <p class="font-label text-xs text-on-surface-variant uppercase tracking-wider">Próxima Sessão</p>
+                            <p class="font-headline font-bold text-on-surface text-base md:text-lg">Realismo - Braço Esquerdo</p>
+                        </div>
+                        <div class="sm:ml-auto text-left sm:text-right mt-2 sm:mt-0 border-t sm:border-t-0 border-white/10 pt-2 sm:pt-0 w-full sm:w-auto">
+                            <p class="font-body text-sm font-medium text-primary">14:00</p>
+                            <p class="font-body text-xs text-on-surface-variant">Hoje</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Social Proof Bar -->
+        <section class="w-full bg-surface-container border-y border-outline-variant/10 py-10 reveal-on-scroll">
+            <div class="max-w-screen-2xl mx-auto px-6 md:px-12">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-outline-variant/20">
+                    <div class="flex flex-col items-center justify-center text-center px-4 py-4 md:py-0">
+                        <h3 class="font-headline text-4xl font-black text-on-surface tracking-tighter mb-2">+50.000</h3>
+                        <p class="font-label text-sm uppercase tracking-widest text-on-surface-variant">Agendamentos</p>
+                    </div>
+                    <div class="flex flex-col items-center justify-center text-center px-4 py-4 md:py-0">
+                        <h3 class="font-headline text-4xl font-black text-on-surface tracking-tighter mb-2 text-gradient">Zero</h3>
+                        <p class="font-label text-sm uppercase tracking-widest text-on-surface-variant">Conflito de Horários</p>
+                    </div>
+                    <div class="flex flex-col items-center justify-center text-center px-4 py-4 md:py-0">
+                        <h3 class="font-headline text-4xl font-black text-on-surface tracking-tighter mb-2">+40%</h3>
+                        <p class="font-label text-sm uppercase tracking-widest text-on-surface-variant">Tempo Economizado</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Steps Section (Bento Grid) -->
+        <section class="py-24 bg-surface px-6 md:px-12 relative">
+            <div class="max-w-screen-2xl mx-auto">
+                <div class="mb-16 text-center max-w-3xl mx-auto reveal-on-scroll">
+                    <h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tighter mb-6 text-on-surface">O fluxo perfeito para o estúdio moderno.</h2>
+                    <p class="font-body text-on-surface-variant text-lg">Esqueça mensagens perdidas. Conduza seus clientes por uma experiência premium desde o primeiro contato.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Card 1 -->
+                    <div class="bg-surface-container-low rounded p-8 border border-outline-variant/10 hover:bg-surface-container-highest transition-colors duration-300 ambient-glow group flex flex-col justify-between min-h-[400px] reveal-on-scroll delay-100">
+                        <div>
+                            <div class="w-14 h-14 rounded bg-surface-container flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">person_pin</span>
+                            </div>
+                            <h3 class="font-headline text-2xl font-bold mb-4 text-on-surface">1. Profile</h3>
+                            <p class="font-body text-on-surface-variant leading-relaxed">Seu cartão de visitas digital brutalista. Links, regras do estúdio e disponibilidade clara e direta.</p>
+                        </div>
+                        <div class="mt-8 h-32 bg-surface-container rounded border border-outline-variant/10 relative overflow-hidden flex items-end justify-center pb-4">
+                            <div class="w-2/3 h-4 bg-surface-variant rounded-full mb-2 group-hover:bg-primary/20 transition-colors"></div>
+                            <div class="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-surface-container to-transparent"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card 2 -->
+                    <div class="bg-surface-container-low rounded p-8 border border-outline-variant/10 hover:bg-surface-container-highest transition-colors duration-300 ambient-glow group flex flex-col justify-between min-h-[400px] md:-translate-y-8 reveal-on-scroll delay-200">
+                        <div>
+                            <div class="w-14 h-14 rounded bg-surface-container flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">photo_library</span>
+                            </div>
+                            <h3 class="font-headline text-2xl font-bold mb-4 text-on-surface">2. Portfolio</h3>
+                            <p class="font-body text-on-surface-variant leading-relaxed">Galeria de alta resolução categorizada. Permita que clientes encontrem a inspiração perfeita.</p>
+                        </div>
+                        <div class="mt-8 grid grid-cols-2 gap-2 h-32">
+                            <div class="bg-surface-container rounded border border-outline-variant/10 h-full w-full bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-500" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuChMJo6fsmKk939e7JsMhr7KeoWzqxMEUkffiQCq3rim_Kr8V6GGHNOJR4o-7jZ6KILsivwaR1s0NPbwjY8dbVgv_yYYCaGgSfZSskte2Xm1B1-p4WspHbHXHDkX8trfWX7xvoJpTDTG6ewSV4y3FBkdN-qpt9DsD55cm2F_31-G12dz2d07pbX8aVBWwIDBG9l2OkInCIeUfB8ZpYEL2uncDTzyP5Ml8Tu55ytw3_fw7LmFOP-eo0-9LvV9V2AGhTdMylMzh9ro_4');"></div>
+                            <div class="bg-surface-container rounded border border-outline-variant/10 h-full w-full bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-500" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBozWStKFGC4vkWP9ewyHCbsgFwTt5m9Ke_Gn29bDGcg5sPoBtj8Bwb_BOu2LCTjTebfy-HVGit1r8IhZQgQ-oks4qB_NoU_XvOwVy-fQX1El1B5tw4jSSImiL3xjyYZcsE0fXnvesus0ESx4EFpKswsxjAfBzX_tBMoZfXjQxw7nDV_Ifi3wfR34Y4yYZX1M8I1DwJBGSJzzLzJamxSLZO_86aUofNi89mA-IPsQgligKS0n2gDGcQhQc8KnWe7yT-tZ6H6Qer0to');"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card 3 -->
+                    <div class="bg-surface-container-low rounded p-8 border border-outline-variant/10 hover:bg-surface-container-highest transition-colors duration-300 ambient-glow group flex flex-col justify-between min-h-[400px] reveal-on-scroll delay-300">
+                        <div>
+                            <div class="w-14 h-14 rounded bg-surface-container flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">edit_document</span>
+                            </div>
+                            <h3 class="font-headline text-2xl font-bold mb-4 text-on-surface">3. Requests</h3>
+                            <p class="font-body text-on-surface-variant leading-relaxed">Formulários de orçamento precisos. Tamanho, local, referência. Chega de "quanto custa uma tattoo?".</p>
+                        </div>
+                        <div class="mt-8 h-32 bg-surface-container rounded border border-outline-variant/10 p-4 flex flex-col gap-3">
+                            <div class="w-full h-8 bg-surface-variant rounded flex items-center px-3 group-hover:bg-primary/10 transition-colors">
+                                <div class="w-1/3 h-2 bg-outline-variant/50 rounded group-hover:bg-primary/50 transition-colors"></div>
+                            </div>
+                            <div class="w-full h-8 bg-surface-variant rounded flex items-center px-3 group-hover:bg-primary/10 transition-colors delay-75">
+                                <div class="w-1/2 h-2 bg-outline-variant/50 rounded group-hover:bg-primary/50 transition-colors"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solutions Section -->
+        <section class="py-24 bg-surface-container-low px-6 md:px-12 border-t border-outline-variant/10">
+            <div class="max-w-screen-2xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6 reveal-on-scroll">
+                    <div class="max-w-2xl">
+                        <h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tighter mb-4 text-on-surface">Ferramentas de Precisão.</h2>
+                        <p class="font-body text-on-surface-variant text-lg">Tudo que você precisa em um único painel. Simples, escuro, focado.</p>
+                    </div>
+                    <button class="js-action-btn text-primary font-body font-semibold flex items-center gap-2 hover:text-primary-dim transition-colors group" data-action="Abrindo Lista de Funcionalidades...">
+                        Explorar Funcionalidades
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                    </button>
+                </div>
+                
+                <div class="flex flex-col gap-6">
+                    <!-- Horizontal Card 1 -->
+                    <div class="bg-surface rounded border border-outline-variant/10 p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 hover:bg-surface-bright transition-colors group reveal-on-scroll">
+                        <div class="w-full md:w-1/3 aspect-video bg-surface-container-highest rounded border border-outline-variant/10 flex items-center justify-center relative overflow-hidden">
+                            <span class="material-symbols-outlined text-6xl text-outline-variant group-hover:text-primary transition-colors duration-500 group-hover:scale-110 transform">event_upcoming</span>
+                            <div class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        </div>
+                        <div class="w-full md:w-2/3">
+                            <p class="font-label text-xs uppercase tracking-widest text-primary mb-2">01 / Agenda</p>
+                            <h3 class="font-headline text-2xl font-bold text-on-surface mb-3">Digital Agenda</h3>
+                            <p class="font-body text-on-surface-variant leading-relaxed max-w-2xl">Controle total sobre seus horários. Sincronização inteligente, lembretes automáticos para clientes e bloqueio de horários com um clique.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Horizontal Card 2 -->
+                    <div class="bg-surface rounded border border-outline-variant/10 p-6 md:p-8 flex flex-col md:flex-row-reverse items-center gap-8 hover:bg-surface-bright transition-colors group reveal-on-scroll">
+                        <div class="w-full md:w-1/3 aspect-video bg-surface-container-highest rounded border border-outline-variant/10 flex items-center justify-center relative overflow-hidden">
+                            <span class="material-symbols-outlined text-6xl text-outline-variant group-hover:text-primary transition-colors duration-500 group-hover:scale-110 transform">rule</span>
+                            <div class="absolute inset-0 bg-gradient-to-bl from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        </div>
+                        <div class="w-full md:w-2/3 md:text-right">
+                            <p class="font-label text-xs uppercase tracking-widest text-primary mb-2">02 / Workflow</p>
+                            <h3 class="font-headline text-2xl font-bold text-on-surface mb-3">Status Management</h3>
+                            <p class="font-body text-on-surface-variant leading-relaxed max-w-2xl md:ml-auto">Crie funis de atendimento. "Aguardando Referência", "Arte em Criação", "Pronto para Agendar". Saiba exatamente em que etapa cada cliente está.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Horizontal Card 3 -->
+                    <div class="bg-surface rounded border border-outline-variant/10 p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 hover:bg-surface-bright transition-colors group reveal-on-scroll">
+                        <div class="w-full md:w-1/3 aspect-video bg-surface-container-highest rounded border border-outline-variant/10 flex items-center justify-center relative overflow-hidden">
+                            <span class="material-symbols-outlined text-6xl text-outline-variant group-hover:text-primary transition-colors duration-500 group-hover:scale-110 transform">link</span>
+                            <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        </div>
+                        <div class="w-full md:w-2/3">
+                            <p class="font-label text-xs uppercase tracking-widest text-primary mb-2">03 / Conversão</p>
+                            <h3 class="font-headline text-2xl font-bold text-on-surface mb-3">Bio Link Central</h3>
+                            <p class="font-body text-on-surface-variant leading-relaxed max-w-2xl">Um link unificado para o seu Instagram. Agregue portfólio, FAQ, formulário de orçamento e WhatsApp em uma interface premium e rápida.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA -->
+        <section class="py-32 px-6 md:px-12 bg-surface relative overflow-hidden flex flex-col items-center justify-center text-center reveal-on-scroll">
+            <div class="absolute inset-0 bg-gradient-to-b from-surface via-surface to-[#4e000a] opacity-80"></div>
+            <div class="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
+                <span class="material-symbols-outlined text-primary text-5xl mb-6 opacity-80 animate-pulse">verified</span>
+                <h2 class="font-headline text-5xl md:text-6xl lg:text-7xl font-black text-on-surface tracking-tighter mb-8 leading-tight">
+                    Pronto para o <br/>
+                    <span class="text-gradient">próximo nível?</span>
+                </h2>
+                <p class="font-body text-xl text-on-surface-variant mb-10 max-w-xl">
+                    Junte-se à elite dos tatuadores que otimizaram sua gestão com o InkFlow.
+                </p>
+                <button class="js-action-btn bg-gradient-primary text-on-primary-fixed rounded font-body text-lg font-bold px-12 py-5 shadow-[0_0_30px_rgba(255,141,140,0.3)] hover:shadow-[0_0_50px_rgba(255,141,140,0.5)] transition-shadow duration-300 scale-95 active:scale-90" data-action="Iniciando Processo de Cadastro...">
+                    Comece Agora - É Grátis
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-12 border-t border-white/5 bg-[#0e0e0e]">
+        <div class="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 max-w-screen-2xl mx-auto gap-8">
+            <div class="text-lg font-black text-zinc-100 font-['Epilogue'] tracking-tighter uppercase text-[#e63946] cursor-pointer js-action-btn" data-action="Voltar ao Topo" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">
+                THE NOIR ATELIER
+            </div>
+            <div class="flex flex-wrap justify-center gap-6 md:gap-8 font-['Inter'] text-xs tracking-widest uppercase">
+                <a class="js-action-btn text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100" href="#" data-action="Opening Privacy Policy">Privacy Policy</a>
+                <a class="js-action-btn text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100" href="#" data-action="Opening Terms">Terms of Service</a>
+                <a class="js-action-btn text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100" href="#" data-action="Locating Studios...">Studio Locator</a>
+                <a class="js-action-btn text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100" href="#" data-action="Opening Support...">Artist Support</a>
+            </div>
+            <div class="text-zinc-600 font-['Inter'] text-xs tracking-widest uppercase text-center md:text-right opacity-80">
+                © 2024 THE NOIR ATELIER. PRECISION IN PERMANENCE.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 1. Toast Notification System ---
+            const toastContainer = document.getElementById('toast-container');
+            
+            function showToast(message, icon = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `flex items-center gap-3 px-6 py-4 rounded shadow-2xl toast-animate pointer-events-auto bg-surface-container-highest border border-white/10`;
+                toast.innerHTML = `
+                    <span class="material-symbols-outlined text-primary">${icon}</span>
+                    <span class="text-xs font-headline font-bold uppercase tracking-widest text-white">${message}</span>
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                // Auto remove after 3s
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(10px)';
+                    toast.style.transition = 'all 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // Bind all elements with .js-action-btn
+            document.querySelectorAll('.js-action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const actionMsg = btn.getAttribute('data-action');
+                    if(actionMsg) showToast(actionMsg, 'bolt');
+                });
+            });
+
+            // Prevent default behavior on standard nav links
+            document.querySelectorAll('.js-nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showToast("Navigation is disabled in this mockup.", "explore");
+                });
+            });
+
+
+            // --- 2. Mobile Menu Toggle ---
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const closeMenuBtn = document.getElementById('close-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileLinks = document.querySelectorAll('.js-mobile-link');
+
+            function openMobileMenu() {
+                mobileMenu.classList.remove('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = 'hidden'; // prevent scrolling
+            }
+
+            function closeMobileMenu() {
+                mobileMenu.classList.add('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = '';
+            }
+
+            mobileBtn.addEventListener('click', openMobileMenu);
+            closeMenuBtn.addEventListener('click', closeMobileMenu);
+            
+            // Close menu when a link is clicked
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+
+
+            // --- 3. Navbar Scroll Effect ---
+            const navbar = document.getElementById('navbar');
+            const navbarContainer = document.getElementById('navbar-container');
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('border-white/10', 'bg-[#0e0e0e]/95');
+                    navbar.classList.remove('border-transparent', 'bg-[#0e0e0e]/80');
+                    navbarContainer.classList.remove('py-6');
+                    navbarContainer.classList.add('py-4');
+                } else {
+                    navbar.classList.remove('border-white/10', 'bg-[#0e0e0e]/95');
+                    navbar.classList.add('border-transparent', 'bg-[#0e0e0e]/80');
+                    navbarContainer.classList.add('py-6');
+                    navbarContainer.classList.remove('py-4');
+                }
+            });
+
+
+            // --- 4. Reveal on Scroll (Intersection Observer) ---
+            const revealElements = document.querySelectorAll('.reveal-on-scroll');
+
+            const revealOptions = {
+                threshold: 0.15, // Trigger when 15% of element is visible
+                rootMargin: "0px 0px -50px 0px" 
+            };
+
+            const revealOnScroll = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    
+                    // Add class to trigger CSS animation
+                    entry.target.classList.add('is-visible');
+                    // Stop observing once revealed
+                    observer.unobserve(entry.target);
+                });
+            }, revealOptions);
+
+            revealElements.forEach(el => {
+                revealOnScroll.observe(el);
+            });
+
+        });
+    </script>
+</body>
+</html>

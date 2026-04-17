@@ -53,11 +53,11 @@ const Booking = () => {
     }, [])
 
     const stylesOptions = [
-        { name: 'REALISTA', img: '/assets/portifolio_novo/Rosto.webp' },
+        { name: 'REALISMO', img: '/assets/portifolio_novo/Rosto.webp' },
         { name: 'BLACKWORK', img: '/assets/portifolio_novo/Caveira.webp' },
+        { name: 'FINE LINE', img: '/assets/portifolio_novo/Borboleta-Colorida.webp' },
         { name: 'GEEK', img: '/assets/portifolio_novo/HomemDeFerro.webp' },
         { name: 'ORIENTAL', img: '/assets/portifolio_novo/tigrao.webp' },
-        { name: 'MAORI', img: '/assets/portifolio_novo/Rosa-Dos-Ventos-1.webp' },
         { name: 'FLORAL', img: '/assets/portifolio_novo/Tattoo-Cobra-Floral.webp' }
     ]
 
@@ -65,31 +65,35 @@ const Booking = () => {
     
     useEffect(() => {
         const styleKeywords = {
-            'REALISTA': ['realis', 'realismo', 'realista'],
+            'REALISMO': ['realismo', 'realista', 'realis'],
             'BLACKWORK': ['blackwork', 'black work', 'preto'],
+            'FINE LINE': ['fine line', 'fineline', 'traço fino'],
             'GEEK': ['geek', 'anime', 'nerd', 'pop'],
             'ORIENTAL': ['oriental', 'japonês', 'japones', 'irezumi'],
-            'MAORI': ['maori', 'tribal', 'ornamental', 'polinés'],
             'FLORAL': ['floral', 'botâni', 'botanical']
         }
 
-        artistaService.getAll().then(res => {
-            const mapped = res.data.map(a => {
-                const roleLower = (a.role || '').toLowerCase()
+        artistaService.getAllArtists().then(res => {
+            const artistsData = res.data || []
+            const mapped = (Array.isArray(artistsData) ? artistsData : []).map(a => {
+                const especialidades = (a?.especialidades || []).map(s => s.toLowerCase())
                 const matched = Object.entries(styleKeywords)
-                    .filter(([, keywords]) => keywords.some(kw => roleLower.includes(kw)))
+                    .filter(([, keywords]) => keywords.some(kw => especialidades.some(e => e.includes(kw))))
                     .map(([style]) => style)
 
                 return {
-                    id: a.id,
-                    name: a.nome,
-                    role: a.role || 'Artista Convidado',
-                    img: a.fotoUrl || '/assets/avatar-placeholder.png',
+                    id: a?.id,
+                    name: a?.nome || 'Artista Indonhecido',
+                    role: a?.role || 'Artista Convidado',
+                    img: a?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(a?.nome || 'User')}`,
                     specialties: matched.length > 0 ? matched : ['GERAL']
                 }
             })
             setArtistsOptions(mapped)
-        }).catch(err => console.error("Erro ao puxar artistas agendamento:", err))
+        }).catch(err => {
+            console.error("Erro ao puxar artistas agendamento:", err)
+            setArtistsOptions([])
+        })
     }, [])
 
     const location = useLocation()
@@ -99,7 +103,7 @@ const Booking = () => {
         const artistaId = params.get('artistaId')
         
         if (artistaId && artistsOptions.length > 0) {
-            const foundArtist = artistsOptions.find(a => a.id.toString() === artistaId)
+            const foundArtist = artistsOptions.find(a => a?.id?.toString() === artistaId)
             if (foundArtist) {
                 setBookingState(prev => ({ ...prev, artist: foundArtist.name }))
             }
@@ -108,7 +112,7 @@ const Booking = () => {
 
     // Efeito para carregar disponibilidade do artista
     useEffect(() => {
-        const artistaSelecionado = artistsOptions.find(a => a.name === bookingState.artist)
+        const artistaSelecionado = artistsOptions.find(a => a?.name === bookingState.artist)
         if (artistaSelecionado) {
             setAvailableDays([]) // Limpa dados antigos
             setBookingState(prev => ({ ...prev, day: '', time: '' })) // Reseta seleção
@@ -129,7 +133,7 @@ const Booking = () => {
 
     // Efeito para carregar slots do dia selecionado
     useEffect(() => {
-        const artistaSelecionado = artistsOptions.find(a => a.name === bookingState.artist)
+        const artistaSelecionado = artistsOptions.find(a => a?.name === bookingState.artist)
         if (artistaSelecionado && bookingState.day) {
             const dayObj = availableDays.find(d => d.day === bookingState.day)
             if (dayObj) {
@@ -291,7 +295,7 @@ const Booking = () => {
 
             const dataHora = `${formattedDate}T${isoTime}`;
 
-            const artistaSelecionado = artistsOptions.find(a => a.name === bookingState.artist)
+            const artistaSelecionado = artistsOptions.find(a => a?.name === bookingState.artist)
 
             // Upload da imagem de referência (se existir)
             let imagemUrl = null
@@ -351,9 +355,9 @@ const Booking = () => {
 
             const novoAgendamento = {
                 cliente: { id: clienteId },
-                artista: artistaSelecionado ? { id: artistaSelecionado.id } : null,
+                artista: artistaSelecionado ? { id: artistaSelecionado?.id } : null,
                 dataHora: dataHora,
-                servico: artistaSelecionado ? `${bookingState.style} com ${artistaSelecionado.name}` : bookingState.style,
+                servico: artistaSelecionado ? `${bookingState.style} com ${artistaSelecionado?.name || 'Artista'}` : bookingState.style,
                 descricao: formData.desc,
                 regiao: formData.regiao || null,
                 largura: formData.largura ? parseFloat(formData.largura) : null,
@@ -476,28 +480,28 @@ const Booking = () => {
                         <div className="artists-grid">
                             {[...artistsOptions].sort((a, b) => {
                                 if (!bookingState.style) return 0;
-                                const aRec = a.specialties.includes(bookingState.style);
-                                const bRec = b.specialties.includes(bookingState.style);
+                                const aRec = a?.specialties?.includes(bookingState.style);
+                                const bRec = b?.specialties?.includes(bookingState.style);
                                 if (aRec && !bRec) return -1;
                                 if (!aRec && bRec) return 1;
                                 return 0;
                             }).map(artist => {
-                                const isRecommended = bookingState.style && artist.specialties.includes(bookingState.style);
+                                const isRecommended = bookingState.style && artist?.specialties?.includes(bookingState.style);
                                 const isDimmed = bookingState.style && !isRecommended;
-                                const isSelected = bookingState.artist === artist.name;
+                                const isSelected = bookingState.artist === artist?.name;
 
                                 return (
                                     <div
-                                        key={artist.name}
-                                        onClick={() => setBookingState(prev => ({ ...prev, artist: isSelected ? '' : artist.name }))}
+                                        key={artist?.id || artist?.name}
+                                        onClick={() => setBookingState(prev => ({ ...prev, artist: isSelected ? '' : artist?.name }))}
                                         className={`artist-card ${isSelected ? 'selected' : ''} ${isDimmed ? 'dimmed' : ''}`}
                                     >
                                         <div className="artist-avatar">
-                                            <img src={artist.img} alt={artist.name} />
+                                            <img src={artist?.img} alt={artist?.name} />
                                         </div>
                                         <div className="artist-info">
-                                            <h4>{artist.name}</h4>
-                                            <p>{artist.role}</p>
+                                            <h4>{artist?.name || 'Artista'}</h4>
+                                            <p>{artist?.role || 'Residente'}</p>
                                             {isRecommended && (
                                                 <span className="recommended-badge"><span className="material-symbols-outlined text-xs" style={{fontSize: '12px'}}>check</span> Recomendado</span>
                                             )}

@@ -26,7 +26,7 @@ const Artists = () => {
     useEffect(() => {
         const fetchArtists = async () => {
             try {
-                const response = await artistaService.getAll();
+                const response = await artistaService.getAllArtists();
                 setArtists(response.data);
             } catch (error) {
                 console.error("Erro ao puxar dados dos artistas:", error);
@@ -50,11 +50,14 @@ const Artists = () => {
 
     // Filtros de Galeria
     const filteredArtists = artists.filter(artist => {
-        const role = (artist.role || '').toLowerCase();
         const nome = (artist.nome || '').toLowerCase();
+        const role = (artist.role || '').toLowerCase();
+        const especialidades = (artist.especialidades || []).map(s => s.toLowerCase());
         
-        const matchesFilter = currentFilter === 'all' || role.includes(currentFilter);
-        const matchesSearch = nome.includes(searchTerm) || role.includes(searchTerm);
+        const matchesFilter = currentFilter === 'all' || (artist.especialidades || []).some(s => s.toUpperCase() === currentFilter.toUpperCase());
+        const matchesSearch = nome.includes(searchTerm) || 
+                              role.includes(searchTerm) || 
+                              especialidades.some(s => s.includes(searchTerm));
 
         return matchesFilter && matchesSearch;
     });
@@ -99,7 +102,7 @@ const Artists = () => {
 
                     {/* Filters */}
                     <div className="mt-8 flex flex-wrap gap-3 overflow-x-auto no-scrollbar pb-2">
-                        {['all', 'blackwork', 'fine line', 'realism', 'geek', 'oriental'].map((filter) => (
+                        {['all', 'REALISMO', 'BLACKWORK', 'FINE LINE', 'ORIENTAL', 'GEEK', 'FLORAL'].map((filter) => (
                             <button 
                                 key={filter}
                                 onClick={() => setCurrentFilter(filter)}
@@ -142,8 +145,8 @@ const Artists = () => {
                                 >
                                     <img 
                                         className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 group-hover:opacity-50 transition-all duration-1000" 
-                                        src={featured.fotoUrl || getFallbackImage(featured.role)} 
-                                        alt={featured.nome}
+                                        src={featured?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(featured?.nome || 'User')}`} 
+                                        alt={featured?.nome || 'Featured'}
                                     />
                                     <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.1) 100%)' }}></div>
                                     
@@ -157,7 +160,7 @@ const Artists = () => {
                                                 Conheça o traço de<br/><span className="text-primary">{featured.nome}</span>
                                             </h2>
                                             <p className="text-sm text-on-surface-variant mb-2 max-w-md leading-relaxed">
-                                                {featured.role || 'Artista Exclusivo'} — Estilo único e sessões sob medida para transformar sua ideia em arte permanente.
+                                                {(featured.especialidades || []).join(', ') || 'Artista Exclusivo'} — Estilo único e sessões sob medida para transformar sua ideia em arte permanente.
                                             </p>
                                             <div className="flex items-center gap-2 mb-6">
                                                 <span className="material-symbols-outlined text-primary text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
@@ -178,14 +181,14 @@ const Artists = () => {
                                         <div className="w-10 h-10 rounded-full border border-primary overflow-hidden">
                                             <img 
                                                 className="w-full h-full object-cover" 
-                                                src={featured.fotoUrl || '/assets/avatar-placeholder.png'} 
-                                                onError={(e) => { e.target.src = '/assets/avatar-placeholder.png' }}
+                                                src={featured?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(featured?.nome || 'User')}`} 
+                                                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(featured?.nome || 'User')}` }}
                                                 alt="avatar"
                                             />
                                         </div>
                                         <div>
                                             <span className="text-xs font-bold text-white block">{featured.nome}</span>
-                                            <span className="text-[9px] uppercase tracking-widest text-on-surface-variant">{featured.role?.split(',')[0] || 'Resident'}</span>
+                                            <span className="text-[9px] uppercase tracking-widest text-on-surface-variant">{(featured.especialidades?.[0]) || 'Resident'}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -199,8 +202,8 @@ const Artists = () => {
                                 <div key={artist.id || idx} className="group relative w-full aspect-[3/4] overflow-hidden rounded-xl bg-surface-container-low border border-white/5 animate-fade" style={{ maxWidth: '400px', margin: '0 auto' }}>
                                     <img 
                                         className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-50 transition-all duration-700" 
-                                        src={artist.fotoUrl || getFallbackImage(artist.role)} 
-                                        alt={artist.nome}
+                                        src={artist?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artist?.nome || 'User')}`} 
+                                        alt={artist?.nome || 'Artista'}
                                     />
                                     <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%)' }}></div>
                                     <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-none z-10">
@@ -208,8 +211,8 @@ const Artists = () => {
                                             <div className="w-12 h-12 rounded-full border border-primary overflow-hidden shadow-lg">
                                                 <img 
                                                     className="w-full h-full object-cover rounded-full" 
-                                                    src={artist.fotoUrl || '/assets/avatar-placeholder.png'} 
-                                                    onError={(e)=>{e.target.src='/assets/avatar-placeholder.png'}}
+                                                    src={artist?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artist?.nome || 'User')}`} 
+                                                    onError={(e)=>{e.target.src=`https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artist?.nome || 'User')}`}}
                                                     alt="avatar"
                                                 />
                                             </div>
@@ -224,8 +227,9 @@ const Artists = () => {
                                     </div>
                                     <div className="absolute bottom-6 left-6 right-6">
                                         <div className="flex flex-wrap gap-1.5 mb-6 justify-start items-center">
-                                            {mainStyle && <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-white">{mainStyle}</span>}
-                                            {subStyle && <span className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-white">{subStyle}</span>}
+                                            {(artist.especialidades || []).slice(0, 3).map((esp, i) => (
+                                                <span key={i} className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-white">{esp.toUpperCase()}</span>
+                                            ))}
                                         </div>
                                         <button 
                                             onClick={() => handleAgendar(artist.id)} 

@@ -51,8 +51,8 @@ export const appointmentService = {
 };
 
 export const artistaService = {
-  getAll: () => api.get('/artists'),
-  getById: (id) => api.get(`/artists/${id}`),
+  getAllArtists: () => api.get('/artistas', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getById: (id) => api.get(`/artistas/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
   getAvailability: (id) => api.get(`/artists/${id}/availability`),
   getSlots: (id, data) => api.get(`/artists/${id}/availability/slots`, { params: { data } }),
 };

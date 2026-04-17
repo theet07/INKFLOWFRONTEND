@@ -540,17 +540,17 @@ const Profile = () => {
               ) : (
                 <div className="artists-list">
                   {artistasUnicos.map(artista => (
-                    <div key={artista.id} className="artist-item">
+                    <div key={artista?.id} className="artist-item">
                       <img
-                        src={artista.fotoUrl || '/assets/portifolio_tatuadores/Tatuador_1.png'}
-                        alt={artista.nome}
-                        onError={e => { e.target.style.display = 'none' }}
+                        src={artista?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artista?.nome || 'User')}`}
+                        alt={artista?.nome || 'Artista'}
+                        onError={e => { e.target.src = `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artista?.nome || 'User')}` }}
                       />
                       <div className="artist-info">
-                        <h5>{artista.nome}</h5>
-                        <p>{artista.role}</p>
+                        <h5>{artista?.nome || 'Artista'}</h5>
+                        <p>{artista?.role || 'Tatuador Residente'}</p>
                       </div>
-                      <button onClick={() => showToast(`Chat com ${artista.nome} em breve!`, 'chat')}>
+                      <button onClick={() => showToast(`Chat com ${artista?.nome || 'o artista'} em breve!`, 'chat')}>
                         <span className="material-symbols-outlined">chat_bubble</span>
                       </button>
                     </div>
