@@ -22,6 +22,7 @@ const getTimePeriod = (dataHora) => {
 }
 
 const statusBadgeClass = {
+  'PENDENTE': 'ad-badge-red',
   'AGENDADO': 'ad-badge-yellow',
   'CONFIRMADO': 'ad-badge-green',
   'EM_ANDAMENTO': 'ad-badge-blue',
@@ -31,6 +32,7 @@ const statusBadgeClass = {
 }
 
 const statusLabel = {
+  'PENDENTE': 'Pendente',
   'AGENDADO': 'Agendado',
   'CONFIRMADO': 'Confirmado',
   'EM_ANDAMENTO': 'Em Andamento',
@@ -94,7 +96,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
     })
     .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora))
 
-  const pendentes = agendamentos.filter(a => a.status === 'AGENDADO').length
+  const pendentes = agendamentos.filter(a => a.status === 'PENDENTE' || a.status === 'AGENDADO').length
   const confirmados = agendamentos.filter(a => a.status === 'CONFIRMADO' || a.status === 'EM_ANDAMENTO').length
   const concluidos = agendamentos.filter(a => a.status === 'REALIZADO' || a.status === 'FINALIZADO').length
 
@@ -110,7 +112,12 @@ const DashboardTab = ({ showToast, openDrawer }) => {
 
   // Próximo status possível para ações rápidas
   const getNextStatus = (current) => {
-    const flow = { 'AGENDADO': 'CONFIRMADO', 'CONFIRMADO': 'EM_ANDAMENTO', 'EM_ANDAMENTO': 'REALIZADO' }
+    const flow = { 
+      'PENDENTE': 'AGENDADO',
+      'AGENDADO': 'CONFIRMADO', 
+      'CONFIRMADO': 'EM_ANDAMENTO', 
+      'EM_ANDAMENTO': 'REALIZADO' 
+    }
     return flow[current] || null
   }
 
@@ -316,7 +323,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
                             <button className="ad-action-accept" title={`Avançar para ${statusLabel[nextStatus]}`} onClick={(e) => { e.stopPropagation(); handleStatusUpdate(ag.id, nextStatus, clientName) }}>
                               <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>arrow_forward</span>
                             </button>
-                            {ag.status === 'AGENDADO' && (
+                            {(ag.status === 'AGENDADO' || ag.status === 'PENDENTE') && (
                               <button className="ad-action-decline" title="Cancelar" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(ag.id, 'CANCELADO', clientName) }}>
                                 <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>close</span>
                               </button>

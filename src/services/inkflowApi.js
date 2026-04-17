@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -46,9 +46,15 @@ export const agendamentoService = {
   delete: (id) => api.delete(`/agendamentos/${id}`),
 };
 
+export const appointmentService = {
+  create: (data) => api.post('/appointments', data),
+};
+
 export const artistaService = {
-  getAll: () => api.get('/artistas'),
-  getById: (id) => api.get(`/artistas/${id}`),
+  getAll: () => api.get('/artists'),
+  getById: (id) => api.get(`/artists/${id}`),
+  getAvailability: (id) => api.get(`/artists/${id}/availability`),
+  getSlots: (id, data) => api.get(`/artists/${id}/availability/slots`, { params: { data } }),
 };
 
 export const portfolioService = {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { agendamentoService, clienteService, artistaService, portfolioService } from '../services/inkflowApi'
+import { agendamentoService, clienteService, artistaService, portfolioService, appointmentService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
 import './Booking.css'
 
@@ -28,6 +28,10 @@ const Booking = () => {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [toasts, setToasts] = useState([])
     const [showTerms, setShowTerms] = useState(false)
+    const [availableDays, setAvailableDays] = useState([])
+    const [availableSlots, setAvailableSlots] = useState([])
+    const [isLoadingAvailability, setIsLoadingAvailability] = useState(false)
+    const [isLoadingSlots, setIsLoadingSlots] = useState(false)
 
     useEffect(() => {
         const userData = localStorage.getItem('user')
@@ -102,6 +106,51 @@ const Booking = () => {
         }
     }, [location.search, artistsOptions])
 
+    // Efeito para carregar disponibilidade do artista
+    useEffect(() => {
+        const artistaSelecionado = artistsOptions.find(a => a.name === bookingState.artist)
+        if (artistaSelecionado) {
+            setAvailableDays([]) // Limpa dados antigos
+            setBookingState(prev => ({ ...prev, day: '', time: '' })) // Reseta seleção
+            setIsLoadingAvailability(true)
+            artistaService.getAvailability(artistaSelecionado.id)
+                .then(res => {
+                    const mappedDays = (res.data || []).map(d => ({
+                        day: d.data.split('-')[2].replace(/^0/, ''),
+                        fullDate: d.data,
+                        active: d.disponivel
+                    }))
+                    setAvailableDays(mappedDays)
+                })
+                .catch(err => console.error("Erro ao carregar disponibilidade:", err))
+                .finally(() => setIsLoadingAvailability(false))
+        }
+    }, [bookingState.artist, artistsOptions])
+
+    // Efeito para carregar slots do dia selecionado
+    useEffect(() => {
+        const artistaSelecionado = artistsOptions.find(a => a.name === bookingState.artist)
+        if (artistaSelecionado && bookingState.day) {
+            const dayObj = availableDays.find(d => d.day === bookingState.day)
+            if (dayObj) {
+                setAvailableSlots([]) // Limpa slots antigos
+                setBookingState(prev => ({ ...prev, time: '' })) // Reseta seleção de horário
+                setIsLoadingSlots(true)
+                artistaService.getSlots(artistaSelecionado.id, dayObj.fullDate)
+                    .then(res => {
+                        const mappedSlots = (res.data || []).map(s => ({
+                            id: s.horario,
+                            label: s.horario,
+                            active: s.disponivel
+                        }))
+                        setAvailableSlots(mappedSlots)
+                    })
+                    .catch(err => console.error("Erro ao carregar slots:", err))
+                    .finally(() => setIsLoadingSlots(false))
+            }
+        }
+    }, [bookingState.day, bookingState.artist, artistsOptions, availableDays])
+
     const brTime = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
     const currentMonth = brTime.getMonth();
     const currentYear = brTime.getFullYear();
@@ -118,7 +167,7 @@ const Booking = () => {
     const prevMonthDaysInMonth = new Date(currentYear, currentMonth, 0).getDate();
     const emptyDays = Array.from({ length: startPadding }, (_, i) => prevMonthDaysInMonth - startPadding + i + 1);
 
-    const days = Array.from({ length: daysInMonth }, (_, i) => {
+    const days = availableDays.length > 0 ? availableDays : Array.from({ length: daysInMonth }, (_, i) => {
         const d = i + 1;
         const dayOfWeek = new Date(currentYear, currentMonth, d).getDay();
         let active = true;
@@ -133,7 +182,7 @@ const Booking = () => {
         };
     });
 
-    const timeSlots = Array.from({ length: 12 }, (_, i) => {
+    const timeSlots = availableSlots.length > 0 ? availableSlots : Array.from({ length: 12 }, (_, i) => {
         const hour = i + 9;
         const timeString = `${hour.toString().padStart(2, '0')}:00`;
         return {
@@ -315,10 +364,10 @@ const Booking = () => {
 
             console.log('[Booking] Payload final do agendamento:', JSON.stringify(novoAgendamento, null, 2))
 
-            await agendamentoService.create(novoAgendamento)
+            await appointmentService.create(novoAgendamento)
 
 
-            showToast('Agendamento Confirmado! Entraremos em contato em breve.', 'success')
+            showToast('Solicitação Enviada! O artista analisará sua referência em breve.', 'success')
 
             setTimeout(() => {
                 setFormData({ name: '', phone: '', email: '', desc: '', terms: false, regiao: '', largura: '', altura: '', tags: [], imagemReferenciaFile: null })
