@@ -4,7 +4,9 @@ import './ArtistLandingPage.css'
 const ArtistLandingPage = () => {
   const [activeFaq, setActiveFaq] = useState(null)
   const [toasts, setToasts] = useState([])
+  const [isDemoOpen, setIsDemoOpen] = useState(false)
   const revealRefs = useRef([])
+  const registerRef = useRef(null)
 
   // FAQ Accordion Data
   const faqData = [
@@ -69,6 +71,16 @@ const ArtistLandingPage = () => {
     setActiveFaq(activeFaq === index ? null : index)
   }
 
+  const scrollToRegister = () => {
+    registerRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const handleRegisterSubmit = (e) => {
+    e.preventDefault()
+    showToast('Interesse registrado! Entraremos em contato via WhatsApp.')
+    e.target.reset()
+  }
+
   return (
     <div className="alp-container">
       <main className="alp-main">
@@ -89,11 +101,11 @@ const ArtistLandingPage = () => {
                 A plataforma definitiva para estúdios privados. Centralize agendamentos, gerencie portfólios e elimine o caos do WhatsApp. Foco total na agulha.
               </p>
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <button className="alp-btn-primary" onClick={() => showToast('Iniciando cadastro...')}>
+                <button className="alp-btn-primary" onClick={scrollToRegister}>
                   Criar Conta Grátis
                   <span className="material-symbols-outlined">arrow_forward</span>
                 </button>
-                <button className="alp-btn-secondary" onClick={() => showToast('Carregando demonstração...')}>
+                <button className="alp-btn-secondary" onClick={() => setIsDemoOpen(true)}>
                   Ver Demonstração
                 </button>
               </div>
@@ -146,7 +158,7 @@ const ArtistLandingPage = () => {
         <section className="alp-section">
           <div className="reveal-on-scroll" ref={addToRefs} style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <h2 className="alp-headline" style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1.5rem' }}>O fluxo perfeito para o estúdio moderno.</h2>
-            <p style={{ color: 'var(--on-surface-variant)', fontSize: '1.1rem', maxWidth: '800px', margin: '0 auto' }}>Esqueça mensagens perdidas. Conduza seus clientes por uma experiência premium desde o primeiro contato.</p>
+            <p style={{ color: 'var(--on-surface-variant)', fontSize: '1.1rem', maxWidth: '800px', margin: '0 auto' }}>Esqueça mensagens perdidas. Conduza seus clientes por uma experiênia premium desde o primeiro contato.</p>
           </div>
           
           <div className="alp-bento-grid">
@@ -201,7 +213,7 @@ const ArtistLandingPage = () => {
                 <h2 className="alp-headline" style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem' }}>Ferramentas de Precisão.</h2>
                 <p style={{ color: 'var(--on-surface-variant)', fontSize: '1.1rem' }}>Tudo que você precisa em um único painel. Simples, escuro, focado.</p>
               </div>
-              <button className="alp-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => showToast('Abrindo funcionalidades...')}>
+              <button className="alp-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => showToast('Explorando novos mundos...')}>
                 Explorar Funcionalidades
                 <span className="material-symbols-outlined">arrow_forward</span>
               </button>
@@ -247,13 +259,52 @@ const ArtistLandingPage = () => {
                   {item.q}
                   <span className="material-symbols-outlined alp-faq-icon">expand_more</span>
                 </button>
-                {activeFaq === index && (
+                <div className="alp-faq-content-wrapper">
                   <div className="alp-faq-content">
                     {item.a}
                   </div>
-                )}
+                </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Registration Lead Capture Section */}
+        <section className="alp-section alp-register-section reveal-on-scroll" ref={registerRef} id="register">
+           <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <h2 className="alp-headline" style={{ fontSize: '3rem', fontWeight: 800 }}>Garanta seu acesso prioritário</h2>
+            <p style={{ color: 'var(--on-surface-variant)', fontSize: '1.1rem', marginTop: '1rem' }}>Estamos liberando o acesso gradualmente. Cadastre seu estúdio para entrar na lista.</p>
+          </div>
+
+          <div className="alp-form-container">
+            <form onSubmit={handleRegisterSubmit}>
+              <div className="alp-form-group">
+                <label>Nome do Artista / Estúdio</label>
+                <input type="text" placeholder="Ex: Sullen Tattoo Studio" required />
+              </div>
+              <div className="alp-form-group">
+                <label>E-mail Profissional</label>
+                <input type="email" placeholder="contato@estudio.com" required />
+              </div>
+              <div className="alp-form-group">
+                <label>WhatsApp (com DDD)</label>
+                <input type="tel" placeholder="(11) 99999-9999" required />
+              </div>
+              <div className="alp-form-group">
+                <label>Especialidade Principal</label>
+                <select required>
+                  <option value="">Selecione um estilo</option>
+                  <option value="realismo">Realismo</option>
+                  <option value="blackwork">Blackwork</option>
+                  <option value="fineline">Fine Line</option>
+                  <option value="oriental">Oriental</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+              <button type="submit" className="alp-btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
+                Quero Participar da Beta
+              </button>
+            </form>
           </div>
         </section>
 
@@ -269,13 +320,32 @@ const ArtistLandingPage = () => {
             <p style={{ fontSize: '1.25rem', color: 'var(--on-surface-variant)', marginBottom: '3rem', maxWidth: '700px', margin: '0 auto 3rem auto' }}>
               Junte-se à elite dos tatuadores que otimizaram sua gestão com o InkFlow.
             </p>
-            <button className="alp-btn-primary" style={{ margin: '0 auto', padding: '1.25rem 3rem', fontSize: '1.1rem' }} onClick={() => showToast('Iniciando cadastro...')}>
+            <button className="alp-btn-primary" style={{ margin: '0 auto', padding: '1.25rem 3rem', fontSize: '1.1rem' }} onClick={scrollToRegister}>
               Comece Agora - É Grátis
             </button>
           </div>
         </section>
 
       </main>
+
+      {/* Demo Modal */}
+      {isDemoOpen && (
+        <div className="alp-modal-overlay" onClick={() => setIsDemoOpen(false)}>
+          <div className="alp-modal-container" onClick={e => e.stopPropagation()}>
+            <button className="alp-modal-close" onClick={() => setIsDemoOpen(false)}>
+              <span className="material-symbols-outlined">close</span>
+            </button>
+            <div className="alp-video-wrapper">
+              <iframe 
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" 
+                title="InkFlow Demo" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast Notification */}
       <div className="alp-toast-container">

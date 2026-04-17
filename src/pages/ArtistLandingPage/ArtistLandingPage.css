@@ -286,6 +286,18 @@
   transform: rotate(180deg);
 }
 
+.alp-faq-content-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  opacity: 0;
+}
+
+.alp-faq-item.active .alp-faq-content-wrapper {
+  max-height: 500px; /* Suficiente para a resposta */
+  opacity: 1;
+}
+
 .alp-faq-content {
   padding: 0 1.5rem 1.5rem 1.5rem;
   color: var(--on-surface-variant);
@@ -312,9 +324,9 @@
 /* Toast Notification */
 .alp-toast-container {
   position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  z-index: 100;
+  top: 2rem;
+  right: 2rem;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -335,6 +347,123 @@
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Registration Form */
+.alp-register-section {
+  scroll-margin-top: 100px;
+}
+
+.alp-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: var(--surface-low);
+  padding: 3rem;
+  border-radius: 8px;
+  border: 1px solid var(--outline-variant);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+
+.alp-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.alp-form-group label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--on-surface-variant);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.alp-form-group input, 
+.alp-form-group select, 
+.alp-form-group textarea {
+  width: 100%;
+  padding: 1rem;
+  background-color: var(--surface-color);
+  border: 1px solid var(--outline-variant);
+  border-radius: 4px;
+  color: var(--on-surface);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.alp-form-group input:focus {
+  border-color: var(--primary-red);
+  outline: none;
+  box-shadow: 0 0 10px rgba(255,141,140,0.1);
+}
+
+/* Modal */
+.alp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.9);
+  backdrop-filter: blur(10px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.alp-modal-container {
+  width: 100%;
+  max-width: 1000px;
+  position: relative;
+  background-color: var(--surface-low);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--outline-variant);
+}
+
+.alp-modal-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: white;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.alp-modal-close:hover {
+  background-color: var(--primary-red);
+  color: black;
+  transform: rotate(90deg);
+}
+
+.alp-video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
+}
+
+.alp-video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
