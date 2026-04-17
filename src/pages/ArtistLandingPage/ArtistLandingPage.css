@@ -27,7 +27,7 @@
 .alp-section {
   position: relative;
   width: 100%;
-  padding: 6rem 1.5rem;
+  padding: 4rem 1.5rem; /* Reduzido de 6rem para evitar vácuo */
   max-width: 1440px;
   margin: 0 auto;
 }
@@ -394,10 +394,13 @@
   transition: all 0.3s ease;
 }
 
-.alp-form-group input:focus {
-  border-color: var(--primary-red);
+.alp-form-group input:focus,
+.alp-form-group select:focus,
+.alp-form-group textarea:focus {
+  border-color: #ff0000;
   outline: none;
-  box-shadow: 0 0 10px rgba(255,141,140,0.1);
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
+  background-color: #222;
 }
 
 /* Modal */

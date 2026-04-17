@@ -270,7 +270,11 @@ const ArtistLandingPage = () => {
         </section>
 
         {/* Registration Lead Capture Section */}
-        <section className="alp-section alp-register-section reveal-on-scroll" ref={registerRef} id="register">
+        <section 
+          className="alp-section alp-register-section reveal-on-scroll" 
+          ref={(el) => { registerRef.current = el; addToRefs(el); }} 
+          id="register"
+        >
            <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <h2 className="alp-headline" style={{ fontSize: '3rem', fontWeight: 800 }}>Garanta seu acesso prioritário</h2>
             <p style={{ color: 'var(--on-surface-variant)', fontSize: '1.1rem', marginTop: '1rem' }}>Estamos liberando o acesso gradualmente. Cadastre seu estúdio para entrar na lista.</p>
@@ -279,29 +283,30 @@ const ArtistLandingPage = () => {
           <div className="alp-form-container">
             <form onSubmit={handleRegisterSubmit}>
               <div className="alp-form-group">
-                <label>Nome do Artista / Estúdio</label>
-                <input type="text" placeholder="Ex: Sullen Tattoo Studio" required />
+                <label>Nome Completo</label>
+                <input type="text" placeholder="Seu nome completo" required />
               </div>
               <div className="alp-form-group">
-                <label>E-mail Profissional</label>
-                <input type="email" placeholder="contato@estudio.com" required />
+                <label>Nome do Estúdio</label>
+                <input type="text" placeholder="Ex: Sullen Tattoo Studio" required />
               </div>
               <div className="alp-form-group">
                 <label>WhatsApp (com DDD)</label>
                 <input type="tel" placeholder="(11) 99999-9999" required />
               </div>
               <div className="alp-form-group">
-                <label>Especialidade Principal</label>
+                <label>Especialidade Principal (Estilo)</label>
                 <select required>
-                  <option value="">Selecione um estilo</option>
+                  <option value="">Selecione seu estilo principal</option>
                   <option value="realismo">Realismo</option>
                   <option value="blackwork">Blackwork</option>
                   <option value="fineline">Fine Line</option>
                   <option value="oriental">Oriental</option>
+                  <option value="geometri">Geométrico</option>
                   <option value="outro">Outro</option>
                 </select>
               </div>
-              <button type="submit" className="alp-btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
+              <button type="submit" className="alp-btn-primary" style={{ width: '100%', marginTop: '1rem', background: 'linear-gradient(135deg, #a80010 0%, #ff0000 100%)', color: 'white' }}>
                 Quero Participar da Beta
               </button>
             </form>
