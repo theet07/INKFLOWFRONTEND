@@ -147,6 +147,7 @@ const Artists = () => {
                                     <img 
                                         className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 group-hover:opacity-50 transition-all duration-1000" 
                                         src={getSafeImageUrl(featured?.fotoUrl, featured?.nome)} 
+                                        onError={(e) => { e.target.onerror = null; e.target.src = getFallbackImage(featured?.especialidades?.[0]) }}
                                         alt={featured?.nome || 'Featured'}
                                         style={{ objectPosition: 'center' }}
                                     />
@@ -184,7 +185,7 @@ const Artists = () => {
                                             <img 
                                                 className="w-full h-full object-cover" 
                                                 src={getSafeImageUrl(featured?.fotoUrl, featured?.nome)} 
-                                                onError={(e) => { e.target.src = getSafeImageUrl(null, featured?.nome) }}
+                                                onError={(e) => { e.target.onerror = null; e.target.src = getSafeImageUrl(null, featured?.nome) }}
                                                 alt="avatar"
                                                 style={{ objectPosition: 'center' }}
                                             />
@@ -206,6 +207,7 @@ const Artists = () => {
                                     <img 
                                         className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-50 transition-all duration-700" 
                                         src={getSafeImageUrl(artist?.fotoUrl, artist?.nome)} 
+                                        onError={(e) => { e.target.onerror = null; e.target.src = getFallbackImage(artist?.especialidades?.[0]) }}
                                         alt={artist?.nome || 'Artista'}
                                         style={{ objectPosition: 'center' }}
                                     />
@@ -216,7 +218,7 @@ const Artists = () => {
                                                 <img 
                                                     className="w-full h-full object-cover rounded-full" 
                                                     src={getSafeImageUrl(artist?.fotoUrl, artist?.nome)} 
-                                                    onError={(e)=>{e.target.src=getSafeImageUrl(null, artist?.nome)}}
+                                                    onError={(e) => { e.target.onerror = null; e.target.src = getSafeImageUrl(null, artist?.nome) }}
                                                     alt="avatar"
                                                     style={{ objectPosition: 'center' }}
                                                 />

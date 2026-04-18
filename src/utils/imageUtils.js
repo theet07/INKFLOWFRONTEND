@@ -1,15 +1,26 @@
 export const getSafeImageUrl = (url, name = 'User') => {
+  const fallback = `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(name)}`;
+  
   if (!url || url.trim() === '') {
-    return `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(name)}`;
+    return fallback;
   }
 
-  // Se for um asset local, prepara para otimização (Cloudinary Fetch)
-  // Em produção, isso ajuda a garantir que a imagem seja servida com compressão moderna
+  // Se for um link absoluto remoto
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  // Se vier da pasta public do frontend
   if (url.startsWith('/assets/')) {
-    // Usamos o serviço de fetch do Cloudinary para redimensionamento e formato inteligente
-    // O prefixo garante que imagens locais sejam tratadas de forma estável
-    return `https://res.cloudinary.com/demo/image/fetch/f_auto,q_auto/https://inkflow-frontend.vercel.app${url}`;
+    return url;
   }
 
-  return url;
+  // Se for um caminho relativo que vêm do backend (ex: /uploads/...)
+  const apiUrl = import.meta.env.VITE_API_URL || '';
+  if (url.startsWith('/')) {
+    return `${apiUrl}${url}`;
+  }
+
+  // Fallback seguro caso seja um formato estranho
+  return `${apiUrl}/${url}`;
 };
