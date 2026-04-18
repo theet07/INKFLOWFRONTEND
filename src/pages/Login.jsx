@@ -432,12 +432,12 @@ const Login = () => {
             <div className="verification-card">
               <div className="login-step-indicator">2 / 2</div>
               <div className="otp-icon-wrapper">
-                <span className="material-symbols-outlined" style={{ fontSize: '40px' }}>mark_email_read</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>mark_email_read</span>
               </div>
-              <h2 className="otp-title">Validação de e-mail</h2>
+              <h2 className="otp-title">Olhe sua caixa de entrada</h2>
               <p className="otp-subtitle">
-                Enviamos um código para seu e-mail:
-                <br /><strong>{registeredEmail}</strong>
+                Enviamos um código de 6 dígitos para<br />
+                <strong style={{color: '#fff', fontWeight: '500'}}>{registeredEmail}</strong>
               </p>
 
               <div className="otp-input-group">
@@ -478,14 +478,14 @@ const Login = () => {
               >
                 {isLoading ? (
                   <>
-                    <span className="login-spinner"></span>
+                    <span className="login-spinner" style={{ borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#000' }}></span>
                     <span>Verificando...</span>
                   </>
-                ) : 'Confirmar Código'}
+                ) : 'CONFIRMAR CÓDIGO'}
               </button>
 
               <div className="otp-resend">
-                Não recebeu? <button onClick={handleSubmit} disabled={isLoading}>Reenviar código</button>
+                Não recebeu o código? <button onClick={handleSubmit} disabled={isLoading}>Reenviar agora</button>
               </div>
             </div>
           ) : (
