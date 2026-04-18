@@ -111,8 +111,8 @@ const Profile = () => {
 
   if (!user.email) return null
 
-  const proximas = agendamentos.filter(a => a.status === 'PENDENTE' || a.status === 'AGENDADO' || a.status === 'CONFIRMADO' || a.status === 'EM_ANDAMENTO')
-  const colecao = agendamentos.filter(a => a.status === 'FINALIZADO')
+  const proximas = agendamentos.filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO')
+  const colecao = agendamentos.filter(a => a.status === 'REALIZADO')
   const artistasUnicos = agendamentos
     .filter(a => a.artista)
     .reduce((acc, a) => {
@@ -484,7 +484,7 @@ const Profile = () => {
                       onClick={() => openModal('Tattoo Finalizada', (
                         <div style={{ padding: '0.5rem', textAlign: 'center', color: '#fff' }}>
                           <img 
-                            src={ag.imagemReferenciaUrl || getFallbackImage(ag.servico)} 
+                            src={ag.imagemResultadoUrl || ag.imagemReferenciaUrl || getFallbackImage(ag.servico)} 
                             alt={ag.servico} 
                             style={{ width: '100%', maxHeight: '40vh', borderRadius: '8px', objectFit: 'contain', backgroundColor: 'rgba(0,0,0,0.5)' }} 
                           />
@@ -507,7 +507,7 @@ const Profile = () => {
                       <div style={{ 
                         width: '100%', 
                         height: '100%', 
-                        backgroundImage: `url("${ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}")`, 
+                        backgroundImage: `url("${ag.imagemResultadoUrl || ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}")`, 
                         backgroundSize: 'cover', 
                         backgroundPosition: 'center',
                         borderRadius: 'inherit'
