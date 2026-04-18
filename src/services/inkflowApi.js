@@ -65,8 +65,8 @@ export const portfolioService = {
 };
 
 export const adminService = {
-  exportBackup: () => api.get('admin/backup/download', { responseType: 'blob' }),
-  getBackupStatus: () => api.get('admin/backup/status'),
+  exportBackup: () => api.get('/v1/admin/backup/download', { responseType: 'blob', baseURL: API_BASE_URL.replace('/v1', '') }),
+  getBackupStatus: () => api.get('/v1/admin/backup/status', { baseURL: API_BASE_URL.replace('/v1', '') }),
 };
 
 export const testConnection = () => api.get('/test');
