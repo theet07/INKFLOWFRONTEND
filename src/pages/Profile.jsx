@@ -78,17 +78,36 @@ const Profile = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  const fetchMeusAgendamentos = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const API_URL = import.meta.env.VITE_API_URL
+        ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
+        : 'https://inkflowbackend-4w1g.onrender.com';
+        
+      const response = await fetch(`${API_URL}/api/appointments/meus`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error('Falha ao buscar as sessões');
+      const data = await response.json();
+      // Dados já vêm filtrados para o dono do token.
+      setAgendamentos(data || []);
+    } catch (err) {
+      console.error('Erro na sincronização das sessões:', err);
+      setAgendamentos([]);
+    } finally {
+      setLoadingAg(false);
+    }
+  };
+
   useEffect(() => {
     if (!user.email) { navigate('/login'); return }
-    if (user.id) {
-      agendamentoService.getByCliente(user.id)
-        .then(res => setAgendamentos(res.data))
-        .catch(() => setAgendamentos([]))
-        .finally(() => setLoadingAg(false))
-    } else {
-      setLoadingAg(false)
-    }
-  }, [user.id])
+    fetchMeusAgendamentos();
+  }, [user.email])
 
   if (!user.email) return null
 
@@ -267,8 +286,7 @@ const Profile = () => {
   const handleUpdateStatus = async (agendamentoId, status, avaliacao, observacoes) => {
     try {
       await agendamentoService.updateStatus(agendamentoId, { status, avaliacao, observacoes })
-      const res = await agendamentoService.getByCliente(user.id)
-      setAgendamentos(res.data)
+      await fetchMeusAgendamentos()
       const msg = status === 'REALIZADO' ? 'Sessão marcada como realizada!' : status === 'CANCELADO' ? 'Sessão cancelada.' : 'Sessão atualizada!'
       showToast(msg, status === 'CANCELADO' ? 'cancel' : 'check_circle')
       closeModal()
