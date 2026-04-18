@@ -111,7 +111,7 @@ const Profile = () => {
 
   if (!user.email) return null
 
-  const proximas = agendamentos.filter(a => a.status === 'AGENDADO' || a.status === 'CONFIRMADO' || a.status === 'EM_ANDAMENTO' || a.status === 'REALIZADO')
+  const proximas = agendamentos.filter(a => a.status === 'PENDENTE' || a.status === 'AGENDADO' || a.status === 'CONFIRMADO' || a.status === 'EM_ANDAMENTO')
   const colecao = agendamentos.filter(a => a.status === 'FINALIZADO')
   const artistasUnicos = agendamentos
     .filter(a => a.artista)
@@ -426,7 +426,7 @@ const Profile = () => {
             <div className="profile-section">
               <div className="section-header">
                 <h3><span className="material-symbols-outlined">calendar_today</span> Próximas Sessões</h3>
-                <a onClick={openAllSessionsModal}>Ver Todas</a>
+                <a onClick={() => navigate('/perfil/agendamentos')}>Ver Todas</a>
               </div>
 
               {loadingAg ? (
@@ -438,7 +438,7 @@ const Profile = () => {
                 </div>
               ) : (
                 <div className="sessions-grid">
-                  {proximas.slice(0, 4).map(ag => (
+                  {proximas.slice(0, 2).map(ag => (
                     <div key={ag.id} className="session-card">
                       <div className="session-img" style={{ backgroundImage: `url("${ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}")`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
                       <div className="session-content">
