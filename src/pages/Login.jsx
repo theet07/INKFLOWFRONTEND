@@ -420,12 +420,13 @@ const Login = () => {
         <div className="login-right">
           {isVerifying ? (
             <div className="verification-card">
+              <div className="step-indicator">2 / 2</div>
               <div className="otp-icon-wrapper">
                 <span className="material-symbols-outlined" style={{ fontSize: '40px' }}>mark_email_read</span>
               </div>
-              <h2 className="otp-title">Verifique seu E-mail</h2>
+              <h2 className="otp-title">Validação de e-mail</h2>
               <p className="otp-subtitle">
-                O traço final está quase pronto. Enviamos um código de 6 dígitos para o seu Gmail. 
+                Enviamos um código para seu e-mail:
                 <br /><strong>{registeredEmail}</strong>
               </p>
 
@@ -447,7 +448,7 @@ const Login = () => {
               <button 
                 className={`otp-confirm-btn ${isLoading ? 'login-btn--loading' : ''}`}
                 onClick={handleVerifyOtp}
-                disabled={isLoading || otp.join('').length < 6}
+                disabled={isLoading || otpValues.join('').length < 6}
               >
                 {isLoading ? (
                   <>
@@ -463,6 +464,9 @@ const Login = () => {
             </div>
           ) : (
             <div className="info-card">
+              {!isLogin && (
+                <div className="step-indicator">1 / 2</div>
+              )}
               <div className="card-image">
                 <div className="tattoo-illustration">
                   <svg viewBox="0 0 1024 1024" className="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#ff0000" stroke="#ff0000" width="48" height="48">
