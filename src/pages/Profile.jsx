@@ -111,8 +111,9 @@ const Profile = () => {
 
   if (!user.email) return null
 
-  const proximas = agendamentos.filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO')
-  const colecao = agendamentos.filter(a => a.status === 'REALIZADO')
+  const isAvaliado = (ag) => Boolean(ag.avaliacao && ag.avaliacao > 0)
+  const proximas = agendamentos.filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO' || (a.status === 'REALIZADO' && !isAvaliado(a)))
+  const colecao = agendamentos.filter(a => a.status === 'REALIZADO' && isAvaliado(a))
   const artistasUnicos = agendamentos
     .filter(a => a.artista)
     .reduce((acc, a) => {
@@ -956,7 +957,7 @@ const SessionModalContent = ({ ag, onUpdate }) => {
             </button>
           </div>
         </>
-      ) : ag.status === 'REALIZADO' ? (
+      ) : (ag.status === 'REALIZADO' && (!ag.avaliacao || ag.avaliacao < 1)) ? (
         <>
           <div className="p-modal-card border-red">
             <span style={{ color: '#ff0000', fontWeight: 'bold' }}>Sessão Concluída! Deixe sua avaliação</span>
@@ -968,7 +969,7 @@ const SessionModalContent = ({ ag, onUpdate }) => {
           <button 
             className="p-btn-primary" 
             disabled={loading || avaliacao < 1} 
-            onClick={() => handleUpdate('FINALIZADO')}
+            onClick={() => handleUpdate('REALIZADO')}
             style={{ width: '100%', marginTop: '0.5rem' }}
           >
             Confirmar e Avaliar
