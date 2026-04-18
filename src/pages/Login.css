@@ -242,7 +242,7 @@
 .info-card {
   width: 100%;
   max-width: 560px;
-  min-height: 600px;
+  min-height: 680px;
   padding: 3.5rem;
   text-align: center;
   background: rgba(21, 21, 21, 0.95);
@@ -250,6 +250,10 @@
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 0, 64, 0.2);
   backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .card-image {
@@ -492,7 +496,7 @@
 .verification-card {
   width: 100%;
   max-width: 560px;
-  min-height: 600px;
+  min-height: 680px;
   padding: 3.5rem;
   text-align: center;
   background: rgba(21, 21, 21, 0.98);
