@@ -147,6 +147,7 @@ const Artists = () => {
                                         className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 group-hover:opacity-50 transition-all duration-1000" 
                                         src={featured?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(featured?.nome || 'User')}`} 
                                         alt={featured?.nome || 'Featured'}
+                                        style={{ objectPosition: 'center' }}
                                     />
                                     <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.1) 100%)' }}></div>
                                     
@@ -184,6 +185,7 @@ const Artists = () => {
                                                 src={featured?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(featured?.nome || 'User')}`} 
                                                 onError={(e) => { e.target.src = `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(featured?.nome || 'User')}` }}
                                                 alt="avatar"
+                                                style={{ objectPosition: 'center 15%' }}
                                             />
                                         </div>
                                         <div>
@@ -204,6 +206,7 @@ const Artists = () => {
                                         className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-50 transition-all duration-700" 
                                         src={artist?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artist?.nome || 'User')}`} 
                                         alt={artist?.nome || 'Artista'}
+                                        style={{ objectPosition: 'center 15%' }}
                                     />
                                     <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%)' }}></div>
                                     <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-none z-10">
@@ -214,6 +217,7 @@ const Artists = () => {
                                                     src={artist?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artist?.nome || 'User')}`} 
                                                     onError={(e)=>{e.target.src=`https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artist?.nome || 'User')}`}}
                                                     alt="avatar"
+                                                    style={{ objectPosition: 'center 15%' }}
                                                 />
                                             </div>
                                             <div>
