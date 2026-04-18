@@ -430,7 +430,7 @@ const Login = () => {
         <div className="login-right">
           {isVerifying ? (
             <div className="verification-card">
-              <div className="step-indicator">2 / 2</div>
+              <div className="login-step-indicator">2 / 2</div>
               <div className="otp-icon-wrapper">
                 <span className="material-symbols-outlined" style={{ fontSize: '40px' }}>mark_email_read</span>
               </div>
@@ -491,7 +491,7 @@ const Login = () => {
           ) : (
             <div className="info-card">
               {!isLogin && (
-                <div className="step-indicator">1 / 2</div>
+                <div className="login-step-indicator">1 / 2</div>
               )}
               <div className="card-image">
                 <div className="tattoo-illustration">
