@@ -22,6 +22,17 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 403) {
+      alert('Acesso não autorizado. Redirecionando para a home...');
+      window.location.href = '/';
+    }
+    return Promise.reject(error);
+  }
+)
+
 export const clienteService = {
   login: (credentials) => api.post('/clientes/login', credentials),
   getAll: () => api.get('/clientes'),

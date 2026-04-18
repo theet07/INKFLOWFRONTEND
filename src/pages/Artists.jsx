@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { artistaService } from '../services/inkflowApi';
+import { getSafeImageUrl } from '../utils/imageUtils';
 import './Artists.css';
 
 const getFallbackImage = (especialidade) => {
@@ -145,7 +146,7 @@ const Artists = () => {
                                 >
                                     <img 
                                         className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:scale-105 group-hover:opacity-50 transition-all duration-1000" 
-                                        src={featured?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(featured?.nome || 'User')}`} 
+                                        src={getSafeImageUrl(featured?.fotoUrl, featured?.nome)} 
                                         alt={featured?.nome || 'Featured'}
                                         style={{ objectPosition: 'center' }}
                                     />
@@ -161,7 +162,7 @@ const Artists = () => {
                                                 Conheça o traço de<br/><span className="text-primary">{featured.nome}</span>
                                             </h2>
                                             <p className="text-sm text-on-surface-variant mb-2 max-w-md leading-relaxed">
-                                                {(featured.especialidades || []).join(', ') || 'Artista Exclusivo'} — Estilo único e sessões sob medida para transformar sua ideia em arte permanente.
+                                                {featured.bio || 'Artista especializado em transformar ideias em arte permanente.'}
                                             </p>
                                             <div className="flex items-center gap-2 mb-6">
                                                 <span className="material-symbols-outlined text-primary text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
@@ -182,10 +183,10 @@ const Artists = () => {
                                         <div className="w-10 h-10 rounded-full border border-primary overflow-hidden">
                                             <img 
                                                 className="w-full h-full object-cover" 
-                                                src={featured?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(featured?.nome || 'User')}`} 
-                                                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(featured?.nome || 'User')}` }}
+                                                src={getSafeImageUrl(featured?.fotoUrl, featured?.nome)} 
+                                                onError={(e) => { e.target.src = getSafeImageUrl(null, featured?.nome) }}
                                                 alt="avatar"
-                                                style={{ objectPosition: 'center 15%' }}
+                                                style={{ objectPosition: 'center' }}
                                             />
                                         </div>
                                         <div>
@@ -204,9 +205,9 @@ const Artists = () => {
                                 <div key={artist.id || idx} className="group relative w-full aspect-[3/4] overflow-hidden rounded-xl bg-surface-container-low border border-white/5 animate-fade" style={{ maxWidth: '400px', margin: '0 auto' }}>
                                     <img 
                                         className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-50 transition-all duration-700" 
-                                        src={artist?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artist?.nome || 'User')}`} 
+                                        src={getSafeImageUrl(artist?.fotoUrl, artist?.nome)} 
                                         alt={artist?.nome || 'Artista'}
-                                        style={{ objectPosition: 'center 15%' }}
+                                        style={{ objectPosition: 'center' }}
                                     />
                                     <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%)' }}></div>
                                     <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-none z-10">
@@ -214,10 +215,10 @@ const Artists = () => {
                                             <div className="w-12 h-12 rounded-full border border-primary overflow-hidden shadow-lg">
                                                 <img 
                                                     className="w-full h-full object-cover rounded-full" 
-                                                    src={artist?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artist?.nome || 'User')}`} 
-                                                    onError={(e)=>{e.target.src=`https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artist?.nome || 'User')}`}}
+                                                    src={getSafeImageUrl(artist?.fotoUrl, artist?.nome)} 
+                                                    onError={(e)=>{e.target.src=getSafeImageUrl(null, artist?.nome)}}
                                                     alt="avatar"
-                                                    style={{ objectPosition: 'center 15%' }}
+                                                    style={{ objectPosition: 'center' }}
                                                 />
                                             </div>
                                             <div>

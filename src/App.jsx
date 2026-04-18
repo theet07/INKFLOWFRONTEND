@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
+import ErrorBoundary from './components/ErrorBoundary'
 
 import Home from './pages/Home'
 import About from './pages/About'
@@ -65,7 +66,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
     </Router>
   )
 }
