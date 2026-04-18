@@ -64,6 +64,11 @@ export const portfolioService = {
   delete: (id) => api.delete(`/portfolio/${id}`),
 };
 
+export const adminService = {
+  exportBackup: () => api.get('admin/backup/download', { responseType: 'blob' }),
+  getBackupStatus: () => api.get('admin/backup/status'),
+};
+
 export const testConnection = () => api.get('/test');
 
 export default api;

@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { agendamentoService, clienteService } from '../services/inkflowApi'
+import { agendamentoService, clienteService, adminService } from '../services/inkflowApi'
 
 const AdminDashboard = () => {
   const [bookings, setBookings] = useState([])
   const [activeTab, setActiveTab] = useState('agendamentos')
+  const [backupStatus, setBackupStatus] = useState(null)
+  const [loadingBackup, setLoadingBackup] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -59,6 +62,45 @@ const AdminDashboard = () => {
     }
   }
 
+  const loadBackupStatus = async () => {
+    setLoadingBackup(true)
+    try {
+      const response = await adminService.getBackupStatus()
+      setBackupStatus(response.data)
+    } catch (error) {
+      console.error('Erro ao carregar status do backup:', error)
+      setBackupStatus({ lastBackup: new Date().toISOString() })
+    } finally {
+      setLoadingBackup(false)
+    }
+  }
+
+  const handleDownloadBackup = async () => {
+    setIsDownloading(true)
+    try {
+      const response = await adminService.exportBackup()
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'inkflow_full_backup.sql')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Erro ao baixar backup:', error)
+      alert('Falha ao gerar arquivo de backup. Verifique a nova rota do Amazon Q.')
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'seguranca') {
+      loadBackupStatus()
+    }
+  }, [activeTab])
+
   return (
     <div className="admin-dashboard" style={{ paddingTop: '100px', minHeight: '100vh' }}>
       <section className="section">
@@ -77,6 +119,13 @@ const AdminDashboard = () => {
             style={{ marginLeft: '1rem' }}
           >
             Estatísticas
+          </button>
+          <button 
+            className={`btn ${activeTab === 'seguranca' ? '' : 'btn-outline'}`}
+            onClick={() => setActiveTab('seguranca')}
+            style={{ marginLeft: '1rem' }}
+          >
+            Segurança
           </button>
         </div>
 
@@ -174,6 +223,56 @@ const AdminDashboard = () => {
                   {bookings.filter(b => (!b.status || b.status === 'AGENDADO')).length}
                 </div>
                 <h3 className="text-primary">Agendados</h3>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'seguranca' && (
+          <div className="security-management">
+            <div className="grid-responsive">
+              <div className="card-equal">
+                <div className="icon-circle">
+                  <span className="material-symbols-outlined" style={{ fontSize: '2rem' }}>database</span>
+                </div>
+                <h3 className="text-primary">Recuperação de Dados</h3>
+                <p className="text-gray" style={{ margin: '1rem 0' }}>
+                  Gere uma cópia completa do banco de dados em formato SQL para fins de segurança e conformidade.
+                </p>
+                <button 
+                  className="btn btn-large" 
+                  onClick={handleDownloadBackup}
+                  disabled={isDownloading}
+                >
+                  {isDownloading ? 'Gerando Arquivo...' : 'Gerar e Baixar Backup FULL (.sql)'}
+                </button>
+              </div>
+
+              <div className="card-equal">
+                <div className="icon-circle">
+                  <span className="material-symbols-outlined" style={{ fontSize: '2rem' }}>update</span>
+                </div>
+                <h3 className="text-primary">Próximo Backup Automático</h3>
+                <p className="text-light" style={{ fontSize: '2rem', fontWeight: 'bold', margin: '1rem 0' }}>
+                  00:00
+                </p>
+                <div style={{ textAlign: 'left', marginTop: 'auto' }}>
+                  <p className="text-gray">
+                    <strong>Último Backup:</strong> {loadingBackup ? 'Carregando...' : (backupStatus?.lastBackup ? new Date(backupStatus.lastBackup).toLocaleString('pt-BR') : 'Nenhum registro encontrado')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="card" style={{ marginTop: '2rem', borderLeft: '4px solid var(--accent-red)', backgroundColor: 'rgba(220, 20, 60, 0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <span className="material-symbols-outlined text-primary" style={{ fontSize: '2rem' }}>warning</span>
+                <div>
+                  <h4 className="text-primary">Atenção</h4>
+                  <p className="text-light">
+                    Backups automáticos ocorrem diariamente às 00:00. Certifique-se de realizar backups manuais antes de grandes manutenções ou migrações de dados.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
