@@ -21,6 +21,8 @@ const Login = () => {
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', ''])
   const [registeredEmail, setRegisteredEmail] = useState('')
   const [toasts, setToasts] = useState([])
+  const [loginError, setLoginError] = useState('')
+  const [otpError, setOtpError] = useState('')
   const navigate = useNavigate()
 
   const showToast = useCallback((message, type = 'info') => {
@@ -38,6 +40,7 @@ const Login = () => {
     if (e) e.preventDefault()
     if (isLoading) return
     setIsLoading(true)
+    setLoginError('')
 
     try {
       if (isLogin) {
@@ -91,7 +94,11 @@ const Login = () => {
             navigate('/agendamento')
           }
         } else {
-          showToast(data.message || 'Email ou senha incorretos!', 'error')
+          if (response.status === 401) {
+            setLoginError('Credenciais inválidas.')
+          } else {
+            showToast(data.message || 'Email ou senha incorretos!', 'error')
+          }
         }
       } else {
         // Fase 1: Solicitar Código de Verificação
@@ -154,6 +161,8 @@ const Login = () => {
           setIsLogin(true)
           setIsVerifying(false)
         }
+      } else if (response.status === 429) {
+        setOtpError('Código bloqueado por excesso de tentativas.')
       } else {
         showToast('Código Inválido ou Expirado.', 'error')
       }
@@ -166,6 +175,7 @@ const Login = () => {
 
   const handleOtpChange = (element, index) => {
     if (isNaN(element.value)) return false
+    setOtpError('')
 
     const newOtp = [...otpValues]
     newOtp[index] = element.value
@@ -184,6 +194,7 @@ const Login = () => {
   }
 
   const handleChange = (e) => {
+    setLoginError('')
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -192,6 +203,7 @@ const Login = () => {
 
   const handlePortalSwitch = () => {
     setIsArtistLogin(prev => !prev)
+    setLoginError('')
     setFormData(prev => ({ ...prev, email: '', password: '', fullName: '', telefone: '' }))
   }
 
@@ -307,6 +319,12 @@ const Login = () => {
                     />
                   </div>
                 </div>
+                
+                {isLogin && loginError && (
+                  <div style={{ color: '#ff4444', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1rem', marginTop: '-1rem' }}>
+                    {loginError}
+                  </div>
+                )}
                 
                 {!isLogin && (
                   <div className="form-group">
@@ -435,6 +453,22 @@ const Login = () => {
                     onFocus={(e) => e.target.select()}
                   />
                 ))}
+              </div>
+
+              {/* Espaço reservado para erros de limite de OTP */}
+              <div style={{ minHeight: '30px', marginBottom: '2rem', marginTop: '-1.5rem', width: '100%', textAlign: 'center' }}>
+                {otpError && (
+                  <div style={{ color: '#ff4444', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                    <span>{otpError}</span>
+                    <button 
+                      onClick={(e) => { e.preventDefault(); setOtpError(''); handleSubmit(null); }} 
+                      disabled={isLoading}
+                      style={{ background: 'none', border: 'none', color: 'var(--accent-red)', fontWeight: 'bold', textDecoration: 'underline', cursor: 'pointer' }}
+                    >
+                      Reenviar código
+                    </button>
+                  </div>
+                )}
               </div>
 
               <button 
