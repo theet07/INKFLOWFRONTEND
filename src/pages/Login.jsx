@@ -222,6 +222,11 @@ const Login = () => {
                       required
                     />
                   </div>
+                  {!isLogin && formData.email && !formData.email.toLowerCase().endsWith('@gmail.com') && (
+                    <span className="error-message" style={{ color: '#ff8d8c', fontSize: '0.75rem', marginTop: '0.5rem', display: 'block' }}>
+                      Para clientes, utilize apenas @gmail.com
+                    </span>
+                  )}
                 </div>
                 
                 <div className="form-group">
@@ -272,7 +277,11 @@ const Login = () => {
                   </div>
                 )}
                 
-                <button type="submit" className={`login-btn${isLoading ? ' login-btn--loading' : ''}`} disabled={isLoading}>
+                <button 
+                  type="submit" 
+                  className={`login-btn${isLoading ? ' login-btn--loading' : ''}`} 
+                  disabled={isLoading || (!isLogin && (!formData.email || !formData.email.toLowerCase().endsWith('@gmail.com')))}
+                >
                   {isLoading ? (
                     <>
                       <span className="login-spinner"></span>
