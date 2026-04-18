@@ -1,10 +1,10 @@
 header {
-    background: var(--primary-dark);
+    background-color: #0d0d0d !important;
     padding: 1rem 0;
     position: fixed;
     width: 100%;
     top: 0;
-    z-index: 1000;
+    z-index: 1050 !important;
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     border-bottom: 1px solid rgba(208,0,0,0.3);
     transition: all 0.3s ease;
@@ -101,7 +101,7 @@ nav {
     position: absolute;
     top: 100%;
     right: 0;
-    background: linear-gradient(135deg, rgba(13, 13, 13, 0.95) 0%, rgba(26, 26, 26, 0.9) 100%);
+    background-color: #1a1a1a !important;
     border: 1px solid rgba(208, 0, 0, 0.3);
     border-radius: 8px;
     padding: 0.5rem 0;
@@ -109,6 +109,7 @@ nav {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     opacity: 0;
     visibility: hidden;
+    display: none;
     transform: translateY(-10px);
     transition: all 0.3s ease;
     z-index: 1001;
@@ -117,6 +118,7 @@ nav {
 .dropdown-menu.show {
     opacity: 1;
     visibility: visible;
+    display: block;
     transform: translateY(0);
 }
 
