@@ -193,6 +193,31 @@ const Login = () => {
     }
   }
 
+  const handleOtpPaste = (e) => {
+    e.preventDefault()
+    const pastedData = e.clipboardData.getData('text/plain').trim()
+    const numericData = pastedData.replace(/\D/g, '').slice(0, 6)
+    
+    if (numericData.length > 0) {
+      setOtpError('')
+      const newOtp = [...otpValues]
+      
+      for (let i = 0; i < numericData.length; i++) {
+        if (i < 6) {
+          newOtp[i] = numericData[i]
+        }
+      }
+      
+      setOtpValues(newOtp)
+      
+      const focusIndex = Math.min(numericData.length, 5)
+      const inputs = e.target.parentElement.querySelectorAll('.otp-field')
+      if (inputs[focusIndex]) {
+        inputs[focusIndex].focus()
+      }
+    }
+  }
+
   const handleChange = (e) => {
     setLoginError('')
     setFormData({
@@ -450,6 +475,7 @@ const Login = () => {
                     value={data}
                     onChange={(e) => handleOtpChange(e.target, index)}
                     onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                    onPaste={handleOtpPaste}
                     onFocus={(e) => e.target.select()}
                   />
                 ))}
