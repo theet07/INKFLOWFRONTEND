@@ -14,8 +14,8 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
-    senha: '',
-    nome: '',
+    password: '',
+    fullName: '',
     telefone: ''
   })
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', ''])
@@ -44,7 +44,7 @@ const Login = () => {
         const response = await fetch(`${API_URL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: formData.email, password: formData.senha })
+          body: JSON.stringify({ email: formData.email, password: formData.password })
         })
         const data = await response.json()
 
@@ -99,7 +99,11 @@ const Login = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            email: formData.email
+            username: formData.email.split('@')[0],
+            email: formData.email,
+            password: formData.password,
+            fullName: formData.fullName,
+            telefone: formData.telefone
           })
         })
 
@@ -139,8 +143,8 @@ const Login = () => {
           userData: {
             username: formData.email.split('@')[0],
             email: formData.email,
-            password: formData.senha,
-            fullName: formData.nome,
+            password: formData.password,
+            fullName: formData.fullName,
             telefone: formData.telefone
           }
         })
@@ -196,7 +200,7 @@ const Login = () => {
 
   const handlePortalSwitch = () => {
     setIsArtistLogin(prev => !prev)
-    setFormData(prev => ({ ...prev, email: '', senha: '' }))
+    setFormData(prev => ({ ...prev, email: '', password: '', fullName: '', telefone: '' }))
   }
 
   return (
@@ -255,9 +259,9 @@ const Login = () => {
                       <input
                         id="nome"
                         type="text"
-                        name="nome"
+                        name="fullName"
                         placeholder="Digite seu nome completo"
-                        value={formData.nome}
+                        value={formData.fullName}
                         onChange={handleChange}
                         required={!isLogin}
                       />
@@ -303,9 +307,9 @@ const Login = () => {
                     <input
                       id="senha"
                       type="password"
-                      name="senha"
+                      name="password"
                       placeholder="Digite sua senha"
-                      value={formData.senha}
+                      value={formData.password}
                       onChange={handleChange}
                       required
                     />
