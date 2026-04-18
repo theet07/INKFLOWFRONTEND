@@ -136,17 +136,9 @@ const Login = () => {
       const response = await fetch(`${API_URL}/api/clientes/verificar-codigo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          codigo: code,
-          // Dados do cadastro para finalizar a criação da conta
-          userData: {
-            username: formData.email.split('@')[0],
-            email: formData.email,
-            password: formData.password,
-            fullName: formData.fullName,
-            telefone: formData.telefone
-          }
+        body: JSON.stringify({ 
+          email: registeredEmail, 
+          codigo: code 
         })
       })
 
