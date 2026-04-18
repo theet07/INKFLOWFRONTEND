@@ -496,7 +496,7 @@
 .verification-card {
   width: 100%;
   max-width: 560px;
-  min-height: 680px;
+  min-height: 710px;
   padding: 4rem 3rem;
   text-align: center;
   background: #111;
@@ -645,4 +645,4 @@
   z-index: 10;
   backdrop-filter: blur(5px);
 }
-
+
