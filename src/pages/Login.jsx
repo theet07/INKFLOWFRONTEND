@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import { formatPhone } from '../utils/formatPhone'
 import './Login.css'
 
@@ -24,6 +25,7 @@ const Login = () => {
   const [loginError, setLoginError] = useState('')
   const [otpError, setOtpError] = useState('')
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const showToast = useCallback((message, type = 'info') => {
     const id = Date.now() + Math.random()
@@ -84,12 +86,15 @@ const Login = () => {
 
           // Hierarquia de redirecionamento: Admin > Artista > Cliente
           if (isAdminAccount) {
+            login(loggedUser, 'admin', data.token)
             localStorage.setItem('userType', 'admin')
             navigate('/admin')
           } else if (isArtistAccount) {
+            login(loggedUser, 'artist', data.token)
             localStorage.setItem('userType', 'artist')
             navigate('/artist-dashboard')
           } else {
+            login(loggedUser, 'client', data.token)
             localStorage.setItem('userType', 'client')
             navigate('/agendamento')
           }
