@@ -282,14 +282,19 @@ const Profile = () => {
     setEditProfile(prev => ({ ...prev, saving: true }))
     try {
       if (user.id) {
-        await clienteService.update(user.id, {
-          ...user,
+        const payloadSeguro = {
           nome: editProfile.nome,
           fullName: editProfile.nome,
           telefone: editProfile.telefone,
-        })
+          email: user.email,
+          cpf: user.cpf,
+          dataNascimento: user.dataNascimento
+        };
+        
+        await clienteService.update(user.id, payloadSeguro)
       }
       const updatedUser = { ...user, nome: editProfile.nome, fullName: editProfile.nome, telefone: editProfile.telefone }
+      delete updatedUser.imagemReferenciaUrl;
       localStorage.setItem('user', JSON.stringify(updatedUser))
       setEditProfile(prev => ({ ...prev, isOpen: false }))
       showToast('Perfil atualizado com sucesso!', 'check_circle')
