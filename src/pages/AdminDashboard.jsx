@@ -21,7 +21,7 @@ const AdminDashboard = () => {
     }
     try {
       const payload = JSON.parse(atob(token.split('.')[1]))
-      if (!payload.roles?.includes('ROLE_ADMIN') && payload.role !== 'ROLE_ADMIN') {
+      if (payload.role !== 'ROLE_ADMIN') {
         navigate('/login')
         return
       }
