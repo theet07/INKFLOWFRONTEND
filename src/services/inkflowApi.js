@@ -54,7 +54,7 @@ export const agendamentoService = {
   create: (agendamento) => api.post('/agendamentos', agendamento),
   update: (id, agendamento) => api.put(`/agendamentos/${id}`, agendamento),
   updateStatus: (id, data) => api.patch(`/agendamentos/${id}/status`, data),
-  avaliar: (id, data) => api.patch(`/agendamentos/${id}/avaliar`, data),
+  avaliar: (id, data) => api.put(`/appointments/${id}/avaliar`, data),
   delete: (id) => api.delete(`/agendamentos/${id}`),
 };
 

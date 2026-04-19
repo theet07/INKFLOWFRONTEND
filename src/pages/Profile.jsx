@@ -321,7 +321,7 @@ const Profile = () => {
 
   const handleAvaliarSessao = async (agendamentoId, avaliacao, observacoes) => {
     try {
-      await agendamentoService.avaliar(agendamentoId, { avaliacao, observacoes })
+      await agendamentoService.avaliar(agendamentoId, { avaliacao })
       await fetchMeusAgendamentos()
       showToast('Avaliação enviada com sucesso!', 'star')
       closeModal()
