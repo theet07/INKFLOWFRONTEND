@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useEffect } from 'react'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -30,6 +30,19 @@ function ScrollToTop() {
   return null
 }
 
+const ProtectedRoute = ({ element, allowedTypes }) => {
+  const { user, userType, loading } = useAuth()
+
+  if (loading) return null
+
+  if (!user) return <Navigate to="/login" replace />
+
+  if (!allowedTypes.includes(userType))
+    return <Navigate to="/" replace />
+
+  return element
+}
+
 function AppContent() {
   const location = useLocation()
   const isLoginPage = location.pathname === '/login'
@@ -49,12 +62,20 @@ function AppContent() {
           <Route path="/contato" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/agendamento" element={<Booking />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/perfil" element={<Profile />} />
-          <Route path="/artist-dashboard" element={<ArtistDashboard />} />
           <Route path="/artistas" element={<Artists />} />
           <Route path="/artista/:id" element={<ArtistProfile />} />
           <Route path="/para-tatuadores" element={<ArtistLandingPage />} />
+
+          {/* Protegidas */}
+          <Route path="/admin" element={
+            <ProtectedRoute allowedTypes={['admin']} element={<AdminDashboard />} />
+          } />
+          <Route path="/artist-dashboard" element={
+            <ProtectedRoute allowedTypes={['artist']} element={<ArtistDashboard />} />
+          } />
+          <Route path="/perfil" element={
+            <ProtectedRoute allowedTypes={['client']} element={<Profile />} />
+          } />
         </Routes>
       </main>
       {!hideShell && <Footer />}
