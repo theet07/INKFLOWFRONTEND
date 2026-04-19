@@ -1,51 +1,27 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { agendamentoService } from '../services/inkflowApi'
+import { useAuth } from '../contexts/AuthContext'
 import './Header.css'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [user, setUser] = useState(null)
   const [notifOpen, setNotifOpen] = useState(false)
   const [agendamentos, setAgendamentos] = useState([])
   const notifRef = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
+  const { user, userType } = useAuth()
 
   useEffect(() => {
-    const userData = localStorage.getItem('user')
-    const token = localStorage.getItem('token')
-
-    if (userData && token) {
-      try {
-        // Verifica se o token JWT está expirado
-        const payload = JSON.parse(atob(token.split('.')[1]))
-        if (payload.exp * 1000 < Date.now()) {
-          localStorage.removeItem('user')
-          localStorage.removeItem('token')
-          setUser(null)
-        } else {
-          setUser(JSON.parse(userData))
-        }
-      } catch {
-        localStorage.removeItem('user')
-        localStorage.removeItem('token')
-        setUser(null)
-      }
-    } else {
-      setUser(null)
-    }
-  }, [location])
-
-  useEffect(() => {
-    if (user?.id) {
+    if (userType === 'client' && user?.id) {
       agendamentoService.getByCliente(user.id)
         .then(res => setAgendamentos(res.data.slice(0, 3)))
         .catch(() => {})
     } else {
       setAgendamentos([])
     }
-  }, [user])
+  }, [user, userType])
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -62,17 +38,14 @@ const Header = () => {
     return new Date(dataHora).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase()
   }
 
-  const statusColor = { 'AGENDADO': '#ff0000', 'CONFIRMADO': '#10b981', 'REALIZADO': '#6366f1', 'CANCELADO': 'rgba(255,255,255,0.3)' }
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
+  const statusColor = {
+    'AGENDADO': '#ff0000',
+    'CONFIRMADO': '#10b981',
+    'REALIZADO': '#6366f1',
+    'CANCELADO': 'rgba(255,255,255,0.3)'
   }
 
-
-
-  const isActive = (path) => {
-    return location.pathname === path ? 'active' : ''
-  }
+  const isActive = (path) => location.pathname === path ? 'active' : ''
 
   const handleSobreNosClick = (e) => {
     e.preventDefault()
@@ -80,9 +53,7 @@ const Header = () => {
       document.getElementById('sobre-nos')?.scrollIntoView({ behavior: 'smooth' })
     } else {
       navigate('/')
-      setTimeout(() => {
-        document.getElementById('sobre-nos')?.scrollIntoView({ behavior: 'smooth' })
-      }, 100)
+      setTimeout(() => document.getElementById('sobre-nos')?.scrollIntoView({ behavior: 'smooth' }), 100)
     }
   }
 
@@ -92,52 +63,65 @@ const Header = () => {
       document.getElementById('servicos')?.scrollIntoView({ behavior: 'smooth' })
     } else {
       navigate('/')
-      setTimeout(() => {
-        document.getElementById('servicos')?.scrollIntoView({ behavior: 'smooth' })
-      }, 100)
+      setTimeout(() => document.getElementById('servicos')?.scrollIntoView({ behavior: 'smooth' }), 100)
     }
   }
+
+  const UserIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M12 14c-6 0-8 4-8 4v2h16v-2s-2-4-8-4z"/>
+    </svg>
+  )
 
   return (
     <header>
       <nav>
         <Link to="/" className="logo">INK FLOW</Link>
+
         <ul className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
           <li><Link to="/" className={isActive('/')}>Home</Link></li>
           <li><Link to="/artistas" className={isActive('/artistas')}>Explorar Artistas</Link></li>
           <li><Link to="/portfolio" className={isActive('/portfolio')}>Portfólio</Link></li>
           <li><Link to="/agendamento" className={isActive('/agendamento')}>Agendamento</Link></li>
           <li><Link to="/contato" className={isActive('/contato')}>Contato</Link></li>
-          {!user && (
-            <li><Link to="/para-tatuadores" className={isActive('/para-tatuadores')} style={{color: 'var(--accent-red)', fontWeight: 'bold'}}>Para Tatuadores</Link></li>
-          )}
-          {user ? (
-            <>
+
+          {(!user || userType === 'admin') && (
             <li>
-              <Link to="/perfil" className={isActive('/perfil')}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="8" r="4"/>
-                  <path d="M12 14c-6 0-8 4-8 4v2h16v-2s-2-4-8-4z"/>
-                </svg>
+              <Link to="/para-tatuadores" className={isActive('/para-tatuadores')}
+                style={{ color: 'var(--accent-red)', fontWeight: 'bold' }}>
+                Para Tatuadores
               </Link>
             </li>
-            </>
+          )}
+
+          {user ? (
+            <li>
+              {userType === 'client' && (
+                <Link to="/perfil" className={isActive('/perfil')}><UserIcon /></Link>
+              )}
+              {userType === 'artist' && (
+                <Link to="/artist-dashboard" className={isActive('/artist-dashboard')}><UserIcon /></Link>
+              )}
+              {userType === 'admin' && (
+                <Link to="/admin" className={isActive('/admin')}><UserIcon /></Link>
+              )}
+            </li>
           ) : (
-            <li><Link to="/login" className={isActive('/login')}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="8" r="4"/>
-                <path d="M12 14c-6 0-8 4-8 4v2h16v-2s-2-4-8-4z"/>
-              </svg>
-              <span style={{marginLeft: '0.5rem'}}>Login</span>
-            </Link></li>
+            <li>
+              <Link to="/login" className={isActive('/login')}>
+                <UserIcon />
+                <span style={{ marginLeft: '0.5rem' }}>Login</span>
+              </Link>
+            </li>
           )}
         </ul>
+
         <div className="nav-actions">
-          <button className="mobile-menu-toggle" onClick={toggleMenu}>
-            ☰
-          </button>
+          <button className="mobile-menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>☰</button>
         </div>
-        {user && (
+
+        {userType === 'client' && (
           <div className="notif-wrap" ref={notifRef}>
             <button className="notif-btn" onClick={() => setNotifOpen(prev => !prev)}>
               <span className="material-symbols-outlined">notifications</span>
@@ -149,14 +133,19 @@ const Header = () => {
                   <div className="notif-empty">Nenhum agendamento ainda.</div>
                 ) : (
                   agendamentos.map(ag => (
-                    <div key={ag.id} className="notif-item" onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>
+                    <div key={ag.id} className="notif-item"
+                      onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>
                       <div className="notif-item-title">{ag.servico || 'Tatuagem'}</div>
                       <div className="notif-item-sub">{ag.artista?.nome || 'Artista'} · {formatDate(ag.dataHora)}</div>
-                      <span className="notif-item-status" style={{ color: statusColor[ag.status] || '#fff' }}>{ag.status}</span>
+                      <span className="notif-item-status"
+                        style={{ color: statusColor[ag.status] || '#fff' }}>{ag.status}</span>
                     </div>
                   ))
                 )}
-                <div className="notif-footer" onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>Ver todos no perfil →</div>
+                <div className="notif-footer"
+                  onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>
+                  Ver todos no perfil →
+                </div>
               </div>
             )}
           </div>
