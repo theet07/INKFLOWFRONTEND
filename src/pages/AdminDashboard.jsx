@@ -8,29 +8,35 @@ const AdminDashboard = () => {
   const [backupStatus, setBackupStatus] = useState(null)
   const [loadingBackup, setLoadingBackup] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
+  const [loadError, setLoadError] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
-    // IMPORTANTE: Esta verificação é apenas visual. 
-    // A proteção real deve ser feita no backend com JWT/roles.
-    const user = JSON.parse(localStorage.getItem('user') || '{}')
-    if (!user.isAdmin) {
+    const storedToken = localStorage.getItem('token')
+
+    try {
+      const payload = JSON.parse(atob(storedToken.split('.')[1]))
+      if (!payload.roles?.includes('ROLE_ADMIN')) {
+        navigate('/login')
+        return
+      }
+    } catch {
       navigate('/login')
       return
     }
-    
+
     loadAgendamentos()
   }, [navigate])
   
   const loadAgendamentos = async () => {
     try {
+      setLoadError(false)
       const response = await agendamentoService.getAll()
       setBookings(response.data)
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error)
-      // Fallback para localStorage se backend não estiver disponível
-      const savedBookings = JSON.parse(localStorage.getItem('bookings') || '[]')
-      setBookings(savedBookings)
+      setLoadError(true)
+      setBookings([])
     }
   }
 
@@ -131,7 +137,9 @@ const AdminDashboard = () => {
 
         {activeTab === 'agendamentos' && (
           <div className="bookings-management">
-            {bookings.length === 0 ? (
+            {loadError ? (
+              <p className="text-gray" style={{ color: '#e74c3c' }}>Erro ao carregar agendamentos. Verifique a conexão com o servidor.</p>
+            ) : bookings.length === 0 ? (
               <p className="text-gray">Nenhum agendamento encontrado.</p>
             ) : (
               <div className="bookings-grid">

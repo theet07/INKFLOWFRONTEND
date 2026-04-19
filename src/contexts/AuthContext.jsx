@@ -2,6 +2,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
+const isTokenExpired = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.exp * 1000 < Date.now()
+  } catch {
+    return true
+  }
+}
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userType, setUserType] = useState(null);
@@ -9,25 +18,29 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Carrega do localStorage uma única vez quando inicializa
     const storedUser = localStorage.getItem('user');
     const storedUserType = localStorage.getItem('userType');
     const storedToken = localStorage.getItem('token');
 
     if (storedUser && storedToken && storedUserType) {
-      try {
-        setUser(JSON.parse(storedUser));
-        setUserType(storedUserType);
-        setToken(storedToken);
-      } catch (error) {
-        console.error("Failed to parse user data from localStorage:", error);
-        localStorage.removeItem('user');
-        localStorage.removeItem('userType');
-        localStorage.removeItem('token');
+      if (isTokenExpired(storedToken)) {
+        localStorage.removeItem('user')
+        localStorage.removeItem('userType')
+        localStorage.removeItem('token')
+      } else {
+        try {
+          setUser(JSON.parse(storedUser));
+          setUserType(storedUserType);
+          setToken(storedToken);
+        } catch (error) {
+          console.error("Failed to parse user data from localStorage:", error);
+          localStorage.removeItem('user');
+          localStorage.removeItem('userType');
+          localStorage.removeItem('token');
+        }
       }
     }
-    
-    // Pequeno delay arquitetural para não estourar o layout na validação
+
     setLoading(false);
   }, []);
 

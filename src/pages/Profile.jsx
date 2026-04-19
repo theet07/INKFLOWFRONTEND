@@ -127,7 +127,7 @@ const Profile = () => {
 
   if (!user || !user.email) return null
 
-  const isAvaliado = (ag) => Boolean(ag.avaliacao && ag.avaliacao > 0)
+  const isAvaliado = (ag) => ag.avaliado === true
   const proximas = agendamentos.filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO' || (a.status === 'REALIZADO' && !isAvaliado(a)))
   const colecao = agendamentos.filter(a => a.status === 'REALIZADO' && isAvaliado(a))
   const artistasUnicos = agendamentos
@@ -240,32 +240,22 @@ const Profile = () => {
       showToast('Digite sua senha para confirmar', 'error')
       return
     }
-
     setDeleteAccountModal(prev => ({ ...prev, deleting: true }))
-    
     try {
-      // Validar senha antes de excluir
       const API_URL = import.meta.env.VITE_API_URL
         ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
         : 'https://inkflowbackend-4w1g.onrender.com'
-      
-      const loginResponse = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, password: deleteAccountModal.password })
+      const response = await fetch(`${API_URL}/api/clientes/minha-conta`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ password: deleteAccountModal.password })
       })
-
-      if (!loginResponse.ok) {
-        showToast('Senha incorreta', 'error')
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        showToast(data.message || 'Senha incorreta', 'error')
         setDeleteAccountModal(prev => ({ ...prev, deleting: false }))
         return
       }
-
-      // Excluir conta
-      if (user.id) {
-        await clienteService.delete(user.id)
-      }
-      
       localStorage.removeItem('user')
       localStorage.removeItem('token')
       localStorage.removeItem('userType')

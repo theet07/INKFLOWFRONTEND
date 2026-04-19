@@ -50,17 +50,12 @@ const DashboardTab = ({ showToast, openDrawer }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let res
-        if (user.artistaId || user.id) {
-          try {
-            res = await agendamentoService.getByArtista(user.artistaId || user.id)
-          } catch (err) {
-            console.error('Falha ao buscar agendamentos do artista. Negando extração global.', err);
-            res = { data: [] }
-          }
-        } else {
-          res = await agendamentoService.getAll()
+        if (!user.artistaId && !user.id) {
+          console.error('Estado do usuário corrompido: sem artistaId nem id.')
+          setLoading(false)
+          return
         }
+        const res = await agendamentoService.getByArtista(user.artistaId || user.id)
         setAgendamentos(Array.isArray(res.data) ? res.data : [])
       } catch (err) {
         console.error('Erro ao carregar agendamentos do artista:', err)

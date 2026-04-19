@@ -26,15 +26,19 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 403) {
-      alert('Acesso não autorizado. Redirecionando para a home...');
-      window.location.href = '/';
+      const isSessionError = error.response?.data?.message?.includes('sessão')
+        || !localStorage.getItem('token');
+      if (isSessionError) {
+        window.location.href = '/';
+      }
+      return Promise.reject(error);
     }
     return Promise.reject(error);
   }
 )
 
 export const clienteService = {
-  login: (credentials) => api.post('/clientes/login', credentials),
+  login: (credentials) => api.post('/auth/login', credentials),
   getAll: () => api.get('/clientes'),
   getById: (id) => api.get(`/clientes/${id}`),
   getByEmail: (email) => api.get(`/clientes/email/${encodeURIComponent(email)}`),
@@ -46,12 +50,12 @@ export const clienteService = {
 };
 
 export const agendamentoService = {
-  getAll: () => api.get('/agendamentos'),
+  getAll: () => api.get('/admin/agendamentos'),
   getById: (id) => api.get(`/agendamentos/${id}`),
   getByCliente: (clienteId) => api.get(`/agendamentos/cliente/${clienteId}`),
-  getByArtista: (artistaId) => api.get(`/artists/${artistaId}/appointments`),
+  getByArtista: (artistaId) => api.get(`/agendamentos/artista/${artistaId}`),
   getByStatus: (status) => api.get(`/agendamentos/status/${status}`),
-  create: (agendamento) => api.post('/agendamentos', agendamento),
+  create: (agendamento) => api.post('/appointments', agendamento),
   update: (id, agendamento) => api.put(`/agendamentos/${id}`, agendamento),
   updateStatus: (id, data) => api.patch(`/agendamentos/${id}/status`, data),
   avaliar: (id, data) => api.put(`/appointments/${id}/avaliar`, data),
@@ -65,8 +69,13 @@ export const appointmentService = {
 export const artistaService = {
   getAllArtists: () => api.get('/artists', { baseURL: API_BASE_URL.replace('/v1', '') }),
   getById: (id) => api.get(`/artists/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
-  getAvailability: (id) => api.get(`/artists/${id}/availability`),
-  getSlots: (id, data) => api.get(`/artists/${id}/availability/slots`, { params: { data } }),
+  getAvailability: (id) => api.get(`/artists/${id}/availability`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getSlots: (id, data) => api.get(`/artists/${id}/availability/slots`, { params: { data }, baseURL: API_BASE_URL.replace('/v1', '') }),
+  update: (id, data) => api.put(`/artistas/${id}`, data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  uploadFoto: (id, formData) => api.post(`/artistas/${id}/foto`, formData, {
+    baseURL: API_BASE_URL.replace('/v1', ''),
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 };
 
 export const portfolioService = {

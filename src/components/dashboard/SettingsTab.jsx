@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { artistaService } from '../../services/inkflowApi'
 
 const SettingsTab = ({ showToast }) => {
   const [studioOpen, setStudioOpen] = useState(true)
@@ -21,15 +22,28 @@ const SettingsTab = ({ showToast }) => {
 
   const avatarInputRef = useRef(null)
 
-  const handleAvatarChange = (e) => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+  const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (ev) => {
-        setAvatarPreview(ev.target.result)
-        showToast('Foto de perfil atualizada!')
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (ev) => setAvatarPreview(ev.target.result)
+    reader.readAsDataURL(file)
+
+    try {
+      const uploadData = new FormData()
+      uploadData.append('file', file)
+      const response = await artistaService.uploadFoto(user.artistaId || user.id, uploadData)
+      showToast('Foto de perfil atualizada!')
+      if (response.data?.fotoUrl) {
+        const updatedUser = { ...user, fotoUrl: response.data.fotoUrl }
+        localStorage.setItem('user', JSON.stringify(updatedUser))
       }
-      reader.readAsDataURL(file)
+    } catch (err) {
+      console.error('Erro ao fazer upload da foto:', err)
+      showToast('Erro ao atualizar foto. Tente novamente.', true)
     }
   }
 
@@ -37,11 +51,14 @@ const SettingsTab = ({ showToast }) => {
     setTags(prev => prev.filter(t => t !== tagToRemove))
   }
 
+  const [newTag, setNewTag] = useState('')
+
   const addTag = () => {
-    const newTag = prompt('Digite a nova especialidade:')
-    if (newTag && newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags(prev => [...prev, newTag.trim()])
+    const tag = newTag.trim()
+    if (tag && !tags.includes(tag)) {
+      setTags(prev => [...prev, tag])
     }
+    setNewTag('')
   }
 
   const toggleScheduleDay = (index) => {
@@ -52,12 +69,21 @@ const SettingsTab = ({ showToast }) => {
     setSchedule(prev => prev.map((s, i) => i === index ? { ...s, [field]: value } : s))
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setSaving(true)
-    setTimeout(() => {
-      setSaving(false)
+    try {
+      await artistaService.update(user.artistaId || user.id, {
+        nome: artistName,
+        bio: artistBio,
+        especialidades: tags.join(',')
+      })
       showToast('Configurações salvas com sucesso!')
-    }, 1000)
+    } catch (err) {
+      console.error('Erro ao salvar configurações:', err)
+      showToast('Erro ao salvar configurações. Tente novamente.', true)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleDiscard = () => {
@@ -144,7 +170,18 @@ const SettingsTab = ({ showToast }) => {
                       <span className="material-symbols-outlined ad-tag-remove" onClick={() => removeTag(tag)}>close</span>
                     </span>
                   ))}
-                  <button className="ad-tag-add" onClick={addTag}>+ Adicionar</button>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                    <input
+                      type="text"
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && addTag()}
+                      placeholder="Nova especialidade..."
+                      className="ad-form-input"
+                      style={{ flex: 1 }}
+                    />
+                    <button onClick={addTag} className="ad-btn-outline-small">Adicionar</button>
+                  </div>
                 </div>
               </div>
             </div>
