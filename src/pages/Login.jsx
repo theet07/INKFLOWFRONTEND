@@ -62,7 +62,7 @@ const Login = () => {
           }
 
           const isArtistAccount = loggedUser.isArtist || loggedUser.role === 'ROLE_ARTISTA' || loggedUser.artistaId
-          const isAdminAccount = loggedUser.isAdmin
+          const isAdminAccount = loggedUser.isAdmin || loggedUser.role === 'ROLE_ADMIN'
 
           // Login Inteligente: Artista tentando entrar pelo portal de cliente
           if (!isArtistLogin && isArtistAccount && !isAdminAccount) {
