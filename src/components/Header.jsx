@@ -134,8 +134,6 @@ const Header = () => {
             </li>
           )}
         </ul>
-
-        <div className="nav-actions">
           <button className="mobile-menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>☰</button>
         </div>
 
@@ -167,6 +165,24 @@ const Header = () => {
               </div>
             )}
           </div>
+        )}
+
+        {user && (
+          <button
+            onClick={() => { logout(); navigate('/login') }}
+            style={{
+              background: 'none',
+              border: '1px solid currentColor',
+              borderRadius: '4px',
+              color: 'inherit',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              fontSize: 'inherit',
+              padding: '4px 12px',
+              marginLeft: '12px'
+            }}>
+            Sair
+          </button>
         )}
       </nav>
     </header>
