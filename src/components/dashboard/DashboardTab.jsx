@@ -54,9 +54,9 @@ const DashboardTab = ({ showToast, openDrawer }) => {
         if (user.artistaId || user.id) {
           try {
             res = await agendamentoService.getByArtista(user.artistaId || user.id)
-          } catch {
-            // Fallback: se o endpoint por artista falhar, busca todos
-            res = await agendamentoService.getAll()
+          } catch (err) {
+            console.error('Falha ao buscar agendamentos do artista. Negando extração global.', err);
+            res = { data: [] }
           }
         } else {
           res = await agendamentoService.getAll()

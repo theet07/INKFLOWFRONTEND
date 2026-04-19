@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { agendamentoService, clienteService } from '../services/inkflowApi'
+import { useAuth } from '../contexts/AuthContext'
 import './Profile.css'
 
 const Toast = ({ message, icon, onExit }) => {
@@ -57,7 +58,7 @@ const getFallbackImage = (servico) => {
 
 const Profile = () => {
   const navigate = useNavigate()
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const { user, token, loading: authLoading } = useAuth()
 
   const [toasts, setToasts] = useState([])
   const [modal, setModal] = useState({ isOpen: false, title: '', content: null, isImage: false })
@@ -80,7 +81,7 @@ const Profile = () => {
 
   const fetchMeusAgendamentos = async () => {
     try {
-      const token = localStorage.getItem('token');
+      if (!token) return;
       const API_URL = import.meta.env.VITE_API_URL
         ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
         : 'https://inkflowbackend-4w1g.onrender.com';
@@ -105,11 +106,26 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (!user.email) { navigate('/login'); return }
-    fetchMeusAgendamentos();
-  }, [user.email])
+    if (!authLoading) {
+      if (!user || !user.email) {
+        navigate('/login');
+        return;
+      }
+      fetchMeusAgendamentos();
+    }
+  }, [user, authLoading, navigate])
 
-  if (!user.email) return null
+  if (authLoading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0a0a0a', color: '#fff' }}>
+        <h2 style={{ color: '#e63946', marginBottom: '1rem', animation: 'pulsate 1.5s infinite ease-in-out' }}>Autenticando Perfil...</h2>
+        <p style={{ opacity: 0.5 }}>Carregando sua galeria segura do InkFlow.</p>
+        <style>{`@keyframes pulsate { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }`}</style>
+      </div>
+    )
+  }
+
+  if (!user || !user.email) return null
 
   const isAvaliado = (ag) => Boolean(ag.avaliacao && ag.avaliacao > 0)
   const proximas = agendamentos.filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO' || (a.status === 'REALIZADO' && !isAvaliado(a)))

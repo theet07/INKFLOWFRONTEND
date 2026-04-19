@@ -49,7 +49,7 @@ export const agendamentoService = {
   getAll: () => api.get('/agendamentos'),
   getById: (id) => api.get(`/agendamentos/${id}`),
   getByCliente: (clienteId) => api.get(`/agendamentos/cliente/${clienteId}`),
-  getByArtista: (artistaId) => api.get(`/agendamentos/artista/${artistaId}`),
+  getByArtista: (artistaId) => api.get(`/artists/${artistaId}/appointments`),
   getByStatus: (status) => api.get(`/agendamentos/status/${status}`),
   create: (agendamento) => api.post('/agendamentos', agendamento),
   update: (id, agendamento) => api.put(`/agendamentos/${id}`, agendamento),
@@ -62,8 +62,8 @@ export const appointmentService = {
 };
 
 export const artistaService = {
-  getAllArtists: () => api.get('/artistas', { baseURL: API_BASE_URL.replace('/v1', '') }),
-  getById: (id) => api.get(`/artistas/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getAllArtists: () => api.get('/artists', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getById: (id) => api.get(`/artists/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
   getAvailability: (id) => api.get(`/artists/${id}/availability`),
   getSlots: (id, data) => api.get(`/artists/${id}/availability/slots`, { params: { data } }),
 };

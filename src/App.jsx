@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import { useEffect } from 'react'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -65,11 +66,13 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <ErrorBoundary>
-        <AppContent />
-      </ErrorBoundary>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <ErrorBoundary>
+          <AppContent />
+        </ErrorBoundary>
+      </Router>
+    </AuthProvider>
   )
 }
 
