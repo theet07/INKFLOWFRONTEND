@@ -11,7 +11,7 @@ const Header = () => {
   const notifRef = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, userType } = useAuth()
+  const { user, userType, logout } = useAuth()
 
   useEffect(() => {
     if (userType === 'client' && user?.id) {
@@ -113,6 +113,24 @@ const Header = () => {
                 <UserIcon />
                 <span style={{ marginLeft: '0.5rem' }}>Login</span>
               </Link>
+            </li>
+          )}
+
+          {user && (
+            <li>
+              <button
+                onClick={() => { logout(); navigate('/login') }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'inherit',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  fontSize: 'inherit',
+                  padding: '0'
+                }}>
+                Sair
+              </button>
             </li>
           )}
         </ul>
