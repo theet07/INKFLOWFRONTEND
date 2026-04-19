@@ -47,26 +47,6 @@ const Header = () => {
 
   const isActive = (path) => location.pathname === path ? 'active' : ''
 
-  const handleSobreNosClick = (e) => {
-    e.preventDefault()
-    if (location.pathname === '/') {
-      document.getElementById('sobre-nos')?.scrollIntoView({ behavior: 'smooth' })
-    } else {
-      navigate('/')
-      setTimeout(() => document.getElementById('sobre-nos')?.scrollIntoView({ behavior: 'smooth' }), 100)
-    }
-  }
-
-  const handleServicosClick = (e) => {
-    e.preventDefault()
-    if (location.pathname === '/') {
-      document.getElementById('servicos')?.scrollIntoView({ behavior: 'smooth' })
-    } else {
-      navigate('/')
-      setTimeout(() => document.getElementById('servicos')?.scrollIntoView({ behavior: 'smooth' }), 100)
-    }
-  }
-
   const UserIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
       <circle cx="12" cy="8" r="4"/>
@@ -115,25 +95,9 @@ const Header = () => {
               </Link>
             </li>
           )}
-
-          {user && (
-            <li>
-              <button
-                onClick={() => { logout(); navigate('/login') }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'inherit',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  fontSize: 'inherit',
-                  padding: '0'
-                }}>
-                Sair
-              </button>
-            </li>
-          )}
         </ul>
+
+        <div className="nav-actions">
           <button className="mobile-menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>☰</button>
         </div>
 
