@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { agendamentoService, clienteService, adminService } from '../services/inkflowApi'
+import { useAuth } from '../contexts/AuthContext'
 
 const AdminDashboard = () => {
   const [bookings, setBookings] = useState([])
@@ -10,13 +11,17 @@ const AdminDashboard = () => {
   const [isDownloading, setIsDownloading] = useState(false)
   const [loadError, setLoadError] = useState(false)
   const navigate = useNavigate()
+  const { token, loading } = useAuth()
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token')
-
+    if (loading) return
+    if (!token) {
+      navigate('/login')
+      return
+    }
     try {
-      const payload = JSON.parse(atob(storedToken.split('.')[1]))
-      if (!payload.roles?.includes('ROLE_ADMIN')) {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      if (!payload.roles?.includes('ROLE_ADMIN') && payload.role !== 'ROLE_ADMIN') {
         navigate('/login')
         return
       }
@@ -24,9 +29,8 @@ const AdminDashboard = () => {
       navigate('/login')
       return
     }
-
     loadAgendamentos()
-  }, [navigate])
+  }, [token, loading, navigate])
   
   const loadAgendamentos = async () => {
     try {
