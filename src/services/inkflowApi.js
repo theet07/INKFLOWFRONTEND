@@ -86,10 +86,10 @@ export const portfolioService = {
 };
 
 export const adminService = {
-  exportBackup: () => api.get('/v1/admin/backup/download', { responseType: 'blob', baseURL: API_BASE_URL.replace('/v1', '') }),
-  getBackupStatus: () => api.get('/v1/admin/backup/status', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  exportBackup: () => api.get('/api/v1/admin/backup/download', { responseType: 'blob', baseURL: API_BASE_URL.replace(/\/api.*$/, '') }),
+  getBackupStatus: () => api.get('/api/v1/admin/backup/status', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') }),
 };
 
-export const testConnection = () => api.get('/test');
+export const testConnection = () => api.get('/api/health', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') });
 
 export default api;
