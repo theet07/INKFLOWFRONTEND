@@ -309,12 +309,25 @@ const Profile = () => {
     try {
       await agendamentoService.updateStatus(agendamentoId, { status, avaliacao, observacoes })
       await fetchMeusAgendamentos()
-      const msg = status === 'REALIZADO' ? 'Sessão marcada como realizada!' : status === 'CANCELADO' ? 'Sessão cancelada.' : 'Sessão atualizada!'
+      const msg = status === 'CANCELADO' ? 'Sessão cancelada.' : 'Sessão atualizada!'
       showToast(msg, status === 'CANCELADO' ? 'cancel' : 'check_circle')
       closeModal()
     } catch (err) {
       console.error('Erro ao atualizar status:', err)
       const errorMsg = err.response?.data?.message || 'Erro ao atualizar sessão. Verifique sua conexão.'
+      showToast(errorMsg, 'error')
+    }
+  }
+
+  const handleAvaliarSessao = async (agendamentoId, avaliacao, observacoes) => {
+    try {
+      await agendamentoService.avaliar(agendamentoId, { avaliacao, observacoes })
+      await fetchMeusAgendamentos()
+      showToast('Avaliação enviada com sucesso!', 'star')
+      closeModal()
+    } catch (err) {
+      console.error('Erro ao enviar avaliação:', err)
+      const errorMsg = err.response?.data?.message || 'Erro ao enviar avaliação. Verifique sua conexão.'
       showToast(errorMsg, 'error')
     }
   }
@@ -327,6 +340,7 @@ const Profile = () => {
       <SessionModalContent
         ag={ag}
         onUpdate={(status, av, obs) => handleUpdateStatus(ag.id, status, av, obs)}
+        onAvaliar={(av, obs) => handleAvaliarSessao(ag.id, av, obs)}
       />
     )
     openModal('Detalhes da Sessão', content)
@@ -448,7 +462,7 @@ const Profile = () => {
             <div className="profile-section">
               <div className="section-header">
                 <h3><span className="material-symbols-outlined">calendar_today</span> Próximas Sessões</h3>
-                <a onClick={() => navigate('/perfil/agendamentos')}>Ver Todas</a>
+                <a onClick={openAllSessionsModal} style={{ cursor: 'pointer' }}>Ver Todas</a>
               </div>
 
               {loadingAg ? (
@@ -461,13 +475,13 @@ const Profile = () => {
               ) : (
                 <div className="sessions-grid">
                   {proximas.slice(0, 2).map(ag => (
-                    <div key={ag.id} className="session-card">
-                      <div className="session-img" style={{ backgroundImage: `url("${ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}")`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
+                    <div key={ag?.id} className="session-card">
+                      <div className="session-img" style={{ backgroundImage: `url("${ag?.imagemReferenciaUrl || getFallbackImage(ag?.servico)}")`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
                       <div className="session-content">
                         <div className="session-top">
                           <div>
-                            <h4>{(ag.servico || 'Tatuagem').replace(/\s+com\s+.+$/i, '')}</h4>
-                            <p>com <span>{ag.artista?.nome || (ag.servico?.match(/com\s+(.+)$/i)?.[1]) || 'Artista'}</span></p>
+                            <h4>{(ag?.servico || 'Tatuagem').replace(/\s+com\s+.+$/i, '')}</h4>
+                            <p>com <span>{ag?.artista?.nome || (ag?.servico?.match(/com\s+(.+)$/i)?.[1]) || 'Artista'}</span></p>
                           </div>
                           <div className={`session-date ${ag.status === 'AGENDADO' ? 'red' : 'gray'}`}>
                             {formatDate(ag.dataHora)}
@@ -821,19 +835,19 @@ const AllSessionsModalContent = ({ sessoes, onAgendamentoClick }) => {
   return (
     <div className="all-sessions-list">
       {sessoes.map(ag => (
-        <div key={ag.id} className="all-sessions-item" onClick={() => onAgendamentoClick(ag)}>
-          <div className="all-sessions-item-img" style={{ backgroundImage: `url("${ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}")`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
+        <div key={ag?.id} className="all-sessions-item" onClick={() => onAgendamentoClick(ag)}>
+          <div className="all-sessions-item-img" style={{ backgroundImage: `url("${ag?.imagemReferenciaUrl || getFallbackImage(ag?.servico)}")`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
           <div className="all-sessions-item-content">
             <div className="all-sessions-item-header">
-              <h4>{(ag.servico || 'Tatuagem').replace(/\s+com\s+.+$/i, '')}</h4>
-              <div className={`session-date ${ag.status === 'AGENDADO' ? 'red' : 'gray'}`}>
-                {formatDate(ag.dataHora)}
+              <h4>{(ag?.servico || 'Tatuagem').replace(/\s+com\s+.+$/i, '')}</h4>
+              <div className={`session-date ${ag?.status === 'AGENDADO' ? 'red' : 'gray'}`}>
+                {formatDate(ag?.dataHora)}
               </div>
             </div>
             <div className="all-sessions-item-details">
-              <span><span className="material-symbols-outlined">person</span> {ag.artista?.nome || (ag.servico?.match(/com\s+(.+)$/i)?.[1]) || 'Artista'}</span>
-              <span><span className="material-symbols-outlined">schedule</span> {formatTime(ag.dataHora)}</span>
-              <span><span className="material-symbols-outlined">info</span> {ag.status}</span>
+              <span><span className="material-symbols-outlined">person</span> {ag?.artista?.nome || (ag?.servico?.match(/com\s+(.+)$/i)?.[1]) || 'Artista'}</span>
+              <span><span className="material-symbols-outlined">schedule</span> {formatTime(ag?.dataHora)}</span>
+              <span><span className="material-symbols-outlined">info</span> {ag?.status}</span>
             </div>
           </div>
         </div>
@@ -842,7 +856,7 @@ const AllSessionsModalContent = ({ sessoes, onAgendamentoClick }) => {
   )
 }
 
-const SessionModalContent = ({ ag, onUpdate }) => {
+const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
   const [avaliacao, setAvaliacao] = useState(ag.avaliacao || 0)
   const [observacoes, setObservacoes] = useState(ag.observacoes || '')
   const [loading, setLoading] = useState(false)
@@ -851,6 +865,12 @@ const SessionModalContent = ({ ag, onUpdate }) => {
   const handleUpdate = async (status) => {
     setLoading(true)
     await onUpdate(status, avaliacao, observacoes)
+    setLoading(false)
+  }
+
+  const handleSubmitAvaliacao = async () => {
+    setLoading(true)
+    await onAvaliar(avaliacao, observacoes)
     setLoading(false)
   }
 
@@ -990,7 +1010,7 @@ const SessionModalContent = ({ ag, onUpdate }) => {
           <button 
             className="p-btn-primary" 
             disabled={loading || avaliacao < 1} 
-            onClick={() => handleUpdate('REALIZADO')}
+            onClick={handleSubmitAvaliacao}
             style={{ width: '100%', marginTop: '0.5rem' }}
           >
             Confirmar e Avaliar
