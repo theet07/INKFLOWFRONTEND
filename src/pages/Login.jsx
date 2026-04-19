@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { clienteService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
 import './Login.css'
 
@@ -46,12 +47,8 @@ const Login = () => {
 
     try {
       if (isLogin) {
-        const response = await fetch(`${API_URL}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: formData.email, password: formData.password })
-        })
-        const data = await response.json()
+        const response = await clienteService.login({ email: formData.email, password: formData.password })
+        const data = response.data
 
         if (data.success) {
           const loggedUser = { ...data.user }
@@ -128,8 +125,16 @@ const Login = () => {
         }
       }
     } catch (error) {
-      console.error('Erro:', error)
-      showToast('Erro ao conectar com o servidor. Tente novamente.', 'error')
+      if (error.response?.status === 401) {
+        setLoginError('Credenciais inválidas.')
+      } else if (error.response?.status === 403) {
+        setLoginError(error.response?.data?.message || 'Conta não verificada.')
+      } else if (isLogin && error.request) {
+        showToast('Erro ao conectar com o servidor. Tente novamente.', 'error')
+      } else {
+        console.error('Erro:', error)
+        showToast('Erro ao conectar com o servidor. Tente novamente.', 'error')
+      }
     } finally {
       setIsLoading(false)
     }
