@@ -106,6 +106,14 @@ const DashboardTab = ({ showToast, openDrawer }) => {
   const getClientName = (ag) => ag.cliente?.fullName || ag.cliente?.nome || 'Cliente'
   const getClientEmail = (ag) => ag.cliente?.email || ''
 
+  const avaliacoes = agendamentos
+    .filter(a => a.avaliacao != null && a.avaliacao > 0)
+    .map(a => a.avaliacao)
+
+  const mediaAvaliacao = avaliacoes.length > 0
+    ? (avaliacoes.reduce((sum, v) => sum + v, 0) / avaliacoes.length).toFixed(1)
+    : null
+
   const handleNewSession = () => navigate('/agendamento')
 
   // Próximo status possível para ações rápidas
@@ -182,7 +190,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
 
         <div className="ad-card-rating">
           <div className="ad-rating-left">
-            <div className="ad-rating-score">4.9</div>
+            <div className="ad-rating-score">{mediaAvaliacao ?? '—'}</div>
             <div>
               <div className="ad-rating-stars">
                 {[1,2,3,4].map(i => (
