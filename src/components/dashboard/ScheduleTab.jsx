@@ -1,103 +1,95 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { agendamentoService } from '../../services/inkflowApi'
+import { useAuth } from '../../contexts/AuthContext'
 
 const ScheduleTab = ({ showToast }) => {
-  const [selectedDay, setSelectedDay] = useState('07')
-  const [viewMode, setViewMode] = useState('monthly')
+  const { user } = useAuth()
+  const [selectedDay, setSelectedDay] = useState(null)
+  const [agendamentos, setAgendamentos] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const dayNames = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 
-  // Calendar grid: null = empty leading space, object = day cell
+  useEffect(() => {
+    if (!user?.artistaId && !user?.id) return
+    const id = user.artistaId || user.id
+    agendamentoService.getByArtista(id)
+      .then(res => {
+        const dados = Array.isArray(res.data) ? res.data : []
+        const ordenados = dados
+          .filter(ag => ag.status !== 'CANCELADO')
+          .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora))
+        setAgendamentos(ordenados)
+      })
+      .catch(() => showToast('Erro ao carregar agenda.', true))
+      .finally(() => setLoading(false))
+  }, [user])
+
+  // Agrupa agendamentos por dia do mês (string '01'..'31')
+  const agendamentosPorDia = agendamentos.reduce((acc, ag) => {
+    const dia = String(new Date(ag.dataHora).getDate()).padStart(2, '0')
+    if (!acc[dia]) acc[dia] = []
+    acc[dia].push(ag)
+    return acc
+  }, {})
+
+  const diasComSessao = Object.keys(agendamentosPorDia)
+
+  // Mês/ano atual para o cabeçalho
+  const hoje = new Date()
+  const mesNome = hoje.toLocaleDateString('pt-BR', { month: 'long' })
+  const mesNomeCapitalizado = mesNome.charAt(0).toUpperCase() + mesNome.slice(1)
+  const ano = hoje.getFullYear()
+
+  // Gera o grid do mês atual dinamicamente
+  const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
+  // JS: 0=Dom, ajusta para Seg=0
+  const offsetInicio = (primeiroDia.getDay() + 6) % 7
+  const totalDias = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate()
+
   const calendarDays = [
-    null, null, // leading empties (Mon, Tue)
-    { day: '01', name: 'Quarta-feira' },
-    { day: '02', name: 'Quinta-feira', indicator: 'bar-muted' },
-    { day: '03', name: 'Sexta-feira' },
-    { day: '04', name: 'Sábado', event: { label: '10:00 AM - Realismo', type: 'primary' } },
-    { day: '05', name: 'Domingo' },
-
-    { day: '06', name: 'Segunda-feira' },
-    { day: '07', name: 'Terça-feira', event: { label: 'Sessões Ativas (3)', type: 'solid' } },
-    { day: '08', name: 'Quarta-feira' },
-    { day: '09', name: 'Quinta-feira', indicator: 'bar-error' },
-    { day: '10', name: 'Sexta-feira' },
-    { day: '11', name: 'Sábado' },
-    { day: '12', name: 'Domingo' },
-
-    // Remaining placeholders
-    { day: '13', name: 'Segunda-feira', placeholder: true },
-    { day: '14', name: 'Terça-feira', placeholder: true },
-    { day: '15', name: 'Quarta-feira', placeholder: true },
-    { day: '16', name: 'Quinta-feira', placeholder: true },
-    { day: '17', name: 'Sexta-feira', placeholder: true },
-    { day: '18', name: 'Sábado', placeholder: true },
-    { day: '19', name: 'Domingo', placeholder: true },
+    ...Array(offsetInicio).fill(null),
+    ...Array.from({ length: totalDias }, (_, i) => {
+      const num = String(i + 1).padStart(2, '0')
+      const diaSemana = new Date(hoje.getFullYear(), hoje.getMonth(), i + 1)
+        .toLocaleDateString('pt-BR', { weekday: 'long' })
+      const nomeDia = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1)
+      return { day: num, name: nomeDia }
+    })
   ]
 
-  // Sessions for selected day
-  const sessions = [
-    {
-      time: '10:00 AM — 02:00 PM',
-      client: 'Elias Thorne',
-      duration: '4h Session',
-      style: 'Realism Sleeve',
-      detail: 'Forearm • Shading Phase',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAKPAPuZN7LuO98_XAx_gTS6yOBoNJ28hOrcZ3QftP-HeWOuvtySiIbu_a3D1p54e3KVxvM5aJ0BgB7J5RkxqfIreiacRpTFtDm_PJVB-8gm6neqpNHRFWR60pMWnRjwxYuhF3vYyL8Z7Gpo2JA8ge5KZYfLXyXyeMA95rPcmPM_bven6jOCQmcjRX5VlbEyjYIjei6RmMzfM5_rUqVn2ry889LigIWpX2sSoksyIM5Q11mnemxfFHOPYQAb2_uF1ZO20t6u6kAO2s',
-      primary: true,
-    },
-    {
-      time: '03:30 PM — 06:00 PM',
-      client: 'Sarah Jenkins',
-      duration: '2.5h Session',
-      style: 'Fine Line Floral',
-      detail: 'Lower Leg • Final Details',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBrt43pITqUpk6u2HAIIskG7tVkD6o8yE41vFd2kgFFz29mPKmhTmN72YOgvAVDhscg-mtujNp-kX7oTzQue7W-AfMiYfyjuoCDPakZB_Uwzakdd0HVsp23tKNTBeCZNRgIPTGPs41CAve4o_pkvWHP9kzYvRxb0Hul3fbX_z_FFNTbDHjQ_bLRqa2PeZZZxja8tqahmy-15HzoK0wVc3Ci8UtI517tF-FxsapN6iaeAEf8Fmm7_13FdQfWjbfohoki6lfeQ15McNo',
-      primary: false,
-    },
-    {
-      time: '07:30 PM — 10:30 PM',
-      client: 'Marcus Vane',
-      duration: '3h Session',
-      style: 'Geometric Chest',
-      detail: 'Chest Piece • Linework',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDKhyNbj3W3K-z70gC0xg6DacLUF6OCVOzUOifRv7WaLGVU-1TVHkGq_mTnVenJ3h2koe_VduNeA0E4CtrCbLWJPWyeTAa1ijWnLZqIe-Ws30tfOcJBBmiIMl__gJ7LXlRSjXpmLqPofXt9Txbvk2K4mI0q65KkF-TuUeekz_i0TII4zog1jOhbwt-S-IYJ-denjyiuL1Df6FRa8dxLW-YBe2RX1nCmN95FpSSeYsKkWf3DZm9zDYjdjSaSZ0y8B1mhU3fwVW23Sec',
-      primary: true,
-    },
-  ]
+  const diaAtual = String(hoje.getDate()).padStart(2, '0')
+  const effectiveSelected = selectedDay || diaAtual
 
-  const daysWithSessions = ['04', '07']
-  const daysCanceled = ['09']
+  const sessoesDoDia = agendamentosPorDia[effectiveSelected] || []
 
   const getPanelStatus = () => {
-    if (daysWithSessions.includes(selectedDay)) return 'Confirmado'
-    if (daysCanceled.includes(selectedDay)) return 'Cancelado'
+    if (sessoesDoDia.length > 0) return 'Confirmado'
     return 'Aberto'
   }
 
-  const getPanelOpacity = () => {
-    if (daysWithSessions.includes(selectedDay)) return 1
-    if (daysCanceled.includes(selectedDay)) return 0.3
-    return 0.1
-  }
+  const getPanelOpacity = () => sessoesDoDia.length > 0 ? 1 : 0.1
 
   const getSelectedDayName = () => {
-    const found = calendarDays.find(d => d && d.day === selectedDay)
+    const found = calendarDays.find(d => d && d.day === effectiveSelected)
     return found ? found.name : ''
   }
 
   const handleDayClick = (day) => {
     setSelectedDay(day.day)
-    if (daysWithSessions.includes(day.day)) {
-      showToast(`Agenda de Out ${day.day} carregada`)
-    } else if (daysCanceled.includes(day.day)) {
-      showToast(`Nenhuma sessão ativa em Out ${day.day}`, true)
+    const count = (agendamentosPorDia[day.day] || []).length
+    if (count > 0) {
+      showToast(`${count} sessão(ões) em ${mesNomeCapitalizado} ${day.day}`)
     } else {
-      showToast(`Out ${day.day} está aberto para agendamento`)
+      showToast(`${mesNomeCapitalizado} ${day.day} está aberto para agendamento`)
     }
   }
 
-  const handleSessionClick = (session) => {
-    showToast(`Abrindo detalhes da sessão: ${session.client}`)
+  const handleSessionClick = (ag) => {
+    showToast(`Detalhes: ${ag.cliente?.nome || 'Cliente'}`)
   }
+
+  const totalConfirmados = agendamentos.filter(ag => ag.status === 'CONFIRMADO').length
 
   return (
     <div className="ad-sched-layout">
@@ -110,9 +102,11 @@ const ScheduleTab = ({ showToast }) => {
           <div className="ad-sched-cal-header">
             <div>
               <h2 className="ad-sched-month-title">
-                Outubro <span className="ad-sched-year">2024</span>
+                {mesNomeCapitalizado} <span className="ad-sched-year">{ano}</span>
               </h2>
-              <p className="ad-sched-month-subtitle">12 Sessões confirmadas este mês</p>
+              <p className="ad-sched-month-subtitle">
+                {loading ? 'Carregando...' : `${totalConfirmados} Sessões confirmadas este mês`}
+              </p>
             </div>
             <div className="ad-sched-nav-btns">
               <button className="ad-sched-nav-btn" onClick={() => showToast('Mês anterior carregado')}>
@@ -126,26 +120,19 @@ const ScheduleTab = ({ showToast }) => {
 
           {/* Calendar Grid */}
           <div className="ad-sched-grid">
-            {/* Day Labels */}
             {dayNames.map(name => (
               <div key={name} className="ad-sched-day-header">{name}</div>
             ))}
 
-            {/* Day Cells */}
             {calendarDays.map((day, i) => {
               if (!day) {
                 return <div key={`empty-${i}`} className="ad-sched-day-cell empty"></div>
               }
 
-              if (day.placeholder) {
-                return (
-                  <div key={day.day} className="ad-sched-day-cell placeholder">
-                    {day.day}
-                  </div>
-                )
-              }
-
-              const isSelected = selectedDay === day.day
+              const isSelected = effectiveSelected === day.day
+              const isHoje = day.day === diaAtual
+              const sessoes = agendamentosPorDia[day.day] || []
+              const temSessao = sessoes.length > 0
 
               return (
                 <div
@@ -153,30 +140,25 @@ const ScheduleTab = ({ showToast }) => {
                   className={`ad-sched-day-cell ${isSelected ? 'selected' : ''}`}
                   onClick={() => handleDayClick(day)}
                 >
-                  <span className={`ad-sched-day-num ${isSelected ? 'active' : ''}`}>{day.day}</span>
+                  <span className={`ad-sched-day-num ${isSelected ? 'active' : ''}`}>
+                    {day.day}
+                  </span>
 
-                  {day.indicator === 'bar-muted' && (
-                    <div className="ad-sched-day-events">
-                      <div className="ad-sched-indicator muted"></div>
-                    </div>
-                  )}
-                  {day.indicator === 'bar-error' && (
-                    <div className="ad-sched-day-events">
-                      <div className="ad-sched-indicator error"></div>
-                    </div>
-                  )}
-                  {day.event && day.event.type === 'primary' && (
-                    <div className="ad-sched-day-events">
-                      <div className="ad-sched-event-tag primary">
-                        <p>{day.event.label}</p>
-                      </div>
-                    </div>
-                  )}
-                  {day.event && day.event.type === 'solid' && (
+                  {temSessao && (
                     <div className="ad-sched-day-events">
                       <div className="ad-sched-event-tag solid">
-                        <p>{day.event.label}</p>
+                        <p>
+                          {sessoes.length === 1
+                            ? sessoes[0].servico || 'Sessão'
+                            : `Sessões (${sessoes.length})`}
+                        </p>
                       </div>
+                    </div>
+                  )}
+
+                  {!temSessao && isHoje && (
+                    <div className="ad-sched-day-events">
+                      <div className="ad-sched-indicator muted"></div>
                     </div>
                   )}
                 </div>
@@ -191,11 +173,11 @@ const ScheduleTab = ({ showToast }) => {
         <div className="ad-sched-panel-header">
           <div className="ad-sched-panel-header-row">
             <span className="ad-sched-panel-day-name">{getSelectedDayName()}</span>
-            <span className={`ad-sched-panel-status ${daysCanceled.includes(selectedDay) ? 'error' : ''}`}>
-              {getPanelStatus()}
-            </span>
+            <span className="ad-sched-panel-status">{getPanelStatus()}</span>
           </div>
-          <h3 className="ad-sched-panel-date">OUT {selectedDay}</h3>
+          <h3 className="ad-sched-panel-date">
+            {mesNomeCapitalizado.slice(0, 3).toUpperCase()} {effectiveSelected}
+          </h3>
         </div>
 
         <div className="ad-sched-panel-sessions" style={{ opacity: getPanelOpacity() }}>
@@ -204,39 +186,59 @@ const ScheduleTab = ({ showToast }) => {
             Sessões Agendadas
           </h4>
 
-          {/* Session Cards */}
-          {sessions.map((session, i) => (
-            <div
-              key={i}
-              className={`ad-sched-session-card ${session.primary ? 'primary' : ''}`}
-              onClick={() => handleSessionClick(session)}
-            >
-              <div className="ad-sched-session-top">
-                <div>
-                  <p className="ad-sched-session-time">{session.time}</p>
-                  <h5 className="ad-sched-session-client">{session.client}</h5>
+          {loading ? (
+            <p style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center', padding: '1rem' }}>
+              Carregando...
+            </p>
+          ) : sessoesDoDia.length === 0 ? (
+            <p style={{ color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '1rem', fontSize: '0.875rem' }}>
+              Nenhuma sessão neste dia.
+            </p>
+          ) : (
+            sessoesDoDia.map((ag, i) => {
+              const data = new Date(ag.dataHora)
+              const hora = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+              const isPrimary = ag.status === 'CONFIRMADO'
+
+              return (
+                <div
+                  key={ag.id}
+                  className={`ad-sched-session-card ${isPrimary ? 'primary' : ''}`}
+                  onClick={() => handleSessionClick(ag)}
+                >
+                  <div className="ad-sched-session-top">
+                    <div>
+                      <p className="ad-sched-session-time">{hora}</p>
+                      <h5 className="ad-sched-session-client">{ag.cliente?.nome || 'Cliente'}</h5>
+                    </div>
+                    <span className={`ad-sched-session-duration ${isPrimary ? 'primary' : ''}`}>
+                      {ag.status}
+                    </span>
+                  </div>
+                  <div className="ad-sched-session-bottom">
+                    <div className="ad-sched-session-img">
+                      {ag.imagemReferenciaUrl
+                        ? <img src={ag.imagemReferenciaUrl} alt={ag.cliente?.nome} />
+                        : <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.1)', borderRadius: '8px' }} />
+                      }
+                    </div>
+                    <div>
+                      <p className="ad-sched-session-style">{ag.servico || 'Tatuagem'}</p>
+                      <p className="ad-sched-session-detail">{ag.descricao || ag.cliente?.email || ''}</p>
+                    </div>
+                  </div>
                 </div>
-                <span className={`ad-sched-session-duration ${session.primary ? 'primary' : ''}`}>
-                  {session.duration}
-                </span>
-              </div>
-              <div className="ad-sched-session-bottom">
-                <div className="ad-sched-session-img">
-                  <img src={session.img} alt={session.client} />
-                </div>
-                <div>
-                  <p className="ad-sched-session-style">{session.style}</p>
-                  <p className="ad-sched-session-detail">{session.detail}</p>
-                </div>
-              </div>
-            </div>
-          ))}
+              )
+            })
+          )}
 
           {/* Break */}
-          <div className="ad-sched-break">
-            <span className="material-symbols-outlined" style={{ fontSize: '0.875rem', marginRight: 8 }}>coffee</span>
-            <span>Limpeza &amp; Reposição do Estúdio</span>
-          </div>
+          {sessoesDoDia.length > 0 && (
+            <div className="ad-sched-break">
+              <span className="material-symbols-outlined" style={{ fontSize: '0.875rem', marginRight: 8 }}>coffee</span>
+              <span>Limpeza &amp; Reposição do Estúdio</span>
+            </div>
+          )}
         </div>
 
         {/* Panel Footer */}
