@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { artistaService } from '../services/inkflowApi'
+import './ArtistProfile.css'
 
 const ArtistProfile = () => {
   const { id } = useParams()
@@ -8,6 +9,8 @@ const ArtistProfile = () => {
   const [artista, setArtista] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [selectedImage, setSelectedImage] = useState(null)
+  const [headerScrolled, setHeaderScrolled] = useState(false)
 
   useEffect(() => {
     artistaService.getById(id)
@@ -16,112 +19,215 @@ const ArtistProfile = () => {
       .finally(() => setLoading(false))
   }, [id])
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setHeaderScrolled(true)
+      } else {
+        setHeaderScrolled(false)
+      }
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   if (loading) return (
-    <div className="min-h-screen bg-surface flex items-center justify-center">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center">
       <p className="text-on-surface-variant font-body">Carregando perfil...</p>
     </div>
   )
 
   if (error || !artista) return (
-    <div className="min-h-screen bg-surface flex items-center justify-center">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center">
       <p className="text-on-surface-variant font-body">Artista não encontrado.</p>
     </div>
   )
 
+  const handleBook = () => navigate(`/agendamento?artistaId=${artista.id}`)
+
   return (
-    <div className="min-h-screen bg-surface text-on-surface pt-24 pb-16">
-      <div className="max-w-5xl mx-auto px-6">
-
-        {/* Bloco 1 — Header */}
-        <div className="glass-card p-8 mb-8 flex gap-8 flex-wrap items-start">
-          {artista.fotoUrl ? (
-            <img
-              src={artista.fotoUrl}
-              alt={artista.nome}
-              className="w-36 h-36 rounded-full object-cover border-2 border-primary image-hover-effect"
-            />
-          ) : (
-            <div className="w-36 h-36 rounded-full bg-surface-container flex items-center justify-center border-2 border-primary text-5xl font-headline font-black text-primary">
-              {artista.nome?.charAt(0)}
+    <div className="bg-background text-on-surface font-body antialiased selection:bg-primary-dim selection:text-on-primary overflow-x-hidden min-h-screen flex flex-col">
+      {/* TopNavBar */}
+      <header 
+        className={`fixed top-0 w-full z-50 backdrop-blur-xl border-b transition-all duration-300 font-['Epilogue'] font-bold tracking-tighter uppercase ${headerScrolled ? 'border-white/10 bg-[#0e0e0e]/95' : 'border-transparent bg-transparent'}`}
+      >
+        <div className={`flex justify-between items-center w-full px-6 md:px-12 mx-auto transition-all duration-300 ${headerScrolled ? 'py-4' : 'py-6'}`}>
+            <div className="text-xl md:text-2xl font-black tracking-tighter text-[#e63946] cursor-pointer" onClick={() => window.scrollTo(0,0)}>
+                {artista.nome}
             </div>
-          )}
-
-          <div className="flex-1">
-            <h1 className="font-headline font-black text-4xl uppercase tracking-wide mb-1">
-              {artista.nome}
-            </h1>
-            <p className="text-primary font-body font-semibold mb-4">{artista.role}</p>
-
-            {artista.bio && (
-              <p className="text-on-surface-variant font-body leading-relaxed mb-6 max-w-xl">
-                {artista.bio}
-              </p>
-            )}
-
-            {artista.especialidades?.length > 0 && (
-              <div className="flex gap-2 flex-wrap mb-6">
-                {artista.especialidades.map((esp, i) => (
-                  <span
-                    key={i}
-                    className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-white"
-                  >
-                    {esp}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <button
-              onClick={() => navigate(`/agendamento?artistaId=${artista.id}`)}
-              className="btn-modern px-8 py-3 font-headline font-black uppercase tracking-widest text-sm"
-            >
-              Agendar Sessão
+            <nav className="hidden md:flex gap-8 items-center text-sm">
+                <span className="text-zinc-500 hover:text-zinc-200 hover:text-primary transition-all duration-300 scale-95 cursor-pointer">Início</span>
+                <span className="text-primary font-bold border-b-2 border-[#e63946] pb-1 scale-95 transition-transform cursor-pointer">Catálogo</span>
+                <span className="text-zinc-500 hover:text-zinc-200 hover:text-primary transition-all duration-300 scale-95 cursor-pointer">Para Tatuadores</span>
+            </nav>
+            <button className="text-[#e63946] border border-[#e63946]/30 px-4 md:px-6 py-2 rounded-sm hover:bg-[#e63946]/10 transition-colors scale-95 active:scale-90 text-sm">
+                Portal
             </button>
-          </div>
         </div>
+      </header>
 
-        {/* Bloco 2 — Portfolio */}
-        {artista.portfolio?.length > 0 ? (
-          <div>
-            <h2 className="font-headline font-black text-2xl uppercase tracking-widest mb-6 border-b border-white/5 pb-4">
-              Portfólio
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {artista.portfolio.map(item => (
-                <div
-                  key={item.id}
-                  className="group relative aspect-square overflow-hidden rounded-xl bg-surface-container border border-white/5"
-                >
-                  <img
-                    src={item.imagemUrl}
-                    alt={item.descricao || item.categoria}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  {(item.categoria || item.descricao) && (
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {item.categoria && (
-                        <p className="text-primary text-xs font-semibold uppercase tracking-widest mb-1">
-                          {item.categoria}
-                        </p>
+      <main className="pt-32 pb-24 px-6 md:px-12 max-w-screen-2xl mx-auto space-y-24 flex-grow w-full">
+          
+          {/* Hero Section */}
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-8">
+              <div className="lg:col-span-7 space-y-8 relative z-10">
+                  <div className="space-y-2">
+                      <span className="font-label text-sm uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
+                          <span className="w-8 h-[1px] bg-primary"></span>
+                          {artista.role || "Artista"}
+                      </span>
+                      <h1 className="font-headline text-6xl md:text-8xl font-black tracking-tighter uppercase leading-none text-glow-primary">
+                          {artista.nome}
+                      </h1>
+                  </div>
+                  <p className="font-body text-lg text-on-surface-variant max-w-xl leading-relaxed">
+                      {artista.bio || "Este artista ainda não publicou uma biografia completa."}
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                      <button 
+                         onClick={handleBook}
+                         className="bg-gradient-to-br from-primary to-primary-dim text-on-primary font-label font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-lg box-glow-primary hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+                      >
+                          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>calendar_today</span>
+                          Agendar Sessão
+                      </button>
+                      <button className="border border-outline-variant/30 text-primary font-label font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-lg hover:bg-surface-container-high active:scale-95 transition-all flex items-center justify-center">
+                          Ver Flash
+                      </button>
+                  </div>
+              </div>
+              
+              <div className="lg:col-span-5 relative">
+                  <div className="absolute inset-0 bg-primary/10 blur-[80px] rounded-full z-0"></div>
+                  <div className="relative z-10 bg-surface-container-highest rounded overflow-hidden aspect-[3/4] border border-white/5">
+                      {artista.fotoUrl ? (
+                        <img 
+                           className="w-full h-full object-cover mix-blend-luminosity opacity-80 hover:opacity-100 transition-opacity duration-700 hover:scale-105 transform" 
+                           src={artista.fotoUrl} 
+                           alt={artista.nome} 
+                        />
+                      ) : (
+                         <div className="w-full h-full flex flex-col items-center justify-center border-2 border-primary border-opacity-10 text-9xl font-headline font-black text-primary bg-surface-container-low">
+                            {artista.nome?.charAt(0)}
+                         </div>
                       )}
-                      {item.descricao && (
-                        <p className="text-on-surface-variant text-sm">{item.descricao}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="glass-card p-12 text-center">
-            <p className="text-on-surface-variant font-body">
-              Este artista ainda não adicionou obras ao portfólio.
-            </p>
-          </div>
-        )}
+                  </div>
+              </div>
+          </section>
 
+          {/* Stats Bento Grid */}
+          <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Experiência - Ocultaremos se não houver um dado lógico vindo do back, ou listamos '--' */}
+              <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto hover:bg-surface-container-highest transition-colors">
+                  <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Experiência</span>
+                  <span className="font-headline text-4xl md:text-5xl font-black tracking-tighter">
+                     {artista.anosExperiencia || '--'}
+                  </span>
+                  <span className="font-body text-sm text-on-surface-variant">Anos</span>
+              </div>
+              <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto md:col-span-2 hover:bg-surface-container-highest transition-colors">
+                  <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Signature Style</span>
+                  <span className="font-headline text-3xl md:text-4xl font-bold tracking-tight uppercase leading-none">
+                     {artista.especialidades?.[0] || 'Artwork'}
+                     <br/><span className="text-primary">InkFlow</span>
+                  </span>
+              </div>
+              <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto hover:bg-surface-container-highest transition-colors">
+                  <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Base</span>
+                  <span className="font-headline text-3xl font-black tracking-tighter uppercase">
+                     {artista.unidadeBase || 'BR'}
+                  </span>
+                  <span className="font-body text-sm text-on-surface-variant">Localização</span>
+              </div>
+          </section>
+
+          {/* Portfolio Masonry (The Ledger) */}
+          <section className="space-y-8">
+              <div className="flex items-end justify-between border-b border-outline-variant/10 pb-4">
+                  <h2 className="font-headline text-3xl font-bold uppercase tracking-tight">The Ledger</h2>
+                  <a className="font-label text-xs md:text-sm uppercase text-primary hover:text-primary-dim transition-colors flex items-center gap-1 cursor-pointer">
+                      Arquivo Completo
+                      <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </a>
+              </div>
+              
+              {artista.portfolio?.length > 0 ? (
+                 <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+                     {artista.portfolio.map((item) => (
+                         <div 
+                           key={item.id} 
+                           onClick={() => setSelectedImage(item.imagemUrl)}
+                           className="break-inside-avoid relative group cursor-pointer overflow-hidden rounded border border-white/5 bg-surface-container-low"
+                         >
+                             <img 
+                               className="w-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                               src={item.imagemUrl} 
+                               alt={item.descricao || item.categoria || 'Portfólio do Artista'} 
+                             />
+                             <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                                 <span className="material-symbols-outlined text-primary text-4xl transform scale-50 group-hover:scale-100 transition-transform duration-300 delay-100">
+                                    zoom_in
+                                 </span>
+                             </div>
+                         </div>
+                     ))}
+                 </div>
+              ) : (
+                 <div className="text-center py-16 bg-surface-container-low border border-white/5 rounded">
+                    <p className="text-on-surface-variant font-body">Este artista ainda não adicionou obras ao portfólio.</p>
+                 </div>
+              )}
+          </section>
+
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full py-12 border-t border-white/5 bg-[#0e0e0e] font-['Inter'] text-xs tracking-widest uppercase mt-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 max-w-screen-2xl mx-auto gap-8 md:gap-0">
+              <div className="text-lg font-black text-zinc-100 font-['Epilogue'] tracking-tighter">
+                  INKFLOW ATELIER
+              </div>
+              <nav className="flex flex-wrap justify-center gap-6">
+                  <span className="text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100 cursor-pointer">Políticas de Privacidade</span>
+                  <span className="text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100 cursor-pointer">Termos de Serviço</span>
+                  <span className="text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100 cursor-pointer">Estúdios</span>
+                  <span className="text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100 cursor-pointer">Suporte</span>
+              </nav>
+              <div className="text-zinc-600 opacity-80 text-center md:text-right">
+                  © 2026 INKFLOW. ALL RIGHTS RESERVED.
+              </div>
+          </div>
+      </footer>
+
+      {/* Lightbox Modal */}
+      <div 
+        className={`fixed inset-0 z-[100] items-center justify-center p-4 md:p-10 transition-all duration-300 ease-out ${selectedImage ? 'flex opacity-100 pointer-events-auto' : 'hidden opacity-0 pointer-events-none'}`}
+      >
+          {/* Backdrop */}
+          <div 
+             onClick={() => setSelectedImage(null)}
+             className="absolute inset-0 bg-black/90 backdrop-blur-md cursor-pointer"
+          ></div>
+          
+          {/* Image Container */}
+          <div className={`relative z-10 w-full h-full max-h-[85vh] flex items-center justify-center pointer-events-none transition-transform duration-300 ${selectedImage ? 'scale-100' : 'scale-95'}`}>
+              {selectedImage && (
+                 <img 
+                    src={selectedImage} 
+                    className="max-w-full max-h-full object-contain rounded-sm shadow-[0_0_50px_rgba(255,141,140,0.1)] pointer-events-auto border border-white/5"
+                    alt="Zoom Obra"
+                 />
+              )}
+              
+              <button 
+                 onClick={() => setSelectedImage(null)}
+                 className="absolute top-0 right-0 md:-top-4 md:-right-4 text-on-surface-variant hover:text-primary bg-surface-container-highest/80 hover:bg-surface-container-highest rounded-full p-2 backdrop-blur-md pointer-events-auto transition-all shadow-lg active:scale-90"
+              >
+                  <span className="material-symbols-outlined">close</span>
+              </button>
+          </div>
       </div>
+      
     </div>
   )
 }

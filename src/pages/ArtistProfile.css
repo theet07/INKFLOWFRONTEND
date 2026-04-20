@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+/* Regras Isoladas e Específicas do Perfil do Artista */
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+}
+
+.text-glow-primary {
+    text-shadow: 0 0 20px rgba(255, 141, 140, 0.4);
+}
+
+.box-glow-primary {
+    box-shadow: 0 0 40px rgba(255, 141, 140, 0.15);
+}
+
+/* Modals Animation Extras */
+.modal-enter { 
+    opacity: 1 !important; 
+    pointer-events: auto !important; 
+}
+
+.modal-img-enter { 
+    transform: scale(1) !important; 
+}
