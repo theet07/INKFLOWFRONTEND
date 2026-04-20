@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { agendamentoService } from '../../services/inkflowApi'
 
 const formatDate = (dataHora) => {
@@ -44,6 +45,8 @@ const statusLabel = {
 const DashboardTab = ({ showToast, openDrawer }) => {
   const [agendamentos, setAgendamentos] = useState([])
   const [loading, setLoading] = useState(true)
+
+  const navigate = useNavigate()
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
 
@@ -103,7 +106,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
   const getClientName = (ag) => ag.cliente?.fullName || ag.cliente?.nome || 'Cliente'
   const getClientEmail = (ag) => ag.cliente?.email || ''
 
-  const handleNewSession = () => showToast('Abrindo formulário de nova sessão...')
+  const handleNewSession = () => navigate('/agendamento')
 
   // Próximo status possível para ações rápidas
   const getNextStatus = (current) => {
@@ -229,7 +232,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
               <div
                 key={ag.id}
                 className="ad-agenda-card"
-                onClick={() => { console.log('Agendamento selecionado:', ag); openDrawer(ag) }}
+                onClick={() => openDrawer(ag)}
               >
                 <div className="ad-agenda-time">
                   <p className="ad-agenda-time-value">{formatTime(ag.dataHora)}</p>
@@ -287,7 +290,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
                   const clientName = getClientName(ag)
                   const nextStatus = getNextStatus(ag.status)
                   return (
-                    <tr key={ag.id} onClick={() => { console.log('Agendamento selecionado:', ag); openDrawer(ag) }}>
+                    <tr key={ag.id} onClick={() => openDrawer(ag)}>
                       <td>
                         <div className="ad-client-cell">
                           <div className="ad-client-avatar">

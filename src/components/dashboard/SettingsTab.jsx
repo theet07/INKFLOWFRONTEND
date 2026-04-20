@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { artistaService, disponibilidadeService } from '../../services/inkflowApi'
 
 const SettingsTab = ({ showToast }) => {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
 
   const [studioOpen, setStudioOpen] = useState(true)
@@ -298,7 +300,7 @@ const SettingsTab = ({ showToast }) => {
           </div>
 
           {/* Gallery Card */}
-          <div className="ad-settings-gallery-card" onClick={() => showToast('Abrindo gerenciador de galeria...')}>
+          <div className="ad-settings-gallery-card" onClick={() => navigate('/artist-dashboard', { state: { tab: 'portfolio' } })}>
             <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiOPlnuw0EiTf19Kk2sGebpOT-L3mhUXcquQCO2PGsYLT-d5knirK8hD3aeFl9AtV_UvaYen96VeqQVmimX7O72j2MGaxCAZqUC6QfUZveFkYnNeRQ3NWcJfBR88RHFqatHYWqQ5CByYFKD1fqMPVOfTE5ovPKJHPDjo2pBc_Tv34V3vOn3Ks-Sa-vsDUmIU14N2TAyz7mw2uS_mJ2w7xAKzSCx41Ctn-wsDyYXkd70S2_7cyKNLtC0-JIMb4frXd_eRIsBPRR5OU" alt="Gallery" />
             <div className="ad-settings-gallery-overlay"></div>
             <div className="ad-settings-gallery-text">
