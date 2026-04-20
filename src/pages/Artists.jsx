@@ -46,7 +46,7 @@ const Artists = () => {
     };
 
     const handleAgendar = (artistId) => {
-        navigate(`/agendamento?artistaId=${artistId}`);
+        navigate(`/artista/${artistId}`);
     };
 
     // Filtros de Galeria
