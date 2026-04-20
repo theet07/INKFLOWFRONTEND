@@ -58,7 +58,7 @@ const getFallbackImage = (servico) => {
 
 const Profile = () => {
   const navigate = useNavigate()
-  const { user, token, loading: authLoading } = useAuth()
+  const { user, token, loading: authLoading, logout } = useAuth()
 
   const [toasts, setToasts] = useState([])
   const [modal, setModal] = useState({ isOpen: false, title: '', content: null, isImage: false })
@@ -163,9 +163,7 @@ const Profile = () => {
         setSettingsOpen(false)
         break
       case 'logout':
-        localStorage.removeItem('user')
-        localStorage.removeItem('token')
-        localStorage.removeItem('userType')
+        logout()
         navigate('/login')
         break
       case 'delete_account':
