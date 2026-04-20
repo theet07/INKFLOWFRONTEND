@@ -2,18 +2,18 @@ import { useState, useRef } from 'react'
 import { artistaService } from '../../services/inkflowApi'
 
 const SettingsTab = ({ showToast }) => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
 
   const [studioOpen, setStudioOpen] = useState(true)
-  const [artistName, setArtistName] = useState(user.nome || user.fullName || '')
-  const [artistEmail, setArtistEmail] = useState(user.email || '')
-  const [artistBio, setArtistBio] = useState(user.bio || '')
+  const [artistName, setArtistName] = useState(storedUser.nome || storedUser.fullName || '')
+  const [artistEmail, setArtistEmail] = useState(storedUser.email || '')
+  const [artistBio, setArtistBio] = useState(storedUser.bio || '')
   const [tags, setTags] = useState(
-    user.especialidades
-      ? user.especialidades.split(',').map(t => t.trim()).filter(Boolean)
+    storedUser.especialidades
+      ? storedUser.especialidades.split(',').map(t => t.trim()).filter(Boolean)
       : []
   )
-  const [avatarPreview, setAvatarPreview] = useState(user.fotoUrl || '')
+  const [avatarPreview, setAvatarPreview] = useState(storedUser.fotoUrl || '')
   const [saving, setSaving] = useState(false)
 
   const [notifications, setNotifications] = useState({ email: true, push: true, audio: false })
