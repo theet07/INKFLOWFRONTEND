@@ -2,12 +2,18 @@ import { useState, useRef } from 'react'
 import { artistaService } from '../../services/inkflowApi'
 
 const SettingsTab = ({ showToast }) => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+
   const [studioOpen, setStudioOpen] = useState(true)
-  const [artistName, setArtistName] = useState('Elias Thorne')
-  const [artistEmail, setArtistEmail] = useState('elias@inkflow.art')
-  const [artistBio, setArtistBio] = useState('Especialista em Blackwork e Surrealismo. 8 anos de experiência transformando ideias em arte permanente na pele. Atendimento exclusivo em estúdio privado.')
-  const [tags, setTags] = useState(['Blackwork', 'Surrealismo', 'Geométrico'])
-  const [avatarPreview, setAvatarPreview] = useState('https://lh3.googleusercontent.com/aida-public/AB6AXuDsb9piO97rJv4Q2QNp7ZOaxehjex-WSnQJBOp5OmtVKdJNAH0tKRjzPlaIvrSAj1DOulBt-Vfn-bv2MPGYBrSc5Fj4z0CWAhr5LbY5uz6WlgkIKc2y6jm9PajFvhNcackvnBws0eNUj18AiQfzWXI1zzVfP-gSkmLqZD3ZrHlJyK5tSieAtkKJiZHX0Sn7lgwMM2HqY6qgL0V_lDjK3m8pw6upFQ4f4iS4ZoG9BGsxnt0IGVEJxHzW6lJFJW2Evm27GIS7xYqjwaM')
+  const [artistName, setArtistName] = useState(user.nome || user.fullName || '')
+  const [artistEmail, setArtistEmail] = useState(user.email || '')
+  const [artistBio, setArtistBio] = useState(user.bio || '')
+  const [tags, setTags] = useState(
+    user.especialidades
+      ? user.especialidades.split(',').map(t => t.trim()).filter(Boolean)
+      : []
+  )
+  const [avatarPreview, setAvatarPreview] = useState(user.fotoUrl || '')
   const [saving, setSaving] = useState(false)
 
   const [notifications, setNotifications] = useState({ email: true, push: true, audio: false })
