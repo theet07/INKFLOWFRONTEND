@@ -16,6 +16,15 @@ const getFallbackImage = (especialidade) => {
     return '/assets/portifolio_novo/Rosa-Dos-Ventos-1.webp';
 };
 
+const poseMap = {
+  '/assets/portifolio_tatuadores/Tatuador_1.png': '/assets/portifolio_tatuadores/Tatuador_1_pose2.png',
+  '/assets/portifolio_tatuadores/Tatuador_2.png': '/assets/portifolio_tatuadores/Tatuador_2_pose2.png',
+  '/assets/portifolio_tatuadores/Tatuadora_3.png': '/assets/portifolio_tatuadores/Tatuadora_3_pose2.png',
+  '/assets/portifolio_tatuadores/Tatuador_4.png': '/assets/portifolio_tatuadores/Tatuador_4_pose2.png',
+  '/assets/portifolio_tatuadores/Tatuadora_5.png': '/assets/portifolio_tatuadores/Tatuadora_5_pose2.png',
+  '/assets/portifolio_tatuadores/Tatuadora_6.png': '/assets/portifolio_tatuadores/Tatuadora_6_pose2.png',
+}
+
 const Artists = () => {
     const navigate = useNavigate();
     const [artists, setArtists] = useState([]);
@@ -206,7 +215,7 @@ const Artists = () => {
                                 <div key={artist.id || idx} className="group relative w-full aspect-[3/4] overflow-hidden rounded-xl bg-surface-container-low border border-white/5 animate-fade" style={{ maxWidth: '400px', margin: '0 auto' }}>
                                     <img 
                                         className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-50 transition-all duration-700" 
-                                        src={getSafeImageUrl(artist?.fotoUrl, artist?.nome)} 
+                                        src={getSafeImageUrl(poseMap[artist?.fotoUrl] || artist?.fotoUrl, artist?.nome)} 
                                         onError={(e) => { e.target.onerror = null; e.target.src = getFallbackImage(artist?.especialidades?.[0]) }}
                                         alt={artist?.nome || 'Artista'}
                                         style={{ objectPosition: 'center' }}
