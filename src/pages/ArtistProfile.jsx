@@ -10,7 +10,6 @@ const ArtistProfile = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [selectedImage, setSelectedImage] = useState(null)
-  const [headerScrolled, setHeaderScrolled] = useState(false)
 
   useEffect(() => {
     artistaService.getById(id)
@@ -18,18 +17,6 @@ const ArtistProfile = () => {
       .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [id])
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setHeaderScrolled(true)
-      } else {
-        setHeaderScrolled(false)
-      }
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   if (loading) return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center">
@@ -47,25 +34,6 @@ const ArtistProfile = () => {
 
   return (
     <div className="bg-background text-on-surface font-body antialiased selection:bg-primary-dim selection:text-on-primary overflow-x-hidden min-h-screen flex flex-col">
-      {/* TopNavBar */}
-      <header 
-        className={`fixed top-0 w-full z-50 backdrop-blur-xl border-b transition-all duration-300 font-['Epilogue'] font-bold tracking-tighter uppercase ${headerScrolled ? 'border-white/10 bg-[#0e0e0e]/95' : 'border-transparent bg-transparent'}`}
-      >
-        <div className={`flex justify-between items-center w-full px-6 md:px-12 mx-auto transition-all duration-300 ${headerScrolled ? 'py-4' : 'py-6'}`}>
-            <div className="text-xl md:text-2xl font-black tracking-tighter text-[#e63946] cursor-pointer" onClick={() => window.scrollTo(0,0)}>
-                {artista.nome}
-            </div>
-            <nav className="hidden md:flex gap-8 items-center text-sm">
-                <span className="text-zinc-500 hover:text-zinc-200 hover:text-primary transition-all duration-300 scale-95 cursor-pointer">Início</span>
-                <span className="text-primary font-bold border-b-2 border-[#e63946] pb-1 scale-95 transition-transform cursor-pointer">Catálogo</span>
-                <span className="text-zinc-500 hover:text-zinc-200 hover:text-primary transition-all duration-300 scale-95 cursor-pointer">Para Tatuadores</span>
-            </nav>
-            <button className="text-[#e63946] border border-[#e63946]/30 px-4 md:px-6 py-2 rounded-sm hover:bg-[#e63946]/10 transition-colors scale-95 active:scale-90 text-sm">
-                Portal
-            </button>
-        </div>
-      </header>
-
       <main className="pt-32 pb-24 px-6 md:px-12 max-w-screen-2xl mx-auto space-y-24 flex-grow w-full">
           
           {/* Hero Section */}
@@ -76,11 +44,11 @@ const ArtistProfile = () => {
                           <span className="w-8 h-[1px] bg-primary"></span>
                           {artista.role || "Artista"}
                       </span>
-                      <h1 className="font-headline text-6xl md:text-8xl font-black tracking-tighter uppercase leading-none text-glow-primary">
+                      <h1 className="font-[Epilogue] font-headline text-6xl md:text-8xl font-black tracking-tighter uppercase leading-none text-glow-primary">
                           {artista.nome}
                       </h1>
                   </div>
-                  <p className="font-body text-lg text-on-surface-variant max-w-xl leading-relaxed">
+                  <p className="font-[Inter] font-body text-lg text-on-surface-variant max-w-xl leading-relaxed">
                       {artista.bio || "Este artista ainda não publicou uma biografia completa."}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -107,7 +75,7 @@ const ArtistProfile = () => {
                            alt={artista.nome} 
                         />
                       ) : (
-                         <div className="w-full h-full flex flex-col items-center justify-center border-2 border-primary border-opacity-10 text-9xl font-headline font-black text-primary bg-surface-container-low">
+                         <div className="w-full h-full flex flex-col items-center justify-center border-2 border-primary border-opacity-10 text-9xl font-[Epilogue] font-headline font-black text-primary bg-surface-container-low">
                             {artista.nome?.charAt(0)}
                          </div>
                       )}
@@ -115,36 +83,46 @@ const ArtistProfile = () => {
               </div>
           </section>
 
-          {/* Stats Bento Grid */}
-          <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {/* Experiência - Ocultaremos se não houver um dado lógico vindo do back, ou listamos '--' */}
-              <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto hover:bg-surface-container-highest transition-colors">
-                  <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Experiência</span>
-                  <span className="font-headline text-4xl md:text-5xl font-black tracking-tighter">
-                     {artista.anosExperiencia || '--'}
-                  </span>
-                  <span className="font-body text-sm text-on-surface-variant">Anos</span>
-              </div>
-              <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto md:col-span-2 hover:bg-surface-container-highest transition-colors">
-                  <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Signature Style</span>
-                  <span className="font-headline text-3xl md:text-4xl font-bold tracking-tight uppercase leading-none">
-                     {artista.especialidades?.[0] || 'Artwork'}
-                     <br/><span className="text-primary">InkFlow</span>
-                  </span>
-              </div>
-              <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto hover:bg-surface-container-highest transition-colors">
-                  <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Base</span>
-                  <span className="font-headline text-3xl font-black tracking-tighter uppercase">
-                     {artista.unidadeBase || 'BR'}
-                  </span>
-                  <span className="font-body text-sm text-on-surface-variant">Localização</span>
-              </div>
-          </section>
+          {/* Stats Bento Grid - Ocultados dinamicamente */}
+          {(artista.anosExperiencia || (artista.especialidades && artista.especialidades.length > 0) || artista.unidadeBase) && (
+              <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  
+                  {artista.anosExperiencia && (
+                    <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto hover:bg-surface-container-highest transition-colors">
+                        <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Experiência</span>
+                        <span className="font-[Epilogue] font-headline text-4xl md:text-5xl font-black tracking-tighter">
+                           {artista.anosExperiencia}
+                        </span>
+                        <span className="font-body text-sm text-on-surface-variant">Anos</span>
+                    </div>
+                  )}
+
+                  {artista.especialidades && artista.especialidades.length > 0 && (
+                    <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto md:col-span-2 hover:bg-surface-container-highest transition-colors">
+                        <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Signature Style</span>
+                        <span className="font-[Epilogue] font-headline text-3xl md:text-4xl font-bold tracking-tight uppercase leading-none">
+                           {artista.especialidades[0]}
+                           <br/><span className="text-primary">Tattoo</span>
+                        </span>
+                    </div>
+                  )}
+
+                  {artista.unidadeBase && (
+                    <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto hover:bg-surface-container-highest transition-colors">
+                        <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Base</span>
+                        <span className="font-[Epilogue] font-headline text-3xl font-black tracking-tighter uppercase">
+                           {artista.unidadeBase}
+                        </span>
+                        <span className="font-body text-sm text-on-surface-variant">Localização</span>
+                    </div>
+                  )}
+              </section>
+          )}
 
           {/* Portfolio Masonry (The Ledger) */}
           <section className="space-y-8">
               <div className="flex items-end justify-between border-b border-outline-variant/10 pb-4">
-                  <h2 className="font-headline text-3xl font-bold uppercase tracking-tight">The Ledger</h2>
+                  <h2 className="font-[Epilogue] font-headline text-3xl font-bold uppercase tracking-tight">O Catálogo</h2>
                   <a className="font-label text-xs md:text-sm uppercase text-primary hover:text-primary-dim transition-colors flex items-center gap-1 cursor-pointer">
                       Arquivo Completo
                       <span className="material-symbols-outlined text-sm">arrow_forward</span>
@@ -174,30 +152,12 @@ const ArtistProfile = () => {
                  </div>
               ) : (
                  <div className="text-center py-16 bg-surface-container-low border border-white/5 rounded">
-                    <p className="text-on-surface-variant font-body">Este artista ainda não adicionou obras ao portfólio.</p>
+                    <p className="text-on-surface-variant font-[Inter] font-body">Este artista ainda não adicionou obras ao portfólio.</p>
                  </div>
               )}
           </section>
 
       </main>
-
-      {/* Footer */}
-      <footer className="w-full py-12 border-t border-white/5 bg-[#0e0e0e] font-['Inter'] text-xs tracking-widest uppercase mt-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-12 max-w-screen-2xl mx-auto gap-8 md:gap-0">
-              <div className="text-lg font-black text-zinc-100 font-['Epilogue'] tracking-tighter">
-                  INKFLOW ATELIER
-              </div>
-              <nav className="flex flex-wrap justify-center gap-6">
-                  <span className="text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100 cursor-pointer">Políticas de Privacidade</span>
-                  <span className="text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100 cursor-pointer">Termos de Serviço</span>
-                  <span className="text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100 cursor-pointer">Estúdios</span>
-                  <span className="text-zinc-600 hover:text-zinc-100 transition-colors opacity-80 hover:opacity-100 cursor-pointer">Suporte</span>
-              </nav>
-              <div className="text-zinc-600 opacity-80 text-center md:text-right">
-                  © 2026 INKFLOW. ALL RIGHTS RESERVED.
-              </div>
-          </div>
-      </footer>
 
       {/* Lightbox Modal */}
       <div 
