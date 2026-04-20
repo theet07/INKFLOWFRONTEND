@@ -79,7 +79,7 @@ const AdminDashboard = () => {
       setBackupStatus(response.data)
     } catch (error) {
       console.error('Erro ao carregar status do backup:', error)
-      setBackupStatus({ lastBackup: new Date().toISOString() })
+      setBackupStatus(null)
     } finally {
       setLoadingBackup(false)
     }
