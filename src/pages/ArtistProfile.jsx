@@ -59,8 +59,11 @@ const ArtistProfile = () => {
                           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>calendar_today</span>
                           Agendar Sessão
                       </button>
-                      <button className="border border-outline-variant/30 text-primary font-label font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-lg hover:bg-surface-container-high active:scale-95 transition-all flex items-center justify-center">
-                          Ver Flash
+                      <button 
+                          onClick={() => navigate('/artistas')}
+                          className="border border-outline-variant/30 text-primary font-label font-bold text-sm uppercase tracking-wider px-8 py-4 rounded-lg hover:bg-surface-container-high active:scale-95 transition-all flex items-center justify-center gap-2">
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
+                          Voltar
                       </button>
                   </div>
 
