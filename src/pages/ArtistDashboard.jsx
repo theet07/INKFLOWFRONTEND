@@ -6,6 +6,7 @@ import ScheduleTab from '../components/dashboard/ScheduleTab'
 import PortfolioTab from '../components/dashboard/PortfolioTab'
 import SettingsTab from '../components/dashboard/SettingsTab'
 import { agendamentoService } from '../services/inkflowApi'
+import { useAuth } from '../contexts/AuthContext'
 import './ArtistDashboard.css'
 
 const ArtistDashboard = () => {
@@ -16,31 +17,23 @@ const ArtistDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const navigate = useNavigate()
 
-  // Segurança de rota: apenas artistas podem acessar este dashboard
+  const { token, loading } = useAuth()
+
   useEffect(() => {
-    const userType = localStorage.getItem('userType')
-    const userData = localStorage.getItem('user')
-
-    // Se não há sessão, limpa tudo e manda pro login
-    if (!userData || !userType) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      localStorage.removeItem('userType')
+    if (loading) return
+    if (!token) {
       navigate('/login', { replace: true })
       return
     }
-
-    // Se é cliente tentando acessar, expulsa para agendamento
-    if (userType === 'client') {
-      navigate('/agendamento', { replace: true })
-      return
-    }
-
-    // Se não é artista nem admin, manda pro login
-    if (userType !== 'artist' && userType !== 'admin') {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      if (payload.role !== 'ROLE_ARTISTA' && payload.role !== 'ROLE_ADMIN') {
+        navigate('/login', { replace: true })
+      }
+    } catch {
       navigate('/login', { replace: true })
     }
-  }, [navigate])
+  }, [loading, token, navigate])
 
   // Persistência de sessão ao usar setas do browser (popstate)
   useEffect(() => {
