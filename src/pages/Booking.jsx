@@ -142,11 +142,8 @@ const Booking = () => {
                 setIsLoadingSlots(true)
                 artistaService.getSlots(artistaSelecionado.id, dayObj.fullDate)
                     .then(res => {
-                        const mappedSlots = (res.data || []).map(s => ({
-                            id: s.horario,
-                            label: s.horario,
-                            active: s.disponivel
-                        }))
+                        const slots = res.data?.slots || []
+                        const mappedSlots = slots.map(s => ({ id: s, label: s, active: true }))
                         setAvailableSlots(mappedSlots)
                     })
                     .catch(err => console.error("Erro ao carregar slots:", err))
@@ -305,11 +302,11 @@ const Booking = () => {
                 })
             } else {
                 // 3. Usuário não logado — backend cria cliente com senha segura
-                await appointmentService.create({
+                await agendamentoService.create({
+                    artistId: artistaSelecionado?.id,
                     clienteNome: formData.name,
                     clienteEmail: formData.email,
                     clienteTelefone: formData.phone,
-                    artistId: artistaSelecionado?.id,
                     date: formattedDate,
                     time: bookingState.time,
                     description: formData.desc,
