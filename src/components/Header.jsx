@@ -131,7 +131,7 @@ const Header = () => {
           </div>
         )}
 
-        {user && (
+        {userType === 'admin' && (
           <button
             onClick={() => { logout(); navigate('/login') }}
             style={{
