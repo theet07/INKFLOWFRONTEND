@@ -85,6 +85,12 @@ export const portfolioService = {
   delete: (id) => api.delete(`/portfolio/${id}`),
 };
 
+export const disponibilidadeService = {
+  getByArtista: (artistaId) => api.get(`/disponibilidade/artista/${artistaId}`),
+  salvar: (artistaId, payload) => api.post(`/disponibilidade/artista/${artistaId}`, payload),
+  remover: (id) => api.delete(`/disponibilidade/${id}`),
+};
+
 export const adminService = {
   exportBackup: () => api.get('/api/v1/admin/backup/download', { responseType: 'blob', baseURL: API_BASE_URL.replace(/\/api.*$/, '') }),
   getBackupStatus: () => api.get('/api/v1/admin/backup/status', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') }),

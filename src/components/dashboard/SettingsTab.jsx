@@ -1,7 +1,9 @@
-import { useState, useRef } from 'react'
-import { artistaService } from '../../services/inkflowApi'
+import { useState, useEffect, useRef } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
+import { artistaService, disponibilidadeService } from '../../services/inkflowApi'
 
 const SettingsTab = ({ showToast }) => {
+  const { user } = useAuth()
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
 
   const [studioOpen, setStudioOpen] = useState(true)
@@ -18,17 +20,39 @@ const SettingsTab = ({ showToast }) => {
 
   const [notifications, setNotifications] = useState({ email: true, push: true, audio: false })
 
+  const diasMap = { 'Seg': 0, 'Ter': 1, 'Qua': 2, 'Qui': 3, 'Sex': 4, 'Sáb': 5, 'Dom': 6 }
+  const [disponibilidadeIds, setDisponibilidadeIds] = useState({})
+
   const [schedule, setSchedule] = useState([
-    { day: 'Seg', active: true, start: '10:00', end: '18:00' },
-    { day: 'Ter', active: true, start: '10:00', end: '18:00' },
-    { day: 'Qua', active: true, start: '10:00', end: '18:00' },
+    { day: 'Seg', active: true,  start: '10:00', end: '18:00' },
+    { day: 'Ter', active: true,  start: '10:00', end: '18:00' },
+    { day: 'Qua', active: true,  start: '10:00', end: '18:00' },
     { day: 'Qui', active: false, start: '10:00', end: '18:00' },
-    { day: 'Sex', active: true, start: '10:00', end: '22:00' },
+    { day: 'Sex', active: true,  start: '10:00', end: '22:00' },
   ])
 
-  const avatarInputRef = useRef(null)
+  useEffect(() => {
+    if (!user?.artistaId && !user?.id) return
+    const artistaId = user.artistaId || user.id
+    disponibilidadeService.getByArtista(artistaId)
+      .then(res => {
+        const dados = Array.isArray(res.data) ? res.data : []
+        const ids = {}
+        dados.forEach(d => { ids[d.diaSemana] = d.id })
+        setDisponibilidadeIds(ids)
+        setSchedule(prev => prev.map(item => {
+          const diaIndex = diasMap[item.day]
+          const registro = dados.find(d => d.diaSemana === diaIndex)
+          if (registro) {
+            return { ...item, active: registro.ativo !== false, start: registro.horaInicio, end: registro.horaFim }
+          }
+          return { ...item, active: false }
+        }))
+      })
+      .catch(() => {})
+  }, [user])
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const avatarInputRef = useRef(null)
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0]
@@ -78,11 +102,29 @@ const SettingsTab = ({ showToast }) => {
   const handleSave = async () => {
     setSaving(true)
     try {
-      await artistaService.update(user.artistaId || user.id, {
+      const artistaId = user.artistaId || user.id
+
+      await artistaService.update(artistaId, {
         nome: artistName,
         bio: artistBio,
         especialidades: tags.join(',')
       })
+
+      await Promise.all(schedule.map(async (item) => {
+        const diaIndex = diasMap[item.day]
+        if (item.active) {
+          await disponibilidadeService.salvar(artistaId, {
+            diaSemana: diaIndex,
+            horaInicio: item.start,
+            horaFim: item.end,
+            duracaoSlotMinutos: 60
+          })
+        } else {
+          const existingId = disponibilidadeIds[diaIndex]
+          if (existingId) await disponibilidadeService.remover(existingId)
+        }
+      }))
+
       showToast('Configurações salvas com sucesso!')
     } catch (err) {
       console.error('Erro ao salvar configurações:', err)
