@@ -86,9 +86,9 @@ export const portfolioService = {
 };
 
 export const disponibilidadeService = {
-  getByArtista: (artistaId) => api.get(`/disponibilidade/artista/${artistaId}`),
-  salvar: (artistaId, payload) => api.post(`/disponibilidade/artista/${artistaId}`, payload),
-  remover: (id) => api.delete(`/disponibilidade/${id}`),
+  getByArtista: (artistaId) => api.get(`/disponibilidade/artista/${artistaId}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  salvar: (artistaId, payload) => api.post(`/disponibilidade/artista/${artistaId}`, payload, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  remover: (id) => api.delete(`/disponibilidade/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
 };
 
 export const adminService = {
