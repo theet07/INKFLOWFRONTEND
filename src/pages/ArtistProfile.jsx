@@ -63,6 +63,18 @@ const ArtistProfile = () => {
                           Ver Flash
                       </button>
                   </div>
+
+                  {artista.especialidades && (
+                      <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between hover:bg-surface-container-highest transition-colors mt-4">
+                          <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Signature Style</span>
+                          <span className="font-[Epilogue] font-headline text-3xl font-bold tracking-tight uppercase leading-none mt-2">
+                              {typeof artista.especialidades === 'string'
+                                  ? artista.especialidades.split(',')[0].trim()
+                                  : artista.especialidades[0]}
+                              <br/><span className="text-primary">Tattoo</span>
+                          </span>
+                      </div>
+                  )}
               </div>
               
               <div className="lg:col-span-5 relative">
@@ -82,42 +94,6 @@ const ArtistProfile = () => {
                   </div>
               </div>
           </section>
-
-          {/* Stats Bento Grid - Ocultados dinamicamente */}
-          {(artista.anosExperiencia || (artista.especialidades && artista.especialidades.length > 0) || artista.unidadeBase) && (
-              <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  
-                  {artista.anosExperiencia && (
-                    <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto hover:bg-surface-container-highest transition-colors">
-                        <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Experiência</span>
-                        <span className="font-[Epilogue] font-headline text-4xl md:text-5xl font-black tracking-tighter">
-                           {artista.anosExperiencia}
-                        </span>
-                        <span className="font-body text-sm text-on-surface-variant">Anos</span>
-                    </div>
-                  )}
-
-                  {artista.especialidades && artista.especialidades.length > 0 && (
-                    <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto md:col-span-2 hover:bg-surface-container-highest transition-colors">
-                        <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Signature Style</span>
-                        <span className="font-[Epilogue] font-headline text-3xl md:text-4xl font-bold tracking-tight uppercase leading-none">
-                           {artista.especialidades[0]}
-                           <br/><span className="text-primary">Tattoo</span>
-                        </span>
-                    </div>
-                  )}
-
-                  {artista.unidadeBase && (
-                    <div className="bg-surface-container-low border border-white/5 p-6 rounded flex flex-col justify-between aspect-square md:aspect-auto hover:bg-surface-container-highest transition-colors">
-                        <span className="font-label text-xs uppercase tracking-widest text-on-surface-variant">Base</span>
-                        <span className="font-[Epilogue] font-headline text-3xl font-black tracking-tighter uppercase">
-                           {artista.unidadeBase}
-                        </span>
-                        <span className="font-body text-sm text-on-surface-variant">Localização</span>
-                    </div>
-                  )}
-              </section>
-          )}
 
           {/* Portfolio Masonry (The Ledger) */}
           <section className="space-y-8">
