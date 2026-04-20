@@ -82,23 +82,9 @@ const Profile = () => {
   const fetchMeusAgendamentos = async () => {
     try {
       if (!token) return;
-      const API_URL = import.meta.env.VITE_API_URL
-        ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
-        : 'https://inkflowbackend-4w1g.onrender.com';
-        
-      const response = await fetch(`${API_URL}/api/appointments/meus`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) throw new Error('Falha ao buscar as sessões');
-      const data = await response.json();
-      // Dados já vêm filtrados para o dono do token.
-      setAgendamentos(data || []);
+      const response = await agendamentoService.getMeus()
+      setAgendamentos(response.data || []);
     } catch (err) {
-      console.error('Erro na sincronização das sessões:', err);
       setAgendamentos([]);
     } finally {
       setLoadingAg(false);

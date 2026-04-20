@@ -54,16 +54,13 @@ export const agendamentoService = {
   getById: (id) => api.get(`/agendamentos/${id}`),
   getByCliente: (clienteId) => api.get(`/agendamentos/cliente/${clienteId}`),
   getByArtista: (artistaId) => api.get(`/agendamentos/artista/${artistaId}`),
+  getMeus: () => api.get('/appointments/meus'),
   getByStatus: (status) => api.get(`/agendamentos/status/${status}`),
   create: (agendamento) => api.post('/appointments', agendamento),
   update: (id, agendamento) => api.put(`/agendamentos/${id}`, agendamento),
   updateStatus: (id, data) => api.patch(`/agendamentos/${id}/status`, data),
   avaliar: (id, data) => api.put(`/appointments/${id}/avaliar`, data),
   delete: (id) => api.delete(`/agendamentos/${id}`),
-};
-
-export const appointmentService = {
-  create: (data) => api.post('/appointments', data),
 };
 
 export const artistaService = {

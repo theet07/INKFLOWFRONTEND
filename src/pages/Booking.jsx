@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { agendamentoService, clienteService, artistaService, portfolioService, appointmentService } from '../services/inkflowApi'
+import { agendamentoService, clienteService, artistaService, portfolioService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
 import './Booking.css'
 
@@ -90,8 +90,7 @@ const Booking = () => {
                 }
             })
             setArtistsOptions(mapped)
-        }).catch(err => {
-            console.error("Erro ao puxar artistas agendamento:", err)
+        }).catch(() => {
             setArtistsOptions([])
         })
     }, [])
@@ -126,7 +125,7 @@ const Booking = () => {
                     }))
                     setAvailableDays(mappedDays)
                 })
-                .catch(err => console.error("Erro ao carregar disponibilidade:", err))
+                .catch(() => {})
                 .finally(() => setIsLoadingAvailability(false))
         }
     }, [bookingState.artist, artistsOptions])
@@ -146,7 +145,7 @@ const Booking = () => {
                         const mappedSlots = slots.map(s => ({ id: s, label: s, active: true }))
                         setAvailableSlots(mappedSlots)
                     })
-                    .catch(err => console.error("Erro ao carregar slots:", err))
+                .catch(() => {})
                     .finally(() => setIsLoadingSlots(false))
             }
         }
@@ -288,7 +287,7 @@ const Booking = () => {
 
             if (user?.id) {
                 // 2. Usuário logado — payload direto com clienteId
-                await appointmentService.create({
+                await agendamentoService.create({
                     cliente: { id: user.id },
                     artista: artistaSelecionado ? { id: artistaSelecionado.id } : null,
                     dataHora,
