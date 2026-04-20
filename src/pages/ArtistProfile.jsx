@@ -17,85 +17,111 @@ const ArtistProfile = () => {
   }, [id])
 
   if (loading) return (
-    <div style={{ paddingTop: '100px', minHeight: '100vh', color: 'white', textAlign: 'center' }}>
-      <p>Carregando perfil...</p>
+    <div className="min-h-screen bg-surface flex items-center justify-center">
+      <p className="text-on-surface-variant font-body">Carregando perfil...</p>
     </div>
   )
 
   if (error || !artista) return (
-    <div style={{ paddingTop: '100px', minHeight: '100vh', color: 'white', textAlign: 'center' }}>
-      <p>Artista não encontrado.</p>
+    <div className="min-h-screen bg-surface flex items-center justify-center">
+      <p className="text-on-surface-variant font-body">Artista não encontrado.</p>
     </div>
   )
 
   return (
-    <div style={{ paddingTop: '100px', minHeight: '100vh', color: 'white', maxWidth: '1100px', margin: '0 auto', padding: '100px 24px 48px' }}>
+    <div className="min-h-screen bg-surface text-on-surface pt-24 pb-16">
+      <div className="max-w-5xl mx-auto px-6">
 
-      {/* Bloco 1 — Header do artista */}
-      <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start', marginBottom: '48px', flexWrap: 'wrap' }}>
-        {artista.fotoUrl ? (
-          <img src={artista.fotoUrl} alt={artista.nome}
-            style={{ width: '140px', height: '140px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #ff0000' }} />
-        ) : (
-          <div style={{ width: '140px', height: '140px', borderRadius: '50%', background: '#262626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px', border: '3px solid #ff0000' }}>
-            {artista.nome?.charAt(0)}
-          </div>
-        )}
-
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '4px' }}>{artista.nome}</h1>
-          <p style={{ color: '#ff0000', fontWeight: '600', marginBottom: '12px' }}>{artista.role}</p>
-          <p style={{ color: 'rgba(255,255,255,0.7)', lineHeight: '1.6', marginBottom: '16px', maxWidth: '600px' }}>{artista.bio}</p>
-
-          {/* Especialidades */}
-          {artista.especialidades?.length > 0 && (
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
-              {artista.especialidades.map((esp, i) => (
-                <span key={i} style={{ background: '#262626', border: '1px solid #484847', borderRadius: '20px', padding: '4px 12px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)' }}>
-                  {esp}
-                </span>
-              ))}
+        {/* Bloco 1 — Header */}
+        <div className="glass-card p-8 mb-8 flex gap-8 flex-wrap items-start">
+          {artista.fotoUrl ? (
+            <img
+              src={artista.fotoUrl}
+              alt={artista.nome}
+              className="w-36 h-36 rounded-full object-cover border-2 border-primary image-hover-effect"
+            />
+          ) : (
+            <div className="w-36 h-36 rounded-full bg-surface-container flex items-center justify-center border-2 border-primary text-5xl font-headline font-black text-primary">
+              {artista.nome?.charAt(0)}
             </div>
           )}
 
-          {/* Botão Agendar */}
-          <button
-            onClick={() => navigate(`/agendamento?artistaId=${artista.id}`)}
-            style={{ background: '#ff0000', color: 'white', border: 'none', borderRadius: '8px', padding: '12px 32px', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer' }}>
-            Agendar Sessão
-          </button>
-        </div>
-      </div>
+          <div className="flex-1">
+            <h1 className="font-headline font-black text-4xl uppercase tracking-wide mb-1">
+              {artista.nome}
+            </h1>
+            <p className="text-primary font-body font-semibold mb-4">{artista.role}</p>
 
-      {/* Bloco 2 — Portfolio */}
-      {artista.portfolio?.length > 0 && (
-        <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 'bold', marginBottom: '24px', borderBottom: '1px solid #262626', paddingBottom: '12px' }}>
-            Portfólio
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-            {artista.portfolio.map(item => (
-              <div key={item.id} style={{ borderRadius: '12px', overflow: 'hidden', background: '#1a1919' }}>
-                <img src={item.imagemUrl} alt={item.descricao || item.categoria}
-                  style={{ width: '100%', height: '260px', objectFit: 'cover' }} />
-                {(item.categoria || item.descricao) && (
-                  <div style={{ padding: '12px' }}>
-                    {item.categoria && <p style={{ color: '#ff0000', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>{item.categoria}</p>}
-                    {item.descricao && <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>{item.descricao}</p>}
-                  </div>
-                )}
+            {artista.bio && (
+              <p className="text-on-surface-variant font-body leading-relaxed mb-6 max-w-xl">
+                {artista.bio}
+              </p>
+            )}
+
+            {artista.especialidades?.length > 0 && (
+              <div className="flex gap-2 flex-wrap mb-6">
+                {artista.especialidades.map((esp, i) => (
+                  <span
+                    key={i}
+                    className="text-[9px] uppercase tracking-widest bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-white"
+                  >
+                    {esp}
+                  </span>
+                ))}
               </div>
-            ))}
+            )}
+
+            <button
+              onClick={() => navigate(`/agendamento?artistaId=${artista.id}`)}
+              className="btn-modern px-8 py-3 font-headline font-black uppercase tracking-widest text-sm"
+            >
+              Agendar Sessão
+            </button>
           </div>
         </div>
-      )}
 
-      {/* Portfolio vazio */}
-      {(!artista.portfolio || artista.portfolio.length === 0) && (
-        <div style={{ textAlign: 'center', padding: '48px', color: 'rgba(255,255,255,0.4)' }}>
-          <p>Este artista ainda não adicionou obras ao portfólio.</p>
-        </div>
-      )}
+        {/* Bloco 2 — Portfolio */}
+        {artista.portfolio?.length > 0 ? (
+          <div>
+            <h2 className="font-headline font-black text-2xl uppercase tracking-widest mb-6 border-b border-white/5 pb-4">
+              Portfólio
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {artista.portfolio.map(item => (
+                <div
+                  key={item.id}
+                  className="group relative aspect-square overflow-hidden rounded-xl bg-surface-container border border-white/5"
+                >
+                  <img
+                    src={item.imagemUrl}
+                    alt={item.descricao || item.categoria}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  {(item.categoria || item.descricao) && (
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {item.categoria && (
+                        <p className="text-primary text-xs font-semibold uppercase tracking-widest mb-1">
+                          {item.categoria}
+                        </p>
+                      )}
+                      {item.descricao && (
+                        <p className="text-on-surface-variant text-sm">{item.descricao}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="glass-card p-12 text-center">
+            <p className="text-on-surface-variant font-body">
+              Este artista ainda não adicionou obras ao portfólio.
+            </p>
+          </div>
+        )}
+
+      </div>
     </div>
   )
 }
