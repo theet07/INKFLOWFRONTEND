@@ -193,10 +193,23 @@ const DashboardTab = ({ showToast, openDrawer }) => {
             <div className="ad-rating-score">{mediaAvaliacao ?? '—'}</div>
             <div>
               <div className="ad-rating-stars">
-                {[1,2,3,4].map(i => (
-                  <span key={i} className="material-symbols-outlined icon-filled">star</span>
-                ))}
-                <span className="material-symbols-outlined">star_half</span>
+                {(() => {
+                  const nota = parseFloat(mediaAvaliacao) || 0
+                  const fullStars = Math.floor(nota)
+                  const hasHalf = nota - fullStars >= 0.3
+                  const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0)
+                  return (
+                    <>
+                      {Array.from({ length: fullStars }, (_, i) => (
+                        <span key={`full-${i}`} className="material-symbols-outlined icon-filled">star</span>
+                      ))}
+                      {hasHalf && <span key="half" className="material-symbols-outlined icon-filled">star_half</span>}
+                      {Array.from({ length: emptyStars }, (_, i) => (
+                        <span key={`empty-${i}`} className="material-symbols-outlined">star</span>
+                      ))}
+                    </>
+                  )
+                })()}
               </div>
               <p className="ad-rating-label">Avaliação Média do Artista</p>
             </div>
