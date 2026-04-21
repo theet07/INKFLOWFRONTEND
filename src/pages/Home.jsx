@@ -647,7 +647,7 @@ const Home = () => {
         paddingTop: '6rem',
         marginTop: '-2rem'
       }}>
-        <div style={{
+        <div className="home-servicos-content" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -655,14 +655,13 @@ const Home = () => {
           maxWidth: '1400px',
           width: '100%'
         }}>
-          <div style={{
+          <div className="home-servicos-column" style={{
             display: 'flex',
             flexDirection: 'column',
             gap: '2rem',
             alignItems: 'center',
             textAlign: 'center',
-            flex: '1',
-            maxWidth: '280px'
+            flex: '1'
           }}>
             <div style={{
               width: '100%',
@@ -796,7 +795,7 @@ const Home = () => {
             </div>
           </div>
 
-          <div style={{
+          <div className="home-servicos-image" style={{
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -806,20 +805,20 @@ const Home = () => {
               src="/assets/images/mao.png" 
               alt="Mão segurando máquina de tatuagem"
               style={{
-                width: '400px',
+                maxWidth: '400px',
+                width: '100%',
                 height: 'auto'
               }}
             />
           </div>
 
-          <div style={{
+          <div className="home-servicos-column" style={{
             display: 'flex',
             flexDirection: 'column',
             gap: '2rem',
             alignItems: 'center',
             textAlign: 'center',
-            flex: '1',
-            maxWidth: '280px'
+            flex: '1'
           }}>
             <div style={{
               width: '100%',

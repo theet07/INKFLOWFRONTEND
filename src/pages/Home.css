@@ -411,3 +411,44 @@
         text-align: center;
     }
 }
+
+/* === HOME SERVIÇOS SECTION — RESPONSIVE === */
+
+.home-servicos-column {
+    max-width: 280px;
+}
+
+@media (max-width: 1024px) {
+    .home-servicos-content {
+        gap: 2rem !important;
+    }
+    .home-servicos-column {
+        max-width: 220px;
+    }
+    .home-servicos-image img {
+        max-width: 320px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .home-servicos-content {
+        flex-direction: column !important;
+        gap: 3rem !important;
+    }
+    .home-servicos-column {
+        max-width: 100%;
+        gap: 2.5rem !important;
+    }
+    .home-servicos-image {
+        order: -1 !important;
+    }
+    .home-servicos-image img {
+        max-width: min(280px, 90vw) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .home-servicos-image img {
+        max-width: min(240px, 85vw) !important;
+    }
+}
