@@ -152,7 +152,7 @@ const ArtistDashboard = () => {
       case 'requests':
         return <RequestsTab showToast={showToast} openDrawer={openDrawer} />
       case 'schedule':
-        return <ScheduleTab showToast={showToast} />
+        return <ScheduleTab showToast={showToast} openDrawer={openDrawer} />
       case 'portfolio':
         return <PortfolioTab showToast={showToast} />
       case 'settings':
@@ -185,7 +185,7 @@ const ArtistDashboard = () => {
               >Semanal</button>
             </div>
           )}
-          <button className="ad-icon-btn">
+          <button className="ad-icon-btn" onClick={() => { setActiveTab('requests'); setSidebarOpen(false) }}>
             <span className="material-symbols-outlined">notifications</span>
           </button>
           <div className="ad-user-info">
@@ -360,7 +360,7 @@ const ArtistDashboard = () => {
       </nav>
 
       {/* FAB Mobile */}
-      <button className="ad-fab" onClick={() => showToast('Abrindo formulário de nova sessão...')}>
+      <button className="ad-fab" onClick={() => navigate('/agendamento')}>
         <span className="material-symbols-outlined">add</span>
       </button>
 

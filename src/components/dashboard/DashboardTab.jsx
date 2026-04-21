@@ -349,7 +349,7 @@ const DashboardTab = ({ showToast, openDrawer }) => {
                             )}
                           </div>
                         ) : (
-                          <button className="ad-more-btn" onClick={(e) => { e.stopPropagation(); showToast(`${clientName}: ${statusLabel[ag.status] || ag.status}`) }}>
+                          <button className="ad-more-btn" onClick={(e) => { e.stopPropagation(); openDrawer(ag) }}>
                             <span className="material-symbols-outlined">more_vert</span>
                           </button>
                         )}

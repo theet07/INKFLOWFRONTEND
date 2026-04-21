@@ -138,7 +138,17 @@ const SettingsTab = ({ showToast }) => {
 
   const handleDiscard = () => {
     if (confirm('Tem certeza que deseja descartar as alterações não salvas?')) {
-      showToast('Alterações descartadas.', true)
+      const original = JSON.parse(localStorage.getItem('user') || '{}')
+      setArtistName(original.nome || original.fullName || '')
+      setArtistEmail(original.email || '')
+      setArtistBio(original.bio || '')
+      setTags(
+        original.especialidades
+          ? original.especialidades.split(',').map(t => t.trim()).filter(Boolean)
+          : []
+      )
+      setAvatarPreview(original.fotoUrl || '')
+      showToast('Alterações descartadas.')
     }
   }
 

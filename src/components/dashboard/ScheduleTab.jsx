@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { agendamentoService } from '../../services/inkflowApi'
 import { useAuth } from '../../contexts/AuthContext'
 
-const ScheduleTab = ({ showToast }) => {
+const ScheduleTab = ({ showToast, openDrawer }) => {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [selectedDay, setSelectedDay] = useState(null)
   const [agendamentos, setAgendamentos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [monthOffset, setMonthOffset] = useState(0)
 
   const dayNames = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 
@@ -35,30 +38,30 @@ const ScheduleTab = ({ showToast }) => {
 
   const diasComSessao = Object.keys(agendamentosPorDia)
 
-  // Mês/ano atual para o cabeçalho
+  // Mês/ano exibido (com offset de navegação)
   const hoje = new Date()
-  const mesNome = hoje.toLocaleDateString('pt-BR', { month: 'long' })
+  const viewDate = new Date(hoje.getFullYear(), hoje.getMonth() + monthOffset, 1)
+  const mesNome = viewDate.toLocaleDateString('pt-BR', { month: 'long' })
   const mesNomeCapitalizado = mesNome.charAt(0).toUpperCase() + mesNome.slice(1)
-  const ano = hoje.getFullYear()
+  const ano = viewDate.getFullYear()
 
-  // Gera o grid do mês atual dinamicamente
-  const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
-  // JS: 0=Dom, ajusta para Seg=0
+  // Gera o grid do mês exibido dinamicamente
+  const primeiroDia = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1)
   const offsetInicio = (primeiroDia.getDay() + 6) % 7
-  const totalDias = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate()
+  const totalDias = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate()
 
   const calendarDays = [
     ...Array(offsetInicio).fill(null),
     ...Array.from({ length: totalDias }, (_, i) => {
       const num = String(i + 1).padStart(2, '0')
-      const diaSemana = new Date(hoje.getFullYear(), hoje.getMonth(), i + 1)
+      const diaSemana = new Date(viewDate.getFullYear(), viewDate.getMonth(), i + 1)
         .toLocaleDateString('pt-BR', { weekday: 'long' })
       const nomeDia = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1)
       return { day: num, name: nomeDia }
     })
   ]
 
-  const diaAtual = String(hoje.getDate()).padStart(2, '0')
+  const diaAtual = monthOffset === 0 ? String(hoje.getDate()).padStart(2, '0') : null
   const effectiveSelected = selectedDay || diaAtual
 
   const sessoesDoDia = agendamentosPorDia[effectiveSelected] || []
@@ -86,7 +89,11 @@ const ScheduleTab = ({ showToast }) => {
   }
 
   const handleSessionClick = (ag) => {
-    showToast(`Detalhes: ${ag.cliente?.nome || 'Cliente'}`)
+    if (openDrawer) {
+      openDrawer(ag)
+    } else {
+      showToast(`Detalhes: ${ag.cliente?.nome || 'Cliente'}`)
+    }
   }
 
   const totalConfirmados = agendamentos.filter(ag => ag.status === 'CONFIRMADO').length
@@ -109,10 +116,10 @@ const ScheduleTab = ({ showToast }) => {
               </p>
             </div>
             <div className="ad-sched-nav-btns">
-              <button className="ad-sched-nav-btn" onClick={() => showToast('Mês anterior carregado')}>
+              <button className="ad-sched-nav-btn" onClick={() => { setMonthOffset(prev => prev - 1); setSelectedDay(null) }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>chevron_left</span>
               </button>
-              <button className="ad-sched-nav-btn" onClick={() => showToast('Próximo mês carregado')}>
+              <button className="ad-sched-nav-btn" onClick={() => { setMonthOffset(prev => prev + 1); setSelectedDay(null) }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>chevron_right</span>
               </button>
             </div>
@@ -243,7 +250,7 @@ const ScheduleTab = ({ showToast }) => {
 
         {/* Panel Footer */}
         <div className="ad-sched-panel-footer">
-          <button className="ad-sched-new-btn" onClick={() => showToast('Abrindo formulário de novo agendamento')}>
+          <button className="ad-sched-new-btn" onClick={() => navigate('/agendamento')}>
             <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>add_circle</span>
             Novo Agendamento
           </button>

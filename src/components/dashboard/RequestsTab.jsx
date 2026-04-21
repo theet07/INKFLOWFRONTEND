@@ -183,7 +183,7 @@ const RequestsTab = ({ showToast, openDrawer }) => {
                             </button>
                           </>
                         ) : (
-                          <button className="ad-req-action-options" onClick={(e) => { e.stopPropagation(); showToast(`${getClientName(ag)}: ${cfg.label}`) }}>
+                          <button className="ad-req-action-options" onClick={(e) => { e.stopPropagation(); if (openDrawer) openDrawer(ag) }}>
                             <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>more_vert</span>
                           </button>
                         )}
