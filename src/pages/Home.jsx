@@ -662,7 +662,8 @@ const Home = () => {
             alignItems: 'center',
             textAlign: 'center',
             flex: '1',
-            maxWidth: '280px'
+            minWidth: '0',
+            maxWidth: '320px'
           }}>
             <div style={{
               width: '100%',
@@ -800,13 +801,13 @@ const Home = () => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            flex: '0 0 auto'
+            flex: '0 1 auto'
           }}>
             <img 
               src="/assets/images/mao.png" 
               alt="Mão segurando máquina de tatuagem"
               style={{
-                width: '400px',
+                width: 'clamp(260px, 30vw, 400px)',
                 height: 'auto'
               }}
             />
@@ -819,28 +820,9 @@ const Home = () => {
             alignItems: 'center',
             textAlign: 'center',
             flex: '1',
-            maxWidth: '280px'
-          }}>
-            <div style={{
-              width: '100%',
-              transition: 'all 0.2s ease-in-out',
-              cursor: 'pointer'
-            }} onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)'
-              e.currentTarget.querySelector('h3').style.color = '#E21B3C'
-            }} onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.querySelector('h3').style.color = '#FFFFFF'
-            }}>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '16px',
-                textAlign: 'center'
-              }}>
-                <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="#E21B3C" width="64" height="64">
+            minWidth: '0',
+            maxWidth: '320px'
+          }}> xmlns="http://www.w3.org/2000/svg" fill="#E21B3C" width="64" height="64">
                   <path fill="#E21B3C" d="M325.41 32.18L222.562 237.879h13.711l13.364-13.363 6.363-6.364 19.727 19.727H346l74.947-179.873c-8.11-4.986-23.97-11.715-41.314-16.445-19.05-5.196-39.628-8.654-54.223-9.381zm-139.205.021c-14.576.771-34.953 4.21-53.838 9.36-17.344 4.73-33.204 11.46-41.314 16.445L166 237.879h36.44l38.722-77.445zm29.25 22.563l36.25 84.584 41.984-83.971c-26.948 5.752-51.079 5.561-78.234-.613zM88.416 98.478l-43.691 65.54 65.88 39.529 15.24-15.24zm335.168 0l-37.43 89.829 15.24 15.24 65.881-39.53zM256 243.605l-20.42 20.42 20.42 30.63 20.42-30.63zM153 255.88v30h75.518l-16.098-24.147 5.853-5.853zm140.727 0l5.853 5.853-16.098 24.147H359v-30zm-129.125 48l-26.045 165.24c114.22 14.268 120.666 14.268 234.886 0l-26.045-165.24h-75.916L256 327.102l-15.482-23.223z"/>
                 </svg>
                 <h3 style={{
