@@ -410,6 +410,13 @@
         gap: 2rem !important;
         text-align: center;
     }
+
+    .home-sobre-grid {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+        text-align: center;
+        padding: 0 1rem;
+    }
 }
 
 /* === HOME SERVIÇOS SECTION — RESPONSIVE === */

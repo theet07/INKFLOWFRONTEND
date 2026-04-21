@@ -226,8 +226,8 @@ const Artists = () => {
                                             <div>
                                                 <h3 className="font-headline font-bold text-xl tracking-tight text-white mb-0.5">{artist.nome}</h3>
                                                 <div className="flex items-center gap-1">
-                                                    <span className="material-symbols-outlined text-[12px] text-primary" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                                                    <span className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant drop-shadow-md">5.0 • EXCLUSIVE</span>
+                                                    <span className="material-symbols-outlined text-[12px] text-primary" style={{fontVariationSettings: "'FILL' 1"}}>verified</span>
+                                                    <span className="text-[10px] uppercase font-bold tracking-widest text-on-surface-variant drop-shadow-md">{artist.especialidades?.[0] || mainStyle || 'ARTISTA'} • VERIFIED</span>
                                                 </div>
                                             </div>
                                         </div>

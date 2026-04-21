@@ -399,7 +399,7 @@ const Home = () => {
           zIndex: 0,
           opacity: 0.8
         }} />
-        <div style={{
+        <div className="home-sobre-grid" style={{
           maxWidth: '1200px',
           margin: '0 auto',
           display: 'grid',
