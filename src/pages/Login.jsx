@@ -160,17 +160,9 @@ const Login = () => {
       })
 
       if (response.ok) {
-        showToast('Conta Ativada com Sucesso!', 'success')
-        const data = await response.json()
-        if (data.token) {
-          localStorage.setItem('token', data.token)
-          localStorage.setItem('user', JSON.stringify(data.user))
-          localStorage.setItem('userType', 'client')
-          navigate('/agendamento')
-        } else {
-          setIsLogin(true)
-          setIsVerifying(false)
-        }
+        showToast('Conta Ativada com Sucesso! Faça login para continuar.', 'success')
+        setIsLogin(true)
+        setIsVerifying(false)
       } else if (response.status === 429) {
         setOtpError('Código bloqueado por excesso de tentativas.')
       } else {
