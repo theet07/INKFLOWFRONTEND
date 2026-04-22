@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { artistaService, disponibilidadeService } from '../../services/inkflowApi'
 
-const SettingsTab = ({ showToast }) => {
+const SettingsTab = ({ showToast, studioOpen, setStudioOpen, switchTab }) => {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
 
-  const [studioOpen, setStudioOpen] = useState(true)
   const [artistName, setArtistName] = useState(storedUser.nome || storedUser.fullName || '')
   const [artistEmail, setArtistEmail] = useState(storedUser.email || '')
   const [artistBio, setArtistBio] = useState(storedUser.bio || '')
@@ -171,9 +169,17 @@ const SettingsTab = ({ showToast }) => {
             </p>
           </div>
           <label className="ad-toggle-large">
-            <input type="checkbox" checked={studioOpen} onChange={(e) => {
-              setStudioOpen(e.target.checked)
-              showToast(e.target.checked ? 'Estúdio aberto para agendamentos' : 'Agendamentos pausados', !e.target.checked)
+            <input type="checkbox" checked={studioOpen} onChange={async (e) => {
+              const val = e.target.checked
+              setStudioOpen(val)
+              try {
+                const artistaId = user?.artistaId || user?.id
+                await artistaService.update(artistaId, { aceitandoAgendamentos: val })
+                showToast(val ? 'Estúdio aberto para agendamentos' : 'Agendamentos pausados', !val)
+              } catch {
+                setStudioOpen(!val)
+                showToast('Erro ao atualizar status do estúdio', true)
+              }
             }} />
             <span className="ad-toggle-track"></span>
           </label>
@@ -310,7 +316,7 @@ const SettingsTab = ({ showToast }) => {
           </div>
 
           {/* Gallery Card */}
-          <div className="ad-settings-gallery-card" onClick={() => navigate('/artist-dashboard', { state: { tab: 'portfolio' } })}>
+          <div className="ad-settings-gallery-card" onClick={() => switchTab('portfolio')}>
             <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiOPlnuw0EiTf19Kk2sGebpOT-L3mhUXcquQCO2PGsYLT-d5knirK8hD3aeFl9AtV_UvaYen96VeqQVmimX7O72j2MGaxCAZqUC6QfUZveFkYnNeRQ3NWcJfBR88RHFqatHYWqQ5CByYFKD1fqMPVOfTE5ovPKJHPDjo2pBc_Tv34V3vOn3Ks-Sa-vsDUmIU14N2TAyz7mw2uS_mJ2w7xAKzSCx41Ctn-wsDyYXkd70S2_7cyKNLtC0-JIMb4frXd_eRIsBPRR5OU" alt="Gallery" />
             <div className="ad-settings-gallery-overlay"></div>
             <div className="ad-settings-gallery-text">

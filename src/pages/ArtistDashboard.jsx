@@ -63,6 +63,21 @@ const ArtistDashboard = () => {
   }, [])
 
   useEffect(() => {
+    const loadNotifs = async () => {
+      try {
+        const stored = JSON.parse(localStorage.getItem('user') || '{}')
+        const artistaId = stored.artistaId || stored.id
+        if (!artistaId) return
+        const res = await agendamentoService.getByArtista(artistaId)
+        const all = Array.isArray(res.data) ? res.data : []
+        setNotifItems([...all].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora)).slice(0, 5))
+        setUnreadCount(all.filter(a => a.status === 'PENDENTE' || a.status === 'AGENDADO').length)
+      } catch {}
+    }
+    loadNotifs()
+  }, [])
+
+  useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) setSidebarOpen(false)
     }
@@ -126,11 +141,10 @@ const ArtistDashboard = () => {
   }
 
   const [viewMode, setViewMode] = useState('monthly')
-
-  const handleViewToggle = (mode) => {
-    setViewMode(mode)
-    showToast(`Visualização alterada para ${mode === 'monthly' ? 'Mensal' : 'Semanal'}`)
-  }
+  const [studioOpen, setStudioOpen] = useState(true)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [notifItems, setNotifItems] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
 
   const navItems = [
     { key: 'dashboard', icon: 'dashboard', label: 'Painel' },
@@ -148,7 +162,7 @@ const ArtistDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardTab showToast={showToast} openDrawer={openDrawer} />
+        return <DashboardTab showToast={showToast} openDrawer={openDrawer} onNewArt={() => switchTab('portfolio')} />
       case 'requests':
         return <RequestsTab showToast={showToast} openDrawer={openDrawer} />
       case 'schedule':
@@ -156,9 +170,9 @@ const ArtistDashboard = () => {
       case 'portfolio':
         return <PortfolioTab showToast={showToast} />
       case 'settings':
-        return <SettingsTab showToast={showToast} />
+        return <SettingsTab showToast={showToast} studioOpen={studioOpen} setStudioOpen={setStudioOpen} switchTab={switchTab} />
       default:
-        return <DashboardTab showToast={showToast} openDrawer={openDrawer} />
+        return <DashboardTab showToast={showToast} openDrawer={openDrawer} onNewArt={() => switchTab('portfolio')} />
     }
   }
 
@@ -185,9 +199,36 @@ const ArtistDashboard = () => {
               >Semanal</button>
             </div>
           )}
-          <button className="ad-icon-btn" onClick={() => { setActiveTab('requests'); setSidebarOpen(false) }}>
-            <span className="material-symbols-outlined">notifications</span>
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button className="ad-icon-btn" title="Notificações" onClick={() => { setNotifOpen(o => !o); setUnreadCount(0) }}>
+              <span className="material-symbols-outlined">notifications</span>
+              {unreadCount > 0 && (
+                <span style={{ position: 'absolute', top: 2, right: 2, width: 8, height: 8, borderRadius: '50%', background: '#E21B3C', border: '1.5px solid #0a0a0a' }} />
+              )}
+            </button>
+            {notifOpen && (
+              <div style={{ position: 'absolute', top: '110%', right: 0, width: 320, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, zIndex: 999, boxShadow: '0 8px 32px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', fontWeight: 700, fontSize: '0.8rem', letterSpacing: 1, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>Notificações</div>
+                {notifItems.length === 0 ? (
+                  <div style={{ padding: '1.5rem', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem' }}>Sem notificações</div>
+                ) : notifItems.map(ag => (
+                  <div key={ag.id} onClick={() => { openDrawer(ag); setNotifOpen(false) }}
+                    style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'center', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#E21B3C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.85rem', color: '#fff', flexShrink: 0 }}>
+                      {(ag.cliente?.fullName || ag.cliente?.nome || 'C').charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ag.cliente?.fullName || ag.cliente?.nome || 'Cliente'}</p>
+                      <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', margin: 0 }}>{ag.servico || 'Sessão'} · {ag.status}</p>
+                    </div>
+                  </div>
+                ))}
+                <div onClick={() => { switchTab('requests'); setNotifOpen(false) }} style={{ padding: '10px 16px', textAlign: 'center', fontSize: '0.8rem', color: '#E21B3C', cursor: 'pointer', fontWeight: 600 }}>Ver todas</div>
+              </div>
+            )}
+          </div>
           <div className="ad-user-info">
             <div className="ad-user-text">
               <p className="ad-user-name">{JSON.parse(localStorage.getItem('user') || '{}').nome || JSON.parse(localStorage.getItem('user') || '{}').fullName || 'Artista'}</p>
@@ -223,8 +264,8 @@ const ArtistDashboard = () => {
           <div className="ad-studio-status">
             <p className="ad-studio-status-label">Status do Estúdio</p>
             <div className="ad-studio-status-value">
-              <span className="ad-pulse-dot"></span>
-              <span className="ad-status-text">Aceitando Agendamentos</span>
+              <span className="ad-pulse-dot" style={!studioOpen ? { background: '#888' } : {}}></span>
+              <span className="ad-status-text">{studioOpen ? 'Aceitando Agendamentos' : 'Pausado'}</span>
             </div>
           </div>
         </div>
@@ -360,7 +401,7 @@ const ArtistDashboard = () => {
       </nav>
 
       {/* FAB Mobile */}
-      <button className="ad-fab" onClick={() => navigate('/agendamento')}>
+      <button className="ad-fab" onClick={() => switchTab('requests')}>
         <span className="material-symbols-outlined">add</span>
       </button>
 

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { agendamentoService } from '../../services/inkflowApi'
 
 const formatDate = (dataHora) => {
@@ -42,11 +41,9 @@ const statusLabel = {
   'CANCELADO': 'Cancelado',
 }
 
-const DashboardTab = ({ showToast, openDrawer }) => {
+const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
   const [agendamentos, setAgendamentos] = useState([])
   const [loading, setLoading] = useState(true)
-
-  const navigate = useNavigate()
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
 
@@ -114,8 +111,6 @@ const DashboardTab = ({ showToast, openDrawer }) => {
     ? (avaliacoes.reduce((sum, v) => sum + v, 0) / avaliacoes.length).toFixed(1)
     : null
 
-  const handleNewSession = () => navigate('/agendamento')
-
   // Próximo status possível para ações rápidas
   const getNextStatus = (current) => {
     const flow = { 
@@ -139,9 +134,9 @@ const DashboardTab = ({ showToast, openDrawer }) => {
           </h1>
         </div>
         <div className="ad-header-actions">
-          <button className="ad-btn-primary" onClick={handleNewSession}>
+          <button className="ad-btn-primary" onClick={onNewArt}>
             <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }}>add</span>
-            Nova Sessão
+            Nova Arte
           </button>
         </div>
       </section>
