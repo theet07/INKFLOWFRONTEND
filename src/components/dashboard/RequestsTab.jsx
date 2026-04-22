@@ -179,7 +179,7 @@ const RequestsTab = ({ showToast, openDrawer }) => {
                     <td>
                       <span className={`ad-badge ${cfg.badgeClass}`}>{cfg.label}</span>
                     </td>
-                    <td className="ad-req-td-right">
+                    <td className="ad-req-td-right" style={{ overflow: 'visible', position: 'relative' }}>
                       <div className="ad-req-actions">
                         {ag?.status === 'AGENDADO' ? (
                           <>

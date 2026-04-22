@@ -1401,6 +1401,7 @@
 .ad-req-table-container {
   background: var(--ad-surface-container-low);
   overflow-x: auto;
+  overflow-y: visible;
   border-radius: 8px;
 }
 
