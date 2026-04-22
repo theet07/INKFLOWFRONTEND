@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { agendamentoService } from '../../services/inkflowApi'
 
 const formatDate = (dataHora) => {
@@ -45,6 +46,7 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
   const [agendamentos, setAgendamentos] = useState([])
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(null)
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
   const [historicoCliente, setHistoricoCliente] = useState(null)
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
@@ -352,37 +354,14 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
                             )}
                           </div>
                         ) : (
-                          <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
-                            <button className="ad-more-btn" onClick={() => setMenuOpen(menuOpen === ag.id ? null : ag.id)}>
-                              <span className="material-symbols-outlined">more_vert</span>
-                            </button>
-                            {menuOpen === ag.id && (
-                              <div style={{ position: 'absolute', right: 0, bottom: '110%', background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, zIndex: 99, minWidth: 200, boxShadow: '0 8px 24px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
-                                <button onClick={() => {
-                                  navigator.clipboard.writeText(getClientEmail(ag))
-                                  showToast('E-mail copiado!')
-                                  setMenuOpen(null)
-                                }} style={{ width: '100%', padding: '10px 16px', background: 'none', border: 'none', color: '#fff', fontSize: '0.85rem', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
-                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-                                  <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: '#E21B3C' }}>content_copy</span>
-                                  Copiar contato
-                                </button>
-                                <button onClick={() => {
-                                  const clientId = ag.cliente?.id
-                                  const nome = getClientName(ag)
-                                  const historico = agendamentos.filter(a => a.cliente?.id === clientId).sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
-                                  setHistoricoCliente({ nome, agendamentos: historico })
-                                  setMenuOpen(null)
-                                }} style={{ width: '100%', padding: '10px 16px', background: 'none', border: 'none', color: '#fff', fontSize: '0.85rem', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
-                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-                                  <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: '#E21B3C' }}>history</span>
-                                  Ver histórico
-                                </button>
-                              </div>
-                            )}
-                          </div>
+                          <button className="ad-more-btn" onClick={(e) => {
+                            e.stopPropagation()
+                            const rect = e.currentTarget.getBoundingClientRect()
+                            setMenuPos({ top: rect.top - 90, left: rect.right - 200 })
+                            setMenuOpen(menuOpen === ag.id ? null : ag.id)
+                          }}>
+                            <span className="material-symbols-outlined">more_vert</span>
+                          </button>
                         )}
                       </td>
                     </tr>
@@ -393,6 +372,39 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
           </div>
         )}
       </section>
+      {menuOpen && createPortal(
+        <div style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, zIndex: 9999, minWidth: 200, boxShadow: '0 8px 24px rgba(0,0,0,0.5)', overflow: 'hidden' }}
+          onClick={e => e.stopPropagation()}>
+          {(() => {
+            const ag = agendamentos.find(a => a.id === menuOpen)
+            if (!ag) return null
+            return (
+              <>
+                <button onClick={() => { navigator.clipboard.writeText(getClientEmail(ag)); showToast('E-mail copiado!'); setMenuOpen(null) }}
+                  style={{ width: '100%', padding: '10px 16px', background: 'none', border: 'none', color: '#fff', fontSize: '0.85rem', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: '#E21B3C' }}>content_copy</span>
+                  Copiar contato
+                </button>
+                <button onClick={() => {
+                  const clientId = ag.cliente?.id
+                  const nome = getClientName(ag)
+                  const historico = agendamentos.filter(a => a.cliente?.id === clientId).sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+                  setHistoricoCliente({ nome, agendamentos: historico })
+                  setMenuOpen(null)
+                }} style={{ width: '100%', padding: '10px 16px', background: 'none', border: 'none', color: '#fff', fontSize: '0.85rem', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: '#E21B3C' }}>history</span>
+                  Ver histórico
+                </button>
+              </>
+            )
+          })()}
+        </div>,
+        document.body
+      )}
       {historicoCliente && (
         <div onClick={() => setHistoricoCliente(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, width: '90%', maxWidth: 560, maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
