@@ -27,8 +27,16 @@ const RequestsTab = ({ showToast, openDrawer }) => {
   const [filter, setFilter] = useState('all')
   const [agendamentos, setAgendamentos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [menuOpen, setMenuOpen] = useState(null)
+  const [historicoCliente, setHistoricoCliente] = useState(null)
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+  useEffect(() => {
+    const close = () => setMenuOpen(null)
+    document.addEventListener('click', close)
+    return () => document.removeEventListener('click', close)
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -183,9 +191,34 @@ const RequestsTab = ({ showToast, openDrawer }) => {
                             </button>
                           </>
                         ) : (
-                          <button className="ad-req-action-options" onClick={(e) => { e.stopPropagation(); if (openDrawer) openDrawer(ag) }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>more_vert</span>
-                          </button>
+                          <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+                            <button className="ad-req-action-options" onClick={() => setMenuOpen(menuOpen === ag.id ? null : ag.id)}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>more_vert</span>
+                            </button>
+                            {menuOpen === ag.id && (
+                              <div style={{ position: 'absolute', right: 0, bottom: '110%', background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, zIndex: 99, minWidth: 200, boxShadow: '0 8px 24px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
+                                <button onClick={() => { navigator.clipboard.writeText(getClientEmail(ag)); showToast('E-mail copiado!'); setMenuOpen(null) }}
+                                  style={{ width: '100%', padding: '10px 16px', background: 'none', border: 'none', color: '#fff', fontSize: '0.85rem', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                  <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: '#E21B3C' }}>content_copy</span>
+                                  Copiar contato
+                                </button>
+                                <button onClick={() => {
+                                  const clientId = ag.cliente?.id
+                                  const nome = getClientName(ag)
+                                  const historico = agendamentos.filter(a => a.cliente?.id === clientId).sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+                                  setHistoricoCliente({ nome, agendamentos: historico })
+                                  setMenuOpen(null)
+                                }} style={{ width: '100%', padding: '10px 16px', background: 'none', border: 'none', color: '#fff', fontSize: '0.85rem', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                  <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: '#E21B3C' }}>history</span>
+                                  Ver histórico
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
                     </td>
@@ -196,6 +229,37 @@ const RequestsTab = ({ showToast, openDrawer }) => {
           </table>
         )}
       </div>
+      {historicoCliente && (
+        <div onClick={() => setHistoricoCliente(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, width: '90%', maxWidth: 560, maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <p style={{ fontSize: '0.7rem', color: '#E21B3C', textTransform: 'uppercase', letterSpacing: 1, margin: 0 }}>Histórico do Cliente</p>
+                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>{historicoCliente.nome}</h3>
+              </div>
+              <button onClick={() => setHistoricoCliente(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              {historicoCliente.agendamentos.length === 0 ? (
+                <p style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>Nenhum agendamento encontrado.</p>
+              ) : historicoCliente.agendamentos.map(a => {
+                const cfg = statusConfig[a.status] || { label: a.status, badgeClass: '' }
+                return (
+                  <div key={a.id} style={{ padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600 }}>{a.servico || 'Sessão'}</p>
+                      <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{formatDate(a.dataHora)} · {formatTime(a.dataHora)}</p>
+                    </div>
+                    <span className={`ad-badge ${cfg.badgeClass}`}>{cfg.label}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

@@ -357,7 +357,7 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
                               <span className="material-symbols-outlined">more_vert</span>
                             </button>
                             {menuOpen === ag.id && (
-                              <div style={{ position: 'absolute', right: 0, top: '110%', background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, zIndex: 99, minWidth: 200, boxShadow: '0 8px 24px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
+                              <div style={{ position: 'absolute', right: 0, bottom: '110%', background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, zIndex: 99, minWidth: 200, boxShadow: '0 8px 24px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
                                 <button onClick={() => {
                                   navigator.clipboard.writeText(getClientEmail(ag))
                                   showToast('E-mail copiado!')
