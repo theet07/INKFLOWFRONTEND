@@ -1005,7 +1005,10 @@
    ========================================== */
 .ad-drawer-overlay {
   position: fixed;
-  inset: 0;
+  top: 64px;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 60;
   display: flex;
   justify-content: flex-end;
