@@ -66,10 +66,10 @@ const PortfolioTab = ({ showToast }) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', 'inkflow_portfolio');
+      formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
       formData.append('folder', 'portfolio');
 
-      const cloudRes = await fetch('https://api.cloudinary.com/v1_1/dzluvaqiy/image/upload', {
+      const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: 'POST',
         body: formData,
       });
