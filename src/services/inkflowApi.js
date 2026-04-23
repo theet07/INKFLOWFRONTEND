@@ -61,7 +61,6 @@ export const agendamentoService = {
   updateStatus: (id, data) => api.patch(`/agendamentos/${id}/status`, data),
   avaliar: (id, data) => api.put(`/appointments/${id}/avaliar`, data),
   delete: (id) => api.delete(`/agendamentos/${id}`),
-  bloquearHorario: (data) => api.post('/agendamentos/bloquear', data),
 };
 
 export const artistaService = {
