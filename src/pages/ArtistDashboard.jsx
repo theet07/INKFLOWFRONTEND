@@ -141,6 +141,7 @@ const ArtistDashboard = () => {
   }
 
   const [viewMode, setViewMode] = useState('monthly')
+  const handleViewToggle = (mode) => setViewMode(mode)
   const [studioOpen, setStudioOpen] = useState(true)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifItems, setNotifItems] = useState([])
@@ -166,7 +167,7 @@ const ArtistDashboard = () => {
       case 'requests':
         return <RequestsTab showToast={showToast} openDrawer={openDrawer} />
       case 'schedule':
-        return <ScheduleTab showToast={showToast} openDrawer={openDrawer} />
+        return <ScheduleTab showToast={showToast} openDrawer={openDrawer} viewMode={viewMode} />
       case 'portfolio':
         return <PortfolioTab showToast={showToast} />
       case 'settings':

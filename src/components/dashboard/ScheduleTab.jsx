@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react'
 import { agendamentoService } from '../../services/inkflowApi'
 import { useAuth } from '../../contexts/AuthContext'
 
-const ScheduleTab = ({ showToast, openDrawer }) => {
+const ScheduleTab = ({ showToast, openDrawer, viewMode: viewModeProp }) => {
   const { user } = useAuth()
   const [selectedDay, setSelectedDay] = useState(null)
   const [agendamentos, setAgendamentos] = useState([])
   const [loading, setLoading] = useState(true)
   const [monthOffset, setMonthOffset] = useState(0)
 
-  // ── Toggle Mensal / Semanal ───────────────────────────────────
-  const [viewMode, setViewMode] = useState('mensal')
+  // ── Mapeia prop do topbar (monthly/weekly) para lógica interna ─
+  const viewMode = viewModeProp === 'weekly' ? 'semanal' : 'mensal'
 
   // ── Limpeza: drag-drop + confirmação ─────────────────────────
   const [hiddenIds, setHiddenIds] = useState([])
@@ -188,25 +188,6 @@ const ScheduleTab = ({ showToast, openDrawer }) => {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              {/* Toggle Mensal / Semanal */}
-              <div style={{ display: 'flex', background: 'rgba(255,255,255,0.06)', borderRadius: 8, padding: 3, gap: 2 }}>
-                {['mensal', 'semanal'].map(mode => (
-                  <button
-                    key={mode}
-                    onClick={() => { setViewMode(mode); setSelectedDay(null) }}
-                    style={{
-                      padding: '5px 14px', borderRadius: 6, border: 'none',
-                      fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer',
-                      textTransform: 'capitalize', transition: 'all 0.18s ease',
-                      background: viewMode === mode ? '#e63946' : 'transparent',
-                      color: viewMode === mode ? '#fff' : 'rgba(255,255,255,0.4)',
-                    }}
-                  >
-                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                  </button>
-                ))}
-              </div>
-
               {/* Navegação de mês */}
               <div className="ad-sched-nav-btns">
                 <button className="ad-sched-nav-btn" onClick={() => { setMonthOffset(p => p - 1); setSelectedDay(null) }}>
