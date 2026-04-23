@@ -42,6 +42,24 @@ const statusLabel = {
   'CANCELADO': 'Cancelado',
 }
 
+const ClientAvatar = ({ ag, size = '0.9rem' }) => {
+  const nome = ag?.cliente?.fullName || ag?.cliente?.nome || 'C'
+  const foto = ag?.cliente?.fotoUrl
+  const [imgError, setImgError] = useState(false)
+
+  if (foto && !imgError) {
+    return (
+      <img src={foto} alt={nome} onError={() => setImgError(true)}
+        style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+    )
+  }
+  return (
+    <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: size }}>
+      {nome.charAt(0).toUpperCase()}
+    </div>
+  )
+}
+
 const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
   const [agendamentos, setAgendamentos] = useState([])
   const [loading, setLoading] = useState(true)
@@ -265,9 +283,7 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
                   <p className="ad-agenda-time-period">{getTimePeriod(ag.dataHora)}</p>
                 </div>
                 <div className="ad-agenda-avatar">
-                  <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.9rem' }}>
-                    {getClientName(ag).charAt(0).toUpperCase()}
-                  </div>
+                  <ClientAvatar ag={ag} size="0.9rem" />
                 </div>
                 <div style={{ flex: 1 }}>
                   <p className="ad-agenda-name">{getClientName(ag)}</p>
@@ -320,9 +336,7 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
                       <td>
                         <div className="ad-client-cell">
                           <div className="ad-client-avatar">
-                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.75rem' }}>
-                              {clientName.charAt(0).toUpperCase()}
-                            </div>
+                            <ClientAvatar ag={ag} size="0.75rem" />
                           </div>
                           <div>
                             <p className="ad-client-name">{clientName}</p>

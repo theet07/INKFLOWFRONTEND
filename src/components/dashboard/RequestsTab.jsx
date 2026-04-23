@@ -24,6 +24,28 @@ const statusConfig = {
   'CANCELADO': { label: 'CANCELADO', badgeClass: 'ad-badge-red' },
 }
 
+const ClientAvatar = ({ ag }) => {
+  const nome = ag?.cliente?.fullName || ag?.cliente?.nome || 'C'
+  const foto = ag?.cliente?.fotoUrl
+  const [imgError, setImgError] = useState(false)
+
+  if (foto && !imgError) {
+    return (
+      <img
+        src={foto}
+        alt={nome}
+        onError={() => setImgError(true)}
+        style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+      />
+    )
+  }
+  return (
+    <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.8rem' }}>
+      {nome.charAt(0).toUpperCase()}
+    </div>
+  )
+}
+
 const RequestsTab = ({ showToast, openDrawer }) => {
   const [filter, setFilter] = useState('all')
   const [agendamentos, setAgendamentos] = useState([])
@@ -160,9 +182,7 @@ const RequestsTab = ({ showToast, openDrawer }) => {
                     <td>
                       <div className="ad-req-client-cell">
                         <div className="ad-req-client-img">
-                          <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.8rem' }}>
-                            {getClientName(ag).charAt(0).toUpperCase()}
-                          </div>
+                          <ClientAvatar ag={ag} />
                         </div>
                         <div>
                           <p className="ad-req-client-name">{getClientName(ag)}</p>
