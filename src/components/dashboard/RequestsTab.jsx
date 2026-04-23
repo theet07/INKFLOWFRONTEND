@@ -35,7 +35,7 @@ const ClientAvatar = ({ ag }) => {
         src={foto}
         alt={nome}
         onError={() => setImgError(true)}
-        style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       />
     )
   }
