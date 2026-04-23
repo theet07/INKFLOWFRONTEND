@@ -66,15 +66,25 @@ const PortfolioTab = ({ showToast }) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('artistaId', user.artistaId || user.id || '');
-      formData.append('categoria', activeFilter !== 'Todos' ? activeFilter : 'Geral');
+      formData.append('upload_preset', 'inkflow_portfolio');
+      formData.append('folder', 'portfolio');
 
-      const res = await portfolioService.upload(formData);
-      
-      // Adiciona a obra nova à galeria local
-      if (res.data) {
-        setGallery(prev => [res.data, ...prev]);
-      }
+      const cloudRes = await fetch('https://api.cloudinary.com/v1_1/dzluvaqiy/image/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const cloudData = await cloudRes.json();
+
+      if (!cloudData.secure_url) throw new Error('Upload falhou no Cloudinary');
+
+      const res = await portfolioService.create({
+        artistaId: user.artistaId || user.id,
+        imagemUrl: cloudData.secure_url,
+        categoria: activeFilter !== 'Todos' ? activeFilter : 'Geral',
+        descricao: '',
+      });
+
+      if (res.data) setGallery(prev => [res.data, ...prev]);
       showToast('Obra adicionada com sucesso!');
     } catch (err) {
       console.error('Erro no upload:', err);
