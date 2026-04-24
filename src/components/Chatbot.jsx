@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
 
 const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
 
@@ -79,7 +80,10 @@ const Chatbot = () => {
           <div className="chatbot-messages">
             {messages.map((message, index) => (
               <div key={index} className={`message ${message.role === 'user' ? 'user-message' : 'bot-message'}`}>
-                {message.content}
+                {message.role === 'model'
+                  ? <ReactMarkdown>{message.content}</ReactMarkdown>
+                  : message.content
+                }
               </div>
             ))}
             {loading && (
