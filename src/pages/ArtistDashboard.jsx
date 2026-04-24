@@ -72,7 +72,11 @@ const ArtistDashboard = () => {
         const res = await agendamentoService.getByArtista(artistaId)
         const all = Array.isArray(res.data) ? res.data : []
         setNotifItems([...all].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora)).slice(0, 5))
-        setUnreadCount(all.filter(a => a.status === 'PENDENTE' || a.status === 'AGENDADO').length)
+        if (all.length > 0) {
+          const lastSeen = localStorage.getItem('notif_artista_lastSeen')
+          const maisRecente = all.reduce((a, b) => new Date(a.dataHora) > new Date(b.dataHora) ? a : b)
+          setArtistaHasNew(!lastSeen || new Date(maisRecente.dataHora) > new Date(lastSeen))
+        }
       } catch {}
     }
     loadNotifs()
@@ -146,7 +150,7 @@ const ArtistDashboard = () => {
   const [studioOpen, setStudioOpen] = useState(true)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifItems, setNotifItems] = useState([])
-  const [unreadCount, setUnreadCount] = useState(0)
+  const [artistaHasNew, setArtistaHasNew] = useState(false)
 
   const navItems = [
     { key: 'dashboard', icon: 'dashboard', label: 'Painel' },
@@ -205,9 +209,15 @@ const ArtistDashboard = () => {
             </div>
           )}
           <div style={{ position: 'relative' }}>
-            <button className="ad-icon-btn" title="Notificações" onClick={() => { setNotifOpen(o => !o); setUnreadCount(0) }}>
+            <button className="ad-icon-btn" title="Notificações" onClick={() => {
+              setNotifOpen(o => !o)
+              if (!notifOpen) {
+                localStorage.setItem('notif_artista_lastSeen', new Date().toISOString())
+                setArtistaHasNew(false)
+              }
+            }}>
               <span className="material-symbols-outlined">notifications</span>
-              {unreadCount > 0 && (
+              {artistaHasNew && (
                 <span style={{ position: 'absolute', top: 2, right: 2, width: 8, height: 8, borderRadius: '50%', background: '#E21B3C', border: '1.5px solid #0a0a0a' }} />
               )}
             </button>

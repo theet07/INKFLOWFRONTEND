@@ -8,6 +8,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [agendamentos, setAgendamentos] = useState([])
+  const [clienteHasNew, setClienteHasNew] = useState(false)
   const notifRef = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
@@ -22,6 +23,24 @@ const Header = () => {
       setAgendamentos([])
     }
   }, [user, userType])
+
+  useEffect(() => {
+    if (agendamentos.length === 0) return
+    const lastSeen = localStorage.getItem('notif_cliente_lastSeen')
+    if (!lastSeen) { setClienteHasNew(true); return }
+    const maisRecente = agendamentos.reduce((a, b) =>
+      new Date(a.dataHora) > new Date(b.dataHora) ? a : b
+    )
+    setClienteHasNew(new Date(maisRecente.dataHora) > new Date(lastSeen))
+  }, [agendamentos])
+
+  const handleAbrirSinoCliente = () => {
+    setNotifOpen(prev => !prev)
+    if (!notifOpen) {
+      localStorage.setItem('notif_cliente_lastSeen', new Date().toISOString())
+      setClienteHasNew(false)
+    }
+  }
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -103,8 +122,12 @@ const Header = () => {
 
         {userType === 'client' && (
           <div className="notif-wrap" ref={notifRef}>
-            <button className="notif-btn" onClick={() => setNotifOpen(prev => !prev)}>
+            <button className="notif-btn" onClick={handleAbrirSinoCliente}
+              style={{ position: 'relative' }}>
               <span className="material-symbols-outlined">notifications</span>
+              {clienteHasNew && (
+                <span style={{ position: 'absolute', top: 2, right: 2, width: 8, height: 8, borderRadius: '50%', background: '#E21B3C', border: '1.5px solid #0a0a0a' }} />
+              )}
             </button>
             {notifOpen && (
               <div className="notif-dropdown">
