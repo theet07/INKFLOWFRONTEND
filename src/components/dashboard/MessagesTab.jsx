@@ -28,16 +28,15 @@ const MessagesTab = ({ showToast }) => {
   const carregarConversas = async () => {
     try {
       const res = await fetch(`${API_BASE}/mensagens/conversas`, { headers })
-      const clienteIds = await res.json()
-      // Para cada clienteId, busca a conversa e monta o resumo
-      const lista = await Promise.all(clienteIds.map(async (cid) => {
-        const r = await fetch(`${API_BASE}/mensagens/conversa/${cid}`, { headers })
+      const lista = await res.json() // [{ clienteId, nome, fotoUrl }]
+      const enriquecida = await Promise.all(lista.map(async (c) => {
+        const r = await fetch(`${API_BASE}/mensagens/conversa/${c.clienteId}`, { headers })
         const msgs = await r.json()
         const ultima = msgs[msgs.length - 1]
         const naoLidas = msgs.filter(m => !m.lida && m.destinatarioId === artistaId).length
-        return { clienteId: cid, ultimaMsg: ultima?.conteudo || '', naoLidas, createdAt: ultima?.createdAt }
+        return { ...c, ultimaMsg: ultima?.conteudo || '', naoLidas, createdAt: ultima?.createdAt }
       }))
-      setConversas(lista.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
+      setConversas(enriquecida.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
     } catch { } finally {
       setLoading(false)
     }
@@ -138,11 +137,14 @@ const MessagesTab = ({ showToast }) => {
               style={{ padding: '14px 20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.04)', background: clienteSelecionado === c.clienteId ? 'rgba(230,57,70,0.08)' : 'transparent', transition: 'background 0.15s' }}
               onMouseEnter={e => { if (clienteSelecionado !== c.clienteId) e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
               onMouseLeave={e => { if (clienteSelecionado !== c.clienteId) e.currentTarget.style.background = 'transparent' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.9rem', color: '#fff', flexShrink: 0 }}>
-                {String(c.clienteId).charAt(0)}
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.9rem', color: '#fff', flexShrink: 0, overflow: 'hidden' }}>
+                {c.fotoUrl
+                  ? <img src={c.fotoUrl} alt={c.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.style.display = 'none' }} />
+                  : (c.nome || '?').charAt(0).toUpperCase()
+                }
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>Cliente #{c.clienteId}</p>
+                <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>{c.nome || 'Cliente'}</p>
                 <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.ultimaMsg || '...'}</p>
               </div>
               {c.naoLidas > 0 && (
@@ -164,10 +166,20 @@ const MessagesTab = ({ showToast }) => {
           <>
             {/* Header */}
             <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#fff' }}>
-                {String(clienteSelecionado).charAt(0)}
-              </div>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: '0.95rem' }}>Cliente #{clienteSelecionado}</p>
+              {(() => {
+                const c = conversas.find(x => x.clienteId === clienteSelecionado)
+                return (
+                  <>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#fff', overflow: 'hidden', flexShrink: 0 }}>
+                      {c?.fotoUrl
+                        ? <img src={c.fotoUrl} alt={c.nome} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.style.display = 'none' }} />
+                        : (c?.nome || '?').charAt(0).toUpperCase()
+                      }
+                    </div>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: '0.95rem' }}>{c?.nome || 'Cliente'}</p>
+                  </>
+                )
+              })()}
             </div>
 
             {/* Mensagens */}
