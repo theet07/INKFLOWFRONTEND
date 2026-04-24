@@ -857,15 +857,11 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
     'CANCELADO': 'Cancelada',
   }
 
-  const sessionDate = new Date(ag.dataHora);
   const now = new Date();
   const createdAt = ag.createdAt ? new Date(ag.createdAt) : null;
-  const horasParaSessao = (sessionDate - now) / (1000 * 60 * 60);
   const horasDesdeCriacao = createdAt ? (now - createdAt) / (1000 * 60 * 60) : 999;
-  const isCancellable = horasParaSessao >= 24 && horasDesdeCriacao <= 24;
-  const cancelMsg = horasDesdeCriacao > 24
-    ? 'O prazo de 24h após o agendamento já expirou.'
-    : 'Faltam menos de 24h para a sessão. Entre em contato com o estúdio.'
+  const isCancellable = horasDesdeCriacao <= 24;
+  const cancelMsg = 'O prazo de 24h após o agendamento já expirou. Entre em contato com o estúdio.'
 
   return (
     <>
