@@ -65,6 +65,14 @@ const Profile = () => {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [avatarModalOpen, setAvatarModalOpen] = useState(false)
   const [deleteAccountModal, setDeleteAccountModal] = useState({ isOpen: false, password: '', deleting: false })
+  const [chatAberto, setChatAberto] = useState(false)
+  const [artistaDoChat, setArtistaDoChat] = useState(null)
+  const [mensagens, setMensagens] = useState([])
+  const [inputMsg, setInputMsg] = useState('')
+  const [loadingMsg, setLoadingMsg] = useState(false)
+  const pollingRef = useRef(null)
+  const ultimoTimestampRef = useRef(new Date().toISOString())
+  const chatEndRef = useRef(null)
   const [agendamentos, setAgendamentos] = useState([])
   const [loadingAg, setLoadingAg] = useState(true)
   const [editProfile, setEditProfile] = useState({ isOpen: false, nome: '', telefone: '', saving: false })
@@ -291,6 +299,63 @@ const Profile = () => {
       const errorMsg = err.response?.data?.message || 'Erro ao atualizar sessão. Verifique sua conexão.'
       showToast(errorMsg, 'error')
     }
+  }
+
+  const API_BASE = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
+
+  const abrirChat = async (artista) => {
+    setArtistaDoChat(artista)
+    setChatAberto(true)
+    setMensagens([])
+    try {
+      const res = await fetch(`${API_BASE}/mensagens/conversa/${artista.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const msgs = await res.json()
+      setMensagens(Array.isArray(msgs) ? msgs : [])
+      if (msgs.length > 0) ultimoTimestampRef.current = msgs[msgs.length - 1].createdAt
+      msgs.filter(m => !m.lida && m.destinatarioId === user?.id)
+          .forEach(m => fetch(`${API_BASE}/mensagens/${m.id}/lida`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` } }))
+    } catch { }
+    // Iniciar polling
+    if (pollingRef.current) clearInterval(pollingRef.current)
+    pollingRef.current = setInterval(async () => {
+      try {
+        const r = await fetch(`${API_BASE}/mensagens/novas?desde=${ultimoTimestampRef.current}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const novas = await r.json()
+        if (novas.length > 0) {
+          setMensagens(prev => [...prev, ...novas])
+          ultimoTimestampRef.current = novas[novas.length - 1].createdAt
+        }
+      } catch { }
+    }, 5000)
+  }
+
+  const fecharChat = () => {
+    setChatAberto(false)
+    setArtistaDoChat(null)
+    setMensagens([])
+    if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null }
+  }
+
+  const enviarMensagem = async () => {
+    if (!inputMsg.trim() || !artistaDoChat) return
+    setLoadingMsg(true)
+    try {
+      const res = await fetch(`${API_BASE}/mensagens`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ remetenteId: user?.id, destinatarioId: artistaDoChat.id, conteudo: inputMsg.trim() })
+      })
+      if (!res.ok) { const e = await res.json(); showToast(e.message || 'Erro ao enviar', 'error'); return }
+      const nova = await res.json()
+      setMensagens(prev => [...prev, nova])
+      ultimoTimestampRef.current = nova.createdAt
+      setInputMsg('')
+    } catch { showToast('Erro ao enviar mensagem', 'error') }
+    finally { setLoadingMsg(false) }
   }
 
   const handleAvaliarSessao = async (agendamentoId, avaliacao, observacoes) => {
@@ -578,7 +643,7 @@ const Profile = () => {
                         <h5>{artista?.nome || 'Artista'}</h5>
                         <p>{artista?.role || 'Tatuador Residente'}</p>
                       </div>
-                      <button onClick={() => showToast(`Chat com ${artista?.nome || 'o artista'} em breve!`, 'chat')}>
+                      <button onClick={() => abrirChat(artista)}>
                         <span className="material-symbols-outlined">chat_bubble</span>
                       </button>
                     </div>
@@ -788,6 +853,52 @@ const Profile = () => {
                   {editProfile.saving ? 'Salvando...' : 'Salvar Alterações'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Chat */}
+      {chatAberto && artistaDoChat && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, width: '90%', maxWidth: 480, height: '70vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {/* Header */}
+            <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <img src={artistaDoChat.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artistaDoChat.nome)}`} alt={artistaDoChat.nome} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem' }}>{artistaDoChat.nome}</p>
+                <p style={{ margin: 0, fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>Artista InkFlow</p>
+              </div>
+              <button onClick={fecharChat} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            {/* Mensagens */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {mensagens.length === 0 && (
+                <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem', marginTop: '2rem' }}>Nenhuma mensagem ainda. Diga olá!</p>
+              )}
+              {mensagens.map(m => {
+                const isCliente = m.remetenteId === user?.id
+                return (
+                  <div key={m.id} style={{ display: 'flex', justifyContent: isCliente ? 'flex-end' : 'flex-start' }}>
+                    <div style={{ maxWidth: '70%', padding: '10px 14px', borderRadius: isCliente ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isCliente ? '#e63946' : 'rgba(255,255,255,0.08)', color: '#fff', fontSize: '0.875rem', lineHeight: 1.5 }}>
+                      <p style={{ margin: 0 }}>{m.conteudo}</p>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.65rem', opacity: 0.6, textAlign: 'right' }}>{new Date(m.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                  </div>
+                )
+              })}
+              <div ref={chatEndRef} />
+            </div>
+            {/* Input */}
+            <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 10 }}>
+              <input value={inputMsg} onChange={e => setInputMsg(e.target.value)} onKeyDown={e => e.key === 'Enter' && !loadingMsg && enviarMensagem()} placeholder="Digite uma mensagem..." disabled={loadingMsg}
+                style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', color: '#fff', fontSize: '0.875rem', outline: 'none' }} />
+              <button onClick={enviarMensagem} disabled={loadingMsg || !inputMsg.trim()}
+                style={{ background: '#e63946', border: 'none', borderRadius: 10, padding: '10px 16px', color: '#fff', cursor: loadingMsg || !inputMsg.trim() ? 'not-allowed' : 'pointer', opacity: loadingMsg || !inputMsg.trim() ? 0.5 : 1 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>send</span>
+              </button>
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import RequestsTab from '../components/dashboard/RequestsTab'
 import ScheduleTab from '../components/dashboard/ScheduleTab'
 import PortfolioTab from '../components/dashboard/PortfolioTab'
 import SettingsTab from '../components/dashboard/SettingsTab'
+import MessagesTab from '../components/dashboard/MessagesTab'
 import { agendamentoService } from '../services/inkflowApi'
 import { useAuth } from '../contexts/AuthContext'
 import './ArtistDashboard.css'
@@ -151,6 +152,7 @@ const ArtistDashboard = () => {
     { key: 'dashboard', icon: 'dashboard', label: 'Painel' },
     { key: 'requests', icon: 'potted_plant', label: 'Solicitações' },
     { key: 'schedule', icon: 'calendar_today', label: 'Agenda' },
+    { key: 'messages', icon: 'chat', label: 'Mensagens' },
     { key: 'portfolio', icon: 'brush', label: 'Portfólio' },
     { key: 'settings', icon: 'settings', label: 'Configurações' },
   ]
@@ -168,6 +170,8 @@ const ArtistDashboard = () => {
         return <RequestsTab showToast={showToast} openDrawer={openDrawer} />
       case 'schedule':
         return <ScheduleTab showToast={showToast} openDrawer={openDrawer} viewMode={viewMode} />
+      case 'messages':
+        return <MessagesTab showToast={showToast} />
       case 'portfolio':
         return <PortfolioTab showToast={showToast} />
       case 'settings':
@@ -279,7 +283,7 @@ const ArtistDashboard = () => {
 
       {/* Main Content */}
       <main className="ad-main">
-        <div className={`ad-content ${activeTab === 'schedule' ? 'full-width' : ''}`}>
+        <div className={`ad-content ${activeTab === 'schedule' || activeTab === 'messages' ? 'full-width' : ''}`}>
           {renderContent()}
         </div>
       </main>

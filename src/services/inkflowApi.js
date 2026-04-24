@@ -88,6 +88,15 @@ export const disponibilidadeService = {
   remover: (id) => api.delete(`/disponibilidade/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
 };
 
+export const mensagemService = {
+  enviar: (data) => api.post('/mensagens', data),
+  getConversa: (outroUsuarioId) => api.get(`/mensagens/conversa/${outroUsuarioId}`),
+  getNovas: (desde) => api.get(`/mensagens/novas?desde=${desde}`),
+  marcarLida: (id) => api.patch(`/mensagens/${id}/lida`),
+  countNaoLidas: () => api.get('/mensagens/nao-lidas/count'),
+  getConversas: () => api.get('/mensagens/conversas'),
+};
+
 export const adminService = {
   exportBackup: () => api.get('/api/v1/admin/backup/download', { responseType: 'blob', baseURL: API_BASE_URL.replace(/\/api.*$/, '') }),
   getBackupStatus: () => api.get('/api/v1/admin/backup/status', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') }),
