@@ -859,8 +859,13 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
 
   const sessionDate = new Date(ag.dataHora);
   const now = new Date();
-  const diffHours = (sessionDate - now) / (1000 * 60 * 60);
-  const isCancellable = diffHours >= 24;
+  const createdAt = ag.createdAt ? new Date(ag.createdAt) : null;
+  const horasParaSessao = (sessionDate - now) / (1000 * 60 * 60);
+  const horasDesdeCriacao = createdAt ? (now - createdAt) / (1000 * 60 * 60) : 999;
+  const isCancellable = horasParaSessao >= 24 && horasDesdeCriacao <= 24;
+  const cancelMsg = horasDesdeCriacao > 24
+    ? 'O prazo de 24h após o agendamento já expirou.'
+    : 'Faltam menos de 24h para a sessão. Entre em contato com o estúdio.'
 
   return (
     <>
@@ -953,7 +958,7 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
           {!isCancellable && (
             <p className="p-modal-note" style={{ color: '#ff6b7a', marginTop: '0.25rem' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '4px' }}>warning</span>
-              Sessões com menos de 24 horas para o início não podem ser canceladas pelo sistema. Entre em contato com o estúdio.
+              {cancelMsg} Entre em contato com o estúdio.
             </p>
           )}
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
