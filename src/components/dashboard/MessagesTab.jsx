@@ -5,7 +5,7 @@ const API_BASE = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://in
 
 const formatTime = (dt) => {
   if (!dt) return ''
-  return new Date(dt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  return new Date(dt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })
 }
 
 const MessagesTab = ({ showToast }) => {
