@@ -107,6 +107,9 @@ const Profile = () => {
       }
       fetchMeusAgendamentos();
     }
+    return () => {
+      if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null }
+    }
   }, [user, authLoading, navigate])
 
   if (authLoading) {

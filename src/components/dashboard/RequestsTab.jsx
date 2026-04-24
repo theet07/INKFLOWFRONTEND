@@ -121,11 +121,7 @@ const RequestsTab = ({ showToast, openDrawer }) => {
 
   const handleRowClick = (e, ag) => {
     if (e.target.closest('button')) return
-    console.log('Agendamento selecionado:', ag)
-    // Usa o drawer blindado do componente pai (ArtistDashboard)
-    if (openDrawer) {
-      openDrawer(ag)
-    }
+    if (openDrawer) openDrawer(ag)
   }
 
   return (

@@ -96,7 +96,6 @@ const ArtistDashboard = () => {
   }, [drawerOpen])
 
   const openDrawer = (agendamento) => {
-    console.log('Agendamento selecionado:', agendamento)
     setDrawerAgendamento(agendamento)
     setDrawerOpen(true)
   }
