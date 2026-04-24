@@ -952,7 +952,7 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
         />
       </div>
 
-      {ag.status === 'AGENDADO' || ag.status === 'CONFIRMADO' ? (
+      {ag.status === 'AGENDADO' || ag.status === 'CONFIRMADO' || ag.status === 'PENDENTE' ? (
         <>
           <p className="p-modal-note">Por favor, chegue com 15 minutos de antecedência.</p>
           {!isCancellable && (
