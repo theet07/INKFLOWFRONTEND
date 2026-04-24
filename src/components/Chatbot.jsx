@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 
 const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
 
 const Chatbot = () => {
+  const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([
     { role: 'model', content: 'Olá! Sou o assistente do InkFlow. Como posso ajudar você hoje?' }
@@ -81,7 +83,22 @@ const Chatbot = () => {
             {messages.map((message, index) => (
               <div key={index} className={`message ${message.role === 'user' ? 'user-message' : 'bot-message'}`}>
                 {message.role === 'model'
-                  ? <ReactMarkdown>{message.content}</ReactMarkdown>
+                  ? <ReactMarkdown
+                      components={{
+                        a: ({ href, children }) => (
+                          <a
+                            onClick={(e) => {
+                              e.preventDefault()
+                              setIsOpen(false)
+                              navigate(href)
+                            }}
+                            style={{ color: '#E21B3C', textDecoration: 'underline', cursor: 'pointer', fontWeight: 600 }}
+                          >
+                            {children}
+                          </a>
+                        )
+                      }}
+                    >{message.content}</ReactMarkdown>
                   : message.content
                 }
               </div>
