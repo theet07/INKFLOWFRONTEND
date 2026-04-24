@@ -167,7 +167,7 @@ const Services = () => {
           flex: '0 0 auto'
         }}>
           <img 
-            src="/assets/images/mao.png" 
+            src="/assets/images/tattoo-hand.png" 
             alt="Mão segurando máquina de tatuagem"
             style={{
               width: '400px',
