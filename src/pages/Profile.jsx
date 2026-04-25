@@ -125,8 +125,12 @@ const Profile = () => {
   if (!user || !user.email) return null
 
   const isAvaliado = (ag) => ag.avaliado === true
-  const proximas = agendamentos.filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO' || (a.status === 'REALIZADO' && !isAvaliado(a)))
-  const colecao = agendamentos.filter(a => a.status === 'REALIZADO' && isAvaliado(a))
+  const proximas = agendamentos
+    .filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO' || (a.status === 'REALIZADO' && !isAvaliado(a)))
+    .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+  const colecao = agendamentos
+    .filter(a => a.status === 'REALIZADO' && isAvaliado(a))
+    .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
   const artistasUnicos = agendamentos
     .filter(a => a.artista)
     .reduce((acc, a) => {
@@ -545,7 +549,9 @@ const Profile = () => {
             <div className="profile-section">
               <div className="section-header">
                 <h3><span className="material-symbols-outlined">auto_awesome_motion</span> Minha Coleção</h3>
-                <a onClick={() => {}}>Galeria Completa</a>
+                <a onClick={() => openModal('Galeria Completa', <ColecaoModalContent colecao={colecao} getFallbackImage={getFallbackImage} openModal={openModal} />)} style={{ cursor: 'pointer' }}>
+                  Galeria Completa
+                </a>
               </div>
 
               {colecao.length === 0 ? (
@@ -555,7 +561,7 @@ const Profile = () => {
                 </div>
               ) : (
                 <div className="gallery-layout">
-                  {colecao.map((ag, i) => (
+                  {colecao.slice(0, 4).map((ag, i) => (
                     <div 
                       key={ag.id} 
                       className="gallery-item" 
@@ -1125,6 +1131,50 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
         </div>
       )}
     </>
+  )
+}
+
+const ColecaoModalContent = ({ colecao, getFallbackImage, openModal }) => {
+  if (colecao.length === 0) {
+    return <div style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '2rem' }}>Nenhuma tattoo na coleção ainda.</div>
+  }
+  return (
+    <div className="gallery-layout">
+      {colecao.map(ag => (
+        <div
+          key={ag.id}
+          className="gallery-item"
+          onClick={() => openModal('Tattoo Finalizada', (
+            <div style={{ padding: '0.5rem', textAlign: 'center', color: '#fff' }}>
+              <img
+                src={ag.imagemResultadoUrl || ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}
+                alt={ag.servico}
+                style={{ width: '100%', maxHeight: '40vh', borderRadius: '8px', objectFit: 'contain', backgroundColor: 'rgba(0,0,0,0.5)' }}
+              />
+              <h3 style={{ marginTop: '1rem', color: '#e63946', fontSize: '1.4rem' }}>{ag.servico}</h3>
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Obra de {ag.artista?.nome || (ag.servico?.match(/com\s+(.+)$/i)?.[1]) || 'Artista Studio'}
+              </p>
+              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ color: '#ffb900', fontSize: '1.4rem', marginBottom: '0.5rem', letterSpacing: '4px' }}>
+                  {'★'.repeat(ag.avaliacao || 0)}{'☆'.repeat(5 - (ag.avaliacao || 0))}
+                </div>
+                <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontStyle: 'italic', lineHeight: '1.5' }}>
+                  "{ag.observacoes || 'Sessão finalizada com muito profissionalismo!'}"
+                </p>
+              </div>
+            </div>
+          ))}
+        >
+          <div style={{
+            width: '100%', height: '100%',
+            backgroundImage: `url("${ag.imagemResultadoUrl || ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}")`,
+            backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 'inherit'
+          }} />
+          <div className="gallery-overlay"><span className="material-symbols-outlined">zoom_in</span></div>
+        </div>
+      ))}
+    </div>
   )
 }
 
