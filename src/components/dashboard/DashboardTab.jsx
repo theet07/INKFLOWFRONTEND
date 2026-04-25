@@ -362,16 +362,20 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
                         <span className={`ad-badge ${getBadgeClass(ag)}`}>{statusLabel[ag.status] || ag.status}</span>
                       </td>
                       <td className="text-right">
-                        {nextStatus ? (
+                        {(ag.status === 'PENDENTE' || ag.status === 'AGENDADO') ? (
+                          <div className="ad-row-actions">
+                            <button className="ad-action-accept" title="Confirmar" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(ag.id, 'CONFIRMADO', clientName) }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>check</span>
+                            </button>
+                            <button className="ad-action-decline" title="Cancelar" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(ag.id, 'CANCELADO', clientName) }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>close</span>
+                            </button>
+                          </div>
+                        ) : nextStatus ? (
                           <div className="ad-row-actions">
                             <button className="ad-action-accept" title={`Avançar para ${statusLabel[nextStatus]}`} onClick={(e) => { e.stopPropagation(); handleStatusUpdate(ag.id, nextStatus, clientName) }}>
                               <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>arrow_forward</span>
                             </button>
-                            {(ag.status === 'AGENDADO' || ag.status === 'PENDENTE') && (
-                              <button className="ad-action-decline" title="Cancelar" onClick={(e) => { e.stopPropagation(); handleStatusUpdate(ag.id, 'CANCELADO', clientName) }}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>close</span>
-                              </button>
-                            )}
                           </div>
                         ) : (
                           <button className="ad-more-btn" onClick={(e) => {
