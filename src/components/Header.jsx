@@ -17,7 +17,9 @@ const Header = () => {
   useEffect(() => {
     if (userType === 'client' && user?.id) {
       agendamentoService.getByCliente(user.id)
-        .then(res => setAgendamentos(res.data.slice(0, 3)))
+        .then(res => setAgendamentos(
+          [...res.data].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora)).slice(0, 3)
+        ))
         .catch(() => {})
     } else {
       setAgendamentos([])
