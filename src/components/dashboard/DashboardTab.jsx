@@ -139,6 +139,13 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
     ? (avaliacoes.reduce((sum, v) => sum + v, 0) / avaliacoes.length).toFixed(1)
     : null
 
+  const getBadgeClass = (ag) => {
+    if (ag.status === 'REALIZADO') {
+      return ag.avaliado ? 'ad-badge-teal' : 'ad-badge-purple'
+    }
+    return getBadgeClass(ag)
+  }
+
   // Próximo status possível para ações rápidas
   const getNextStatus = (current) => {
     const flow = { 
@@ -287,7 +294,7 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
                 <div style={{ flex: 1 }}>
                   <p className="ad-agenda-name">{getClientName(ag)}</p>
                   <p className="ad-agenda-desc">{ag.servico || 'Sessão'}</p>
-                  <span className={`ad-badge ${statusBadgeClass[ag.status] || ''}`}>{statusLabel[ag.status] || ag.status}</span>
+                  <span className={`ad-badge ${getBadgeClass(ag)}`}>{statusLabel[ag.status] || ag.status}</span>
                 </div>
                 {getNextStatus(ag.status) && (
                   <button 
@@ -352,7 +359,7 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
                         <p className="ad-style-area">{ag.regiao || '—'}</p>
                       </td>
                       <td className="text-center">
-                        <span className={`ad-badge ${statusBadgeClass[ag.status] || ''}`}>{statusLabel[ag.status] || ag.status}</span>
+                        <span className={`ad-badge ${getBadgeClass(ag)}`}>{statusLabel[ag.status] || ag.status}</span>
                       </td>
                       <td className="text-right">
                         {nextStatus ? (

@@ -174,7 +174,9 @@ const RequestsTab = ({ showToast, openDrawer }) => {
             </thead>
             <tbody>
               {filteredRows.map(ag => {
-                const cfg = statusConfig[ag?.status] || { label: ag?.status || '—', badgeClass: '' }
+                const cfg = ag?.status === 'REALIZADO'
+                  ? { label: 'REALIZADO', badgeClass: ag?.avaliado ? 'ad-badge-teal' : 'ad-badge-purple' }
+                  : statusConfig[ag?.status] || { label: ag?.status || '—', badgeClass: '' }
                 return (
                   <tr
                     key={ag?.id}
@@ -290,7 +292,9 @@ const RequestsTab = ({ showToast, openDrawer }) => {
               {historicoCliente.agendamentos.length === 0 ? (
                 <p style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>Nenhum agendamento encontrado.</p>
               ) : historicoCliente.agendamentos.map(a => {
-                const cfg = statusConfig[a.status] || { label: a.status, badgeClass: '' }
+                const cfg = a.status === 'REALIZADO'
+                  ? { label: 'REALIZADO', badgeClass: a.avaliado ? 'ad-badge-teal' : 'ad-badge-purple' }
+                  : statusConfig[a.status] || { label: a.status, badgeClass: '' }
                 return (
                   <div key={a.id} style={{ padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
