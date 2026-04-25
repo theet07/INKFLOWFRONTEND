@@ -559,7 +559,10 @@ const Booking = () => {
                                     </div>
                                     <div className="form-field">
                                         <label>DESCRIÇÃO DO PROJETO</label>
-                                        <textarea id="form-desc" value={formData.desc} onChange={handleChange} placeholder="Descreva sua ideia de tatuagem..." rows="4" required></textarea>
+                                        <textarea id="form-desc" value={formData.desc} onChange={handleChange} placeholder="Descreva sua ideia de tatuagem..." rows="4" maxLength={1000} required></textarea>
+                                        <div style={{ textAlign: 'right', fontSize: '0.75rem', color: (formData.desc?.length || 0) > 900 ? '#e63946' : 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
+                                          {formData.desc?.length || 0}/1000
+                                        </div>
                                     </div>
                                     <div className="form-row">
                                         <div className="form-field">
