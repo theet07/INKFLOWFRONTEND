@@ -127,10 +127,10 @@ const Profile = () => {
   const isAvaliado = (ag) => ag.avaliado === true
   const proximas = agendamentos
     .filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO' || (a.status === 'REALIZADO' && !isAvaliado(a)))
-    .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   const colecao = agendamentos
     .filter(a => a.status === 'REALIZADO' && isAvaliado(a))
-    .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   const artistasUnicos = agendamentos
     .filter(a => a.artista)
     .reduce((acc, a) => {
