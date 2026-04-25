@@ -18,24 +18,33 @@ const Header = () => {
   const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
 
   useEffect(() => {
-    if (userType === 'client' && user?.id) {
+    if (userType !== 'client' || !user?.id || !token) {
+      setAgendamentos([])
+      setMsgNaoLidas(0)
+      return
+    }
+
+    const fetchNotifs = () => {
+      // Fetch agendamentos
       agendamentoService.getByCliente(user.id)
         .then(res => setAgendamentos(
           [...res.data].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora)).slice(0, 3)
         ))
         .catch(() => {})
 
-      if (token) {
-        fetch(`${API_URL}/mensagens/nao-lidas/count`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-          .then(r => r.json())
-          .then(data => setMsgNaoLidas(data.total || 0))
-          .catch(() => {})
-      }
-    } else {
-      setAgendamentos([])
+      // Fetch mensagens não lidas
+      fetch(`${API_URL}/mensagens/nao-lidas/count`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(r => r.json())
+        .then(data => setMsgNaoLidas(data.total || 0))
+        .catch(() => {})
     }
+
+    fetchNotifs() // Roda imediatamente
+
+    const interval = setInterval(fetchNotifs, 10000) // Repete a cada 10s
+    return () => clearInterval(interval) // Limpa ao desmontar
   }, [user, userType, token])
 
   useEffect(() => {
