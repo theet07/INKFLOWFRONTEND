@@ -9,10 +9,13 @@ const Header = () => {
   const [notifOpen, setNotifOpen] = useState(false)
   const [agendamentos, setAgendamentos] = useState([])
   const [clienteHasNew, setClienteHasNew] = useState(false)
+  const [msgNaoLidas, setMsgNaoLidas] = useState(0)
   const notifRef = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, userType, logout } = useAuth()
+  const { user, userType, logout, token } = useAuth()
+
+  const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
 
   useEffect(() => {
     if (userType === 'client' && user?.id) {
@@ -21,19 +24,28 @@ const Header = () => {
           [...res.data].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora)).slice(0, 3)
         ))
         .catch(() => {})
+
+      if (token) {
+        fetch(`${API_URL}/mensagens/nao-lidas/count`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then(r => r.json())
+          .then(data => setMsgNaoLidas(data.total || 0))
+          .catch(() => {})
+      }
     } else {
       setAgendamentos([])
     }
-  }, [user, userType])
+  }, [user, userType, token])
 
   useEffect(() => {
     if (agendamentos.length === 0) return
     const lastSeen = localStorage.getItem('notif_cliente_lastSeen')
     if (!lastSeen) { setClienteHasNew(true); return }
     const maisRecente = agendamentos.reduce((a, b) =>
-      new Date(a.dataHora) > new Date(b.dataHora) ? a : b
+      new Date(a.createdAt) > new Date(b.createdAt) ? a : b
     )
-    setClienteHasNew(new Date(maisRecente.dataHora) > new Date(lastSeen))
+    setClienteHasNew(new Date(maisRecente.createdAt) > new Date(lastSeen))
   }, [agendamentos])
 
   const handleAbrirSinoCliente = () => {
@@ -41,6 +53,7 @@ const Header = () => {
     if (!notifOpen) {
       localStorage.setItem('notif_cliente_lastSeen', new Date().toISOString())
       setClienteHasNew(false)
+      setMsgNaoLidas(0)
     }
   }
 
@@ -127,7 +140,7 @@ const Header = () => {
             <button className="notif-btn" onClick={handleAbrirSinoCliente}
               style={{ position: 'relative' }}>
               <span className="material-symbols-outlined">notifications</span>
-              {clienteHasNew && (
+              {(clienteHasNew || msgNaoLidas > 0) && (
                 <span style={{ position: 'absolute', top: 2, right: 2, width: 8, height: 8, borderRadius: '50%', background: '#E21B3C', border: '1.5px solid #0a0a0a' }} />
               )}
             </button>
@@ -146,6 +159,11 @@ const Header = () => {
                         style={{ color: statusColor[ag.status] || '#fff' }}>{ag.status}</span>
                     </div>
                   ))
+                )}
+                {msgNaoLidas > 0 && (
+                  <div className="notif-header" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 4, paddingTop: 8 }}>
+                    💬 {msgNaoLidas} mensagem(ns) não lida(s)
+                  </div>
                 )}
                 <div className="notif-footer"
                   onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>
