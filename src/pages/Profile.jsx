@@ -642,7 +642,7 @@ const Profile = () => {
               ) : (
                 <div className="artists-list">
                   {artistasUnicos.map(artista => (
-                    <div key={artista?.id} className="artist-item">
+                    <div key={artista?.id} className="artist-item" onClick={() => navigate('/artista/' + artista?.id)} style={{ cursor: 'pointer' }}>
                       <img
                         src={artista?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artista?.nome || 'User')}`}
                         alt={artista?.nome || 'Artista'}
@@ -652,7 +652,7 @@ const Profile = () => {
                         <h5>{artista?.nome || 'Artista'}</h5>
                         <p>{artista?.role || 'Tatuador Residente'}</p>
                       </div>
-                      <button onClick={() => abrirChat(artista)}>
+                      <button onClick={(e) => { e.stopPropagation(); abrirChat(artista) }}>
                         <span className="material-symbols-outlined">chat_bubble</span>
                       </button>
                     </div>
