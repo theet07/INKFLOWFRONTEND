@@ -1080,7 +1080,10 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
               style={{ 
                 flex: 1, 
                 opacity: !isCancellable ? 0.5 : 1, 
-                cursor: !isCancellable ? 'not-allowed' : 'pointer' 
+                cursor: !isCancellable ? 'not-allowed' : 'pointer',
+                background: '#e8192c',
+                color: '#fff',
+                border: 'none'
               }}
             >
               Cancelar Sessão
