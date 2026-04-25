@@ -47,6 +47,11 @@ const ClientAvatar = ({ ag }) => {
   )
 }
 
+const getNextStatus = (current) => {
+  const flow = { 'PENDENTE': 'CONFIRMADO', 'CONFIRMADO': 'EM_ANDAMENTO', 'EM_ANDAMENTO': 'REALIZADO' }
+  return flow[current] || null
+}
+
 const RequestsTab = ({ showToast, openDrawer }) => {
   const [filter, setFilter] = useState('all')
   const [agendamentos, setAgendamentos] = useState([])
@@ -118,11 +123,6 @@ const RequestsTab = ({ showToast, openDrawer }) => {
   const handleDecline = (e, ag) => {
     e.stopPropagation()
     handleStatusUpdate(ag.id, 'CANCELADO', getClientName(ag))
-  }
-
-  const handleRowClick = (e, ag) => {
-    if (e.target.closest('button')) return
-    if (openDrawer) openDrawer(ag)
   }
 
   return (
@@ -200,7 +200,7 @@ const RequestsTab = ({ showToast, openDrawer }) => {
                     </td>
                     <td className="ad-req-td-right" style={{ overflow: 'visible', position: 'relative' }}>
                       <div className="ad-req-actions">
-                        {(ag?.status === 'AGENDADO' || ag?.status === 'PENDENTE') ? (
+                        {(ag?.status === 'PENDENTE' || ag?.status === 'AGENDADO') ? (
                           <>
                             <button className="ad-req-action-accept" onClick={(e) => handleAccept(e, ag)}>
                               <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>check</span>
@@ -209,6 +209,12 @@ const RequestsTab = ({ showToast, openDrawer }) => {
                               <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>close</span>
                             </button>
                           </>
+                        ) : getNextStatus(ag?.status) ? (
+                          <div className="ad-req-actions" style={{ justifyContent: 'flex-end' }}>
+                            <button className="ad-req-action-accept" title={`Avançar para ${getNextStatus(ag?.status)}`} onClick={(e) => { e.stopPropagation(); handleStatusUpdate(ag.id, getNextStatus(ag.status), getClientName(ag)) }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>arrow_forward</span>
+                            </button>
+                          </div>
                         ) : (
                           <div className="ad-req-actions" style={{ justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
                             <button className="ad-req-action-options" onClick={(e) => {

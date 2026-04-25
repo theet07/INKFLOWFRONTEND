@@ -142,8 +142,7 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
   // Próximo status possível para ações rápidas
   const getNextStatus = (current) => {
     const flow = { 
-      'PENDENTE': 'AGENDADO',
-      'AGENDADO': 'CONFIRMADO', 
+      'PENDENTE': 'CONFIRMADO',
       'CONFIRMADO': 'EM_ANDAMENTO', 
       'EM_ANDAMENTO': 'REALIZADO' 
     }
