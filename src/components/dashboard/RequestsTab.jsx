@@ -16,13 +16,13 @@ const formatTime = (dataHora) => {
 }
 
 const statusConfig = {
-  'PENDENTE': { label: 'PENDENTE', badgeClass: 'ad-badge-yellow' },
-  'AGENDADO': { label: 'PENDENTE', badgeClass: 'ad-badge-yellow' },
-  'CONFIRMADO': { label: 'CONFIRMADO', badgeClass: 'ad-badge-green' },
-  'EM_ANDAMENTO': { label: 'EM ANDAMENTO', badgeClass: 'ad-badge-blue' },
-  'REALIZADO': { label: 'REALIZADO', badgeClass: 'ad-badge-purple' },
-  'FINALIZADO': { label: 'FINALIZADO', badgeClass: 'ad-badge-teal' },
-  'CANCELADO': { label: 'CANCELADO', badgeClass: 'ad-badge-red' },
+  'PENDENTE':     { label: 'PENDENTE',     badgeClass: 'ad-badge-yellow' },
+  'AGENDADO':     { label: 'AGENDADO',     badgeClass: 'ad-badge-yellow' },
+  'CONFIRMADO':   { label: 'CONFIRMADO',   badgeClass: 'ad-badge-green'  },
+  'EM_ANDAMENTO': { label: 'EM ANDAMENTO', badgeClass: 'ad-badge-blue'   },
+  'REALIZADO':    { label: 'REALIZADO',    badgeClass: 'ad-badge-purple' },
+  'FINALIZADO':   { label: 'FINALIZADO',   badgeClass: 'ad-badge-teal'   },
+  'CANCELADO':    { label: 'CANCELADO',    badgeClass: 'ad-badge-red'    },
 }
 
 const ClientAvatar = ({ ag }) => {

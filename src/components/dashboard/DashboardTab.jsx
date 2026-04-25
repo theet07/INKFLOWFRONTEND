@@ -23,13 +23,13 @@ const getTimePeriod = (dataHora) => {
 }
 
 const statusBadgeClass = {
-  'PENDENTE': 'ad-badge-red',
-  'AGENDADO': 'ad-badge-yellow',
-  'CONFIRMADO': 'ad-badge-green',
+  'PENDENTE':     'ad-badge-yellow',
+  'AGENDADO':     'ad-badge-yellow',
+  'CONFIRMADO':   'ad-badge-green',
   'EM_ANDAMENTO': 'ad-badge-blue',
-  'REALIZADO': 'ad-badge-purple',
-  'FINALIZADO': 'ad-badge-teal',
-  'CANCELADO': 'ad-badge-red',
+  'REALIZADO':    'ad-badge-purple',
+  'FINALIZADO':   'ad-badge-teal',
+  'CANCELADO':    'ad-badge-red',
 }
 
 const statusLabel = {
