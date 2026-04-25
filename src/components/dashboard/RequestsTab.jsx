@@ -16,6 +16,7 @@ const formatTime = (dataHora) => {
 }
 
 const statusConfig = {
+  'PENDENTE': { label: 'PENDENTE', badgeClass: 'ad-badge-yellow' },
   'AGENDADO': { label: 'PENDENTE', badgeClass: 'ad-badge-yellow' },
   'CONFIRMADO': { label: 'CONFIRMADO', badgeClass: 'ad-badge-green' },
   'EM_ANDAMENTO': { label: 'EM ANDAMENTO', badgeClass: 'ad-badge-blue' },
@@ -87,7 +88,7 @@ const RequestsTab = ({ showToast, openDrawer }) => {
 
   const filters = [
     { key: 'all', label: 'Todos' },
-    { key: 'AGENDADO', label: 'Pendente' },
+    { key: 'PENDENTE', label: 'Pendente' },
     { key: 'CONFIRMADO', label: 'Confirmado' },
     { key: 'CANCELADO', label: 'Cancelado' },
   ]
@@ -199,7 +200,7 @@ const RequestsTab = ({ showToast, openDrawer }) => {
                     </td>
                     <td className="ad-req-td-right" style={{ overflow: 'visible', position: 'relative' }}>
                       <div className="ad-req-actions">
-                        {ag?.status === 'AGENDADO' ? (
+                        {(ag?.status === 'AGENDADO' || ag?.status === 'PENDENTE') ? (
                           <>
                             <button className="ad-req-action-accept" onClick={(e) => handleAccept(e, ag)}>
                               <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>check</span>
