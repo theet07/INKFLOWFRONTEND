@@ -130,7 +130,7 @@ const Profile = () => {
     .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora))
   const colecao = agendamentos
     .filter(a => a.status === 'REALIZADO' && isAvaliado(a))
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
   const artistasUnicos = agendamentos
     .filter(a => a.artista)
     .reduce((acc, a) => {
