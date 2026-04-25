@@ -143,7 +143,7 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
     if (ag.status === 'REALIZADO') {
       return ag.avaliado ? 'ad-badge-teal' : 'ad-badge-purple'
     }
-    return getBadgeClass(ag)
+    return statusBadgeClass[ag.status] || ''
   }
 
   // Próximo status possível para ações rápidas
