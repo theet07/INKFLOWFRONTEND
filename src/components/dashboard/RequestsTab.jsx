@@ -125,6 +125,11 @@ const RequestsTab = ({ showToast, openDrawer }) => {
     handleStatusUpdate(ag.id, 'CANCELADO', getClientName(ag))
   }
 
+  const handleRowClick = (e, ag) => {
+    if (e.target.closest('button')) return
+    if (openDrawer) openDrawer(ag)
+  }
+
   return (
     <>
       {/* Page Header & Filters */}

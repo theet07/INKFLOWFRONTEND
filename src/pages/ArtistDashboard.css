@@ -805,6 +805,24 @@
   color: #ef4444;
 }
 
+.ad-badge-blue {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.ad-badge-purple {
+  color: #a855f7;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.ad-badge-teal {
+  color: #14b8a6;
+  background: rgba(20, 184, 166, 0.15);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+}
+
 
 /* ==========================================
    TABLE
