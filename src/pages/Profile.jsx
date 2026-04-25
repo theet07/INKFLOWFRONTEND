@@ -126,8 +126,8 @@ const Profile = () => {
 
   const isAvaliado = (ag) => ag.avaliado === true
   const proximas = agendamentos
-    .filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO' || (a.status === 'REALIZADO' && !isAvaliado(a)))
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO')
+    .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora))
   const colecao = agendamentos
     .filter(a => a.status === 'REALIZADO' && isAvaliado(a))
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
