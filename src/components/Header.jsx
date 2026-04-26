@@ -58,20 +58,18 @@ const Header = () => {
   }, [agendamentos])
 
   const handleAbrirSinoCliente = () => {
-    setNotifOpen(prev => !prev)
-    if (!notifOpen) {
+    const abrindo = !notifOpen
+    setNotifOpen(abrindo)
+
+    if (!abrindo) {
+      // está fechando → marca como lido
       localStorage.setItem('notif_cliente_lastSeen', new Date().toISOString())
       setClienteHasNew(false)
-      
-      // Marcar mensagens como lidas no backend
-      if (msgNaoLidas > 0 && token) {
-        fetch(`${API_URL}/mensagens/marcar-todas-lidas`, {
-          method: 'PATCH',
-          headers: { Authorization: `Bearer ${token}` }
-        })
-          .then(() => setMsgNaoLidas(0))
-          .catch(() => {})
-      }
+      setMsgNaoLidas(0)
+      fetch(`${API_URL}/mensagens/marcar-todas-lidas`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` }
+      }).catch(() => {})
     }
   }
 
