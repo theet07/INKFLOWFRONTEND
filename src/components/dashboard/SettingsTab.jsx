@@ -17,8 +17,43 @@ const SettingsTab = ({ showToast, studioOpen, setStudioOpen, switchTab }) => {
   )
   const [avatarPreview, setAvatarPreview] = useState(storedUser.fotoUrl || '')
   const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const [notifications, setNotifications] = useState({ email: true, push: true, audio: false })
+
+  // Buscar dados atualizados do artista da API
+  useEffect(() => {
+    const fetchArtistaData = async () => {
+      try {
+        const artistaId = user?.artistaId || user?.id || storedUser.artistaId || storedUser.id
+        if (!artistaId) return
+        
+        const response = await artistaService.getById(artistaId)
+        const artistaData = response.data
+        
+        // Atualizar estados com dados da API
+        setArtistName(artistaData.nome || '')
+        setArtistEmail(artistaData.email || '')
+        setArtistBio(artistaData.bio || '')
+        setTags(
+          artistaData.especialidades
+            ? artistaData.especialidades.split(',').map(t => t.trim()).filter(Boolean)
+            : []
+        )
+        setAvatarPreview(artistaData.fotoUrl || '')
+        
+        // Atualizar localStorage com dados mais recentes
+        const updatedUser = { ...storedUser, ...artistaData }
+        localStorage.setItem('user', JSON.stringify(updatedUser))
+      } catch (err) {
+        console.error('Erro ao buscar dados do artista:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchArtistaData()
+  }, [user])
 
   const diasMap = { 'Seg': 0, 'Ter': 1, 'Qua': 2, 'Qui': 3, 'Sex': 4, 'Sáb': 5, 'Dom': 6 }
   const [disponibilidadeIds, setDisponibilidadeIds] = useState({})
@@ -109,6 +144,15 @@ const SettingsTab = ({ showToast, studioOpen, setStudioOpen, switchTab }) => {
         bio: artistBio,
         especialidades: tags.join(',')
       })
+
+      // Atualizar localStorage após salvar
+      const updatedUser = {
+        ...storedUser,
+        nome: artistName,
+        bio: artistBio,
+        especialidades: tags.join(',')
+      }
+      localStorage.setItem('user', JSON.stringify(updatedUser))
 
       await Promise.all(schedule.map(async (item) => {
         const diaIndex = diasMap[item.day]
