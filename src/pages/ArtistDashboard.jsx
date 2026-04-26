@@ -220,10 +220,14 @@ const ArtistDashboard = () => {
       case 'schedule':
         return <ScheduleTab showToast={showToast} openDrawer={openDrawer} viewMode={viewMode} />
       case 'messages':
-        return <MessagesTab showToast={showToast} onMensagemLida={(clienteId) => {
-          // Remover mensagens deste remetente do estado global
-          setMensagensNaoLidas(prev => prev.filter(m => m.remetenteId !== clienteId))
-        }} />
+        return <MessagesTab 
+          showToast={showToast} 
+          mensagensNaoLidas={mensagensNaoLidas}
+          onMensagemLida={(clienteId) => {
+            // Remover mensagens deste remetente do estado global
+            setMensagensNaoLidas(prev => prev.filter(m => m.remetenteId !== clienteId))
+          }} 
+        />
       case 'portfolio':
         return <PortfolioTab showToast={showToast} />
       case 'settings':

@@ -8,7 +8,7 @@ const formatTime = (dt) => {
   return new Date(dt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })
 }
 
-const MessagesTab = ({ showToast, onMensagemLida }) => {
+const MessagesTab = ({ showToast, mensagensNaoLidas = [], onMensagemLida }) => {
   const { user, token } = useAuth()
   const [conversas, setConversas] = useState([]) // [{ clienteId, nome, fotoUrl, ultimaMsg, naoLidas }]
   const [clienteSelecionado, setClienteSelecionado] = useState(null)
@@ -143,7 +143,9 @@ const MessagesTab = ({ showToast, onMensagemLida }) => {
               <span className="material-symbols-outlined" style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>chat_bubble</span>
               Nenhuma conversa ainda.
             </div>
-          ) : conversas.map(c => (
+          ) : conversas.map(c => {
+            const naoLidasDoCliente = mensagensNaoLidas.filter(m => m.remetenteId === c.clienteId).length
+            return (
             <div key={c.clienteId} onClick={() => selecionarCliente(c.clienteId)}
               style={{ padding: '14px 20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.04)', background: clienteSelecionado === c.clienteId ? 'rgba(230,57,70,0.08)' : 'transparent', transition: 'background 0.15s' }}
               onMouseEnter={e => { if (clienteSelecionado !== c.clienteId) e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
@@ -158,11 +160,13 @@ const MessagesTab = ({ showToast, onMensagemLida }) => {
                 <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: '#fff' }}>{c.nome || 'Cliente'}</p>
                 <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.ultimaMsg || '...'}</p>
               </div>
-              {c.naoLidas > 0 && (
-                <span style={{ background: '#e63946', color: '#fff', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0 }}>{c.naoLidas}</span>
+              {naoLidasDoCliente > 0 && (
+                <span style={{ background: '#e63946', color: '#fff', borderRadius: '50%', minWidth: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0, padding: '0 6px' }}>
+                  {naoLidasDoCliente > 9 ? '9+' : naoLidasDoCliente}
+                </span>
               )}
             </div>
-          ))}
+          )})
         </div>
       </div>
 
