@@ -272,7 +272,11 @@ const ArtistDashboard = () => {
               }
             }}>
               <span className="material-symbols-outlined">notifications</span>
-              {(artistaHasNew || mensagensNaoLidas.length > 0) && (
+              {(() => {
+                const sinoAtivo = localStorage.getItem('notif_sino_ativo') !== 'false'
+                const msgAtivo = localStorage.getItem('notif_msg_ativo') !== 'false'
+                return (sinoAtivo && artistaHasNew) || (msgAtivo && mensagensNaoLidas.length > 0)
+              })() && (
                 <span style={{ position: 'absolute', top: 2, right: 2, width: 8, height: 8, borderRadius: '50%', background: '#E21B3C', border: '1.5px solid #0a0a0a' }} />
               )}
             </button>
@@ -344,7 +348,10 @@ const ArtistDashboard = () => {
             >
               <span className="material-symbols-outlined">{item.icon}</span>
               <span>{item.label}</span>
-              {item.key === 'messages' && mensagensNaoLidas.length > 0 && (
+              {item.key === 'messages' && (() => {
+                const msgAtivo = localStorage.getItem('notif_msg_ativo') !== 'false'
+                return msgAtivo && mensagensNaoLidas.length > 0
+              })() && (
                 <span style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: '#E21B3C', color: '#fff', borderRadius: '50%', minWidth: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, padding: '0 6px' }}>
                   {mensagensNaoLidas.length}
                 </span>
@@ -489,7 +496,10 @@ const ArtistDashboard = () => {
               style={activeTab === item.key ? { fontVariationSettings: "'FILL' 1" } : {}}
             >{item.icon}</span>
             <span>{item.label}</span>
-            {item.key === 'messages' && mensagensNaoLidas.length > 0 && (
+            {item.key === 'messages' && (() => {
+              const msgAtivo = localStorage.getItem('notif_msg_ativo') !== 'false'
+              return msgAtivo && mensagensNaoLidas.length > 0
+            })() && (
               <span style={{ position: 'absolute', top: 4, right: 8, background: '#E21B3C', color: '#fff', borderRadius: '50%', minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700, padding: '0 4px' }}>
                 {mensagensNaoLidas.length}
               </span>

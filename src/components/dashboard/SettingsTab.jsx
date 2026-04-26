@@ -22,7 +22,7 @@ const SettingsTab = ({ showToast, studioOpen, setStudioOpen, switchTab }) => {
   const [notifications, setNotifications] = useState({
     sino: localStorage.getItem('notif_sino_ativo') !== 'false',
     msg: localStorage.getItem('notif_msg_ativo') !== 'false',
-    som: localStorage.getItem('notif_som_ativo') === 'true'
+    som: localStorage.getItem('notif_som_ativo') !== 'false'
   })
 
   const handleToggleNotif = (key) => {
