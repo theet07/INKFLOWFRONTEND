@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import emailjs from '@emailjs/browser'
 import { useAuth } from '../contexts/AuthContext'
 
 const Contact = () => {
@@ -43,35 +42,20 @@ const Contact = () => {
     e.preventDefault()
     setLoading(true)
 
-    // Validar se as variáveis de ambiente estão carregadas
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID
-    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-
-    if (!serviceId || !templateId || !publicKey) {
-      console.error('Variáveis de ambiente do EmailJS não configuradas. Reinicie o servidor de desenvolvimento.')
-      showToast('Erro de configuração. Entre em contato pelo WhatsApp.', true)
-      setLoading(false)
-      return
-    }
+    const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
 
     try {
-      await emailjs.send(
-        serviceId,
-        templateId,
-        {
-          from_name: formData.nome,
-          from_email: formData.email,
-          phone: formData.telefone,
-          message: formData.mensagem,
-          to_email: 'inkflowstudios07@gmail.com',
-        },
-        publicKey
-      )
+      const res = await fetch(`${API_URL}/contato`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erro ao enviar')
       showToast('Mensagem enviada com sucesso!')
       setFormData({ nome: '', email: '', telefone: '', mensagem: '' })
     } catch (err) {
-      console.error('Erro ao enviar e-mail:', err)
+      console.error('Erro ao enviar mensagem:', err)
       showToast('Erro ao enviar mensagem. Tente novamente.', true)
     } finally {
       setLoading(false)

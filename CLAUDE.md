@@ -53,6 +53,12 @@ git push origin teste
   - Artista (ArtistDashboard.jsx): badge no sino para agendamentos + mensagens
   - Som de beep ao receber nova mensagem (configurável)
   - Preferências salvas em localStorage (sino, mensagens, som)
+- Formulário de contato com envio de e-mail via backend Spring Boot:
+  - Auto-preenchimento para usuários logados
+  - Máscara de telefone
+  - Toast notifications
+  - Botão WhatsApp integrado
+  - Envio para inkflowstudios07@gmail.com
 
 ## Estrutura dos Projetos
 - Frontend correto: INKFLOWFRONTEND-LIMPO
@@ -163,6 +169,12 @@ git push origin teste
 
 ### Chatbot
 - `POST /api/chat` → `{ message }` (system prompt: InkFlow opera em "todo o Brasil")
+
+### Contato
+- `POST /api/contato` → `{ nome, email, telefone, mensagem }` (público, sem autenticação)
+  - Envia e-mail para `inkflowstudios07@gmail.com`
+  - Validação: nome, email e mensagem obrigatórios
+  - Limite: mensagem até 2000 caracteres
 
 ---
 
