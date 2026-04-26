@@ -130,8 +130,6 @@ const Contact = () => {
                 {loading ? 'Enviando...' : 'Enviar Mensagem'}
               </button>
               
-              <span style={{ color: '#999', fontSize: '0.9rem' }}>ou</span>
-              
               <a
                 href={`https://wa.me/15144373894?text=${encodeURIComponent('Olá! Vim pelo site InkFlow e gostaria de mais informações.')}`}
                 target="_blank"
