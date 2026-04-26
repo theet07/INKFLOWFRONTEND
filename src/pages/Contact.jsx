@@ -43,10 +43,22 @@ const Contact = () => {
     e.preventDefault()
     setLoading(true)
 
+    // Validar se as variáveis de ambiente estão carregadas
+    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID
+    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+
+    if (!serviceId || !templateId || !publicKey) {
+      console.error('Variáveis de ambiente do EmailJS não configuradas. Reinicie o servidor de desenvolvimento.')
+      showToast('Erro de configuração. Entre em contato pelo WhatsApp.', true)
+      setLoading(false)
+      return
+    }
+
     try {
       await emailjs.send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        serviceId,
+        templateId,
         {
           from_name: formData.nome,
           from_email: formData.email,
@@ -54,7 +66,7 @@ const Contact = () => {
           message: formData.mensagem,
           to_email: 'inkflowstudios07@gmail.com',
         },
-        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+        publicKey
       )
       showToast('Mensagem enviada com sucesso!')
       setFormData({ nome: '', email: '', telefone: '', mensagem: '' })
