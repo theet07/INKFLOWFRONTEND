@@ -6,9 +6,11 @@ const ArtistLandingPage = () => {
   const [toasts, setToasts] = useState([])
   const [isDemoOpen, setIsDemoOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
   const [formData, setFormData] = useState({
     nomeCompleto: '',
     nomeEstudio: '',
+    email: '',
     whatsapp: '',
     especialidade: ''
   })
@@ -115,14 +117,18 @@ const ArtistLandingPage = () => {
         throw new Error(data.error || 'Erro ao cadastrar')
       }
       
-      showToast('Cadastro realizado! Entraremos em contato via WhatsApp.', false)
-      setFormData({ nomeCompleto: '', nomeEstudio: '', whatsapp: '', especialidade: '' })
+      setSubmitSuccess(true)
     } catch (err) {
       console.error('Erro ao cadastrar lead:', err)
       showToast(err.message || 'Erro ao cadastrar. Tente novamente.', true)
     } finally {
       setLoading(false)
     }
+  }
+
+  const resetForm = () => {
+    setFormData({ nomeCompleto: '', nomeEstudio: '', email: '', whatsapp: '', especialidade: '' })
+    setSubmitSuccess(false)
   }
 
   return (
@@ -325,66 +331,125 @@ const ArtistLandingPage = () => {
           </div>
 
           <div className="alp-form-container">
-            <form onSubmit={handleRegisterSubmit}>
-              <div className="alp-form-group">
-                <label>Nome Completo</label>
-                <input 
-                  type="text" 
-                  name="nomeCompleto"
-                  value={formData.nomeCompleto}
-                  onChange={handleChange}
-                  placeholder="Seu nome completo" 
-                  required 
-                />
-              </div>
-              <div className="alp-form-group">
-                <label>Nome do Estúdio</label>
-                <input 
-                  type="text" 
-                  name="nomeEstudio"
-                  value={formData.nomeEstudio}
-                  onChange={handleChange}
-                  placeholder="Ex: Sullen Tattoo Studio" 
-                  required 
-                />
-              </div>
-              <div className="alp-form-group">
-                <label>WhatsApp (com DDD)</label>
-                <input 
-                  type="tel" 
-                  name="whatsapp"
-                  value={formData.whatsapp}
-                  onChange={handleChange}
-                  placeholder="(11) 99999-9999" 
-                  required 
-                />
-              </div>
-              <div className="alp-form-group">
-                <label>Especialidade Principal (Estilo)</label>
-                <select 
-                  name="especialidade"
-                  value={formData.especialidade}
-                  onChange={handleChange}
-                  required
+            {submitSuccess ? (
+              <div style={{
+                background: '#1a1a1a',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '12px',
+                padding: '3rem 2rem',
+                textAlign: 'center'
+              }}>
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  background: 'rgba(34, 197, 94, 0.1)',
+                  border: '2px solid #22c55e',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 2rem auto',
+                  fontSize: '3rem',
+                  color: '#22c55e'
+                }}>
+                  ✓
+                </div>
+                <h3 style={{
+                  fontSize: '1.5rem',
+                  fontWeight: '700',
+                  marginBottom: '1rem',
+                  color: '#ffffff'
+                }}>Solicitação enviada com sucesso!</h3>
+                <p style={{
+                  color: 'rgba(255,255,255,0.7)',
+                  lineHeight: '1.6',
+                  marginBottom: '2rem',
+                  maxWidth: '500px',
+                  margin: '0 auto 2rem auto'
+                }}>
+                  Fique de olho no seu e-mail — nossa equipe entrará em contato em breve para dar continuidade ao seu cadastro na plataforma.
+                </p>
+                <button 
+                  onClick={resetForm}
+                  className="alp-btn-secondary"
+                  style={{ margin: '0 auto' }}
                 >
-                  <option value="">Selecione seu estilo principal</option>
-                  <option value="realismo">Realismo</option>
-                  <option value="blackwork">Blackwork</option>
-                  <option value="fineline">Fine Line</option>
-                  <option value="oriental">Oriental</option>
-                  <option value="geometri">Geométrico</option>
-                  <option value="outro">Outro</option>
-                </select>
+                  Enviar outra solicitação
+                </button>
               </div>
-              <button 
-                type="submit" 
-                className="alp-btn-primary" 
-                style={{ width: '100%', marginTop: '1rem', background: 'linear-gradient(135deg, #a80010 0%, #ff0000 100%)', color: 'white' }}
-                disabled={loading}
-              >
-                {loading ? 'ENVIANDO...' : 'Quero Participar da Beta'}
-              </button>
-            </form>
+            ) : (
+              <form onSubmit={handleRegisterSubmit}>
+                <div className="alp-form-group">
+                  <label>Nome Completo</label>
+                  <input 
+                    type="text" 
+                    name="nomeCompleto"
+                    value={formData.nomeCompleto}
+                    onChange={handleChange}
+                    placeholder="Seu nome completo" 
+                    required 
+                  />
+                </div>
+                <div className="alp-form-group">
+                  <label>Nome do Estúdio</label>
+                  <input 
+                    type="text" 
+                    name="nomeEstudio"
+                    value={formData.nomeEstudio}
+                    onChange={handleChange}
+                    placeholder="Ex: Sullen Tattoo Studio" 
+                    required 
+                  />
+                </div>
+                <div className="alp-form-group">
+                  <label>E-mail Profissional</label>
+                  <input 
+                    type="email" 
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="seu@email.com" 
+                    required 
+                  />
+                </div>
+                <div className="alp-form-group">
+                  <label>WhatsApp (com DDD)</label>
+                  <input 
+                    type="tel" 
+                    name="whatsapp"
+                    value={formData.whatsapp}
+                    onChange={handleChange}
+                    placeholder="(11) 99999-9999" 
+                    required 
+                  />
+                </div>
+                <div className="alp-form-group">
+                  <label>Especialidade Principal (Estilo)</label>
+                  <select 
+                    name="especialidade"
+                    value={formData.especialidade}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Selecione seu estilo principal</option>
+                    <option value="realismo">Realismo</option>
+                    <option value="blackwork">Blackwork</option>
+                    <option value="fineline">Fine Line</option>
+                    <option value="oriental">Oriental</option>
+                    <option value="geometri">Geométrico</option>
+                    <option value="outro">Outro</option>
+                  </select>
+                </div>
+                <button 
+                  type="submit" 
+                  className="alp-btn-primary" 
+                  style={{ width: '100%', marginTop: '1rem', background: 'linear-gradient(135deg, #a80010 0%, #ff0000 100%)', color: 'white' }}
+                  disabled={loading}
+                >
+                  {loading ? 'ENVIANDO...' : 'Quero Participar da Beta'}
+                </button>
+              </form>
+            )}
           </div>
         </section>
 
