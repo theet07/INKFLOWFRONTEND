@@ -39,23 +39,16 @@ const Portfolio = () => {
       <section className="section" style={{ paddingTop: '8rem' }}>
         <div style={{
           textAlign: 'center',
-          marginBottom: '4rem'
+          marginBottom: '3rem'
         }}>
           <h2 style={{
             fontFamily: 'Bebas Neue, cursive',
-            fontSize: '4rem',
-            color: 'var(--accent-red)',
-            marginBottom: '1rem',
-            textShadow: '0 0 20px rgba(226, 27, 60, 0.3)',
-            letterSpacing: '2px'
+            fontSize: '2.5rem',
+            color: '#E21B3C',
+            marginBottom: '0.5rem',
+            letterSpacing: '3px',
+            fontWeight: '400'
           }}>PORTFÓLIO</h2>
-          
-          <div style={{
-            width: '80px',
-            height: '3px',
-            background: 'linear-gradient(90deg, transparent, var(--accent-red), transparent)',
-            margin: '0 auto 2rem auto'
-          }}></div>
         </div>
         
         <div style={{
