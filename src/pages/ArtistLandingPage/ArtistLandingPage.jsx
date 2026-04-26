@@ -5,6 +5,13 @@ const ArtistLandingPage = () => {
   const [activeFaq, setActiveFaq] = useState(null)
   const [toasts, setToasts] = useState([])
   const [isDemoOpen, setIsDemoOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    nomeCompleto: '',
+    nomeEstudio: '',
+    whatsapp: '',
+    especialidade: ''
+  })
   const revealRefs = useRef([])
   const registerRef = useRef(null)
 
@@ -59,12 +66,27 @@ const ArtistLandingPage = () => {
     }
   }
 
-  const showToast = (msg) => {
+  const showToast = (msg, isError = false) => {
     const id = Date.now()
-    setToasts((prev) => [...prev, { id, msg }])
+    setToasts((prev) => [...prev, { id, msg, isError }])
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id))
     }, 3000)
+  }
+
+  const formatTelefone = (value) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11)
+    if (digits.length <= 2) return digits
+    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData({
+      ...formData,
+      [name]: name === 'whatsapp' ? formatTelefone(value) : value
+    })
   }
 
   const toggleFaq = (index) => {
@@ -75,10 +97,32 @@ const ArtistLandingPage = () => {
     registerRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault()
-    showToast('Interesse registrado! Entraremos em contato via WhatsApp.')
-    e.target.reset()
+    setLoading(true)
+
+    const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
+
+    try {
+      const res = await fetch(`${API_URL}/leads/artista`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      const data = await res.json()
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Erro ao cadastrar')
+      }
+      
+      showToast('Cadastro realizado! Entraremos em contato via WhatsApp.', false)
+      setFormData({ nomeCompleto: '', nomeEstudio: '', whatsapp: '', especialidade: '' })
+    } catch (err) {
+      console.error('Erro ao cadastrar lead:', err)
+      showToast(err.message || 'Erro ao cadastrar. Tente novamente.', true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -284,19 +328,45 @@ const ArtistLandingPage = () => {
             <form onSubmit={handleRegisterSubmit}>
               <div className="alp-form-group">
                 <label>Nome Completo</label>
-                <input type="text" placeholder="Seu nome completo" required />
+                <input 
+                  type="text" 
+                  name="nomeCompleto"
+                  value={formData.nomeCompleto}
+                  onChange={handleChange}
+                  placeholder="Seu nome completo" 
+                  required 
+                />
               </div>
               <div className="alp-form-group">
                 <label>Nome do Estúdio</label>
-                <input type="text" placeholder="Ex: Sullen Tattoo Studio" required />
+                <input 
+                  type="text" 
+                  name="nomeEstudio"
+                  value={formData.nomeEstudio}
+                  onChange={handleChange}
+                  placeholder="Ex: Sullen Tattoo Studio" 
+                  required 
+                />
               </div>
               <div className="alp-form-group">
                 <label>WhatsApp (com DDD)</label>
-                <input type="tel" placeholder="(11) 99999-9999" required />
+                <input 
+                  type="tel" 
+                  name="whatsapp"
+                  value={formData.whatsapp}
+                  onChange={handleChange}
+                  placeholder="(11) 99999-9999" 
+                  required 
+                />
               </div>
               <div className="alp-form-group">
                 <label>Especialidade Principal (Estilo)</label>
-                <select required>
+                <select 
+                  name="especialidade"
+                  value={formData.especialidade}
+                  onChange={handleChange}
+                  required
+                >
                   <option value="">Selecione seu estilo principal</option>
                   <option value="realismo">Realismo</option>
                   <option value="blackwork">Blackwork</option>
@@ -306,8 +376,13 @@ const ArtistLandingPage = () => {
                   <option value="outro">Outro</option>
                 </select>
               </div>
-              <button type="submit" className="alp-btn-primary" style={{ width: '100%', marginTop: '1rem', background: 'linear-gradient(135deg, #a80010 0%, #ff0000 100%)', color: 'white' }}>
-                Quero Participar da Beta
+              <button 
+                type="submit" 
+                className="alp-btn-primary" 
+                style={{ width: '100%', marginTop: '1rem', background: 'linear-gradient(135deg, #a80010 0%, #ff0000 100%)', color: 'white' }}
+                disabled={loading}
+              >
+                {loading ? 'ENVIANDO...' : 'Quero Participar da Beta'}
               </button>
             </form>
           </div>
@@ -355,8 +430,10 @@ const ArtistLandingPage = () => {
       {/* Toast Notification */}
       <div className="alp-toast-container">
         {toasts.map((toast) => (
-          <div key={toast.id} className="alp-toast">
-            <span className="material-symbols-outlined" style={{ color: 'var(--primary-red)' }}>bolt</span>
+          <div key={toast.id} className="alp-toast" style={{ background: toast.isError ? '#ff4444' : 'var(--surface-highest)' }}>
+            <span className="material-symbols-outlined" style={{ color: toast.isError ? '#fff' : 'var(--primary-red)' }}>
+              {toast.isError ? 'error' : 'bolt'}
+            </span>
             <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{toast.msg}</span>
           </div>
         ))}
