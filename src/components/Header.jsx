@@ -9,7 +9,7 @@ const Header = () => {
   const [notifOpen, setNotifOpen] = useState(false)
   const [agendamentos, setAgendamentos] = useState([])
   const [clienteHasNew, setClienteHasNew] = useState(false)
-  const [msgNaoLidas, setMsgNaoLidas] = useState(0)
+  const [mensagensNaoLidas, setMensagensNaoLidas] = useState([])
   const notifRef = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
@@ -20,7 +20,7 @@ const Header = () => {
   useEffect(() => {
     if (userType !== 'client' || !user?.id || !token) {
       setAgendamentos([])
-      setMsgNaoLidas(0)
+      setMensagensNaoLidas([])
       return
     }
 
@@ -33,11 +33,11 @@ const Header = () => {
         .catch(() => {})
 
       // Fetch mensagens não lidas
-      fetch(`${API_URL}/mensagens/nao-lidas/count`, {
+      fetch(`${API_URL}/mensagens/nao-lidas`, {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(r => r.json())
-        .then(data => setMsgNaoLidas(data.total || 0))
+        .then(data => setMensagensNaoLidas(data || []))
         .catch(() => {})
     }
 
@@ -65,7 +65,7 @@ const Header = () => {
       // está fechando → marca como lido
       localStorage.setItem('notif_cliente_lastSeen', new Date().toISOString())
       setClienteHasNew(false)
-      setMsgNaoLidas(0)
+      setMensagensNaoLidas([])
       fetch(`${API_URL}/mensagens/marcar-todas-lidas`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
@@ -156,7 +156,7 @@ const Header = () => {
             <button className="notif-btn" onClick={handleAbrirSinoCliente}
               style={{ position: 'relative' }}>
               <span className="material-symbols-outlined">notifications</span>
-              {(clienteHasNew || msgNaoLidas > 0) && (
+              {(clienteHasNew || mensagensNaoLidas.length > 0) && (
                 <span style={{ position: 'absolute', top: 2, right: 2, width: 8, height: 8, borderRadius: '50%', background: '#E21B3C', border: '1.5px solid #0a0a0a' }} />
               )}
             </button>
@@ -176,10 +176,19 @@ const Header = () => {
                     </div>
                   ))
                 )}
-                {msgNaoLidas > 0 && (
-                  <div className="notif-header" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 4, paddingTop: 8 }}>
-                    💬 {msgNaoLidas} mensagem(ns) não lida(s)
-                  </div>
+                {mensagensNaoLidas.length > 0 && (
+                  <>
+                    <div className="notif-header" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 4, paddingTop: 8 }}>
+                      Mensagens Não Lidas
+                    </div>
+                    {mensagensNaoLidas.map(m => (
+                      <div key={m.id} className="notif-item"
+                        onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>
+                        <div className="notif-item-title">{m.remetenteNome}</div>
+                        <div className="notif-item-sub">{m.conteudo.length > 40 ? m.conteudo.slice(0, 40) + '...' : m.conteudo}</div>
+                      </div>
+                    ))}
+                  </>
                 )}
                 <div className="notif-footer"
                   onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>
