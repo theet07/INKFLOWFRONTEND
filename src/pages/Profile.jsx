@@ -180,8 +180,9 @@ const Profile = () => {
           .then(() => showToast('Código de indicação copiado!', 'loyalty'))
         break
       case 'switch_account':
-        showToast('Funcionalidade em desenvolvimento', 'info')
         setSettingsOpen(false)
+        logout()
+        navigate('/login')
         break
       case 'logout':
         logout()
