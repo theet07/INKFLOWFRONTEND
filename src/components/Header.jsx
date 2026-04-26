@@ -10,12 +10,26 @@ const Header = () => {
   const [agendamentos, setAgendamentos] = useState([])
   const [clienteHasNew, setClienteHasNew] = useState(false)
   const [mensagensNaoLidas, setMensagensNaoLidas] = useState([])
+  const [prevMsgCount, setPrevMsgCount] = useState(0)
   const notifRef = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
   const { user, userType, logout, token } = useAuth()
 
   const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
+
+  const tocarBeep = () => {
+    const ctx = new AudioContext()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.frequency.value = 880
+    gain.gain.setValueAtTime(0.1, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+    osc.start(ctx.currentTime)
+    osc.stop(ctx.currentTime + 0.3)
+  }
 
   useEffect(() => {
     if (userType !== 'client' || !user?.id || !token) {
@@ -37,7 +51,15 @@ const Header = () => {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(r => r.json())
-        .then(data => setMensagensNaoLidas(data || []))
+        .then(data => {
+          const novasMsgs = data || []
+          if (novasMsgs.length > prevMsgCount && prevMsgCount > 0) {
+            const somAtivo = localStorage.getItem('notif_som_ativo') === 'true'
+            if (somAtivo) tocarBeep()
+          }
+          setPrevMsgCount(novasMsgs.length)
+          setMensagensNaoLidas(novasMsgs)
+        })
         .catch(() => {})
     }
 
@@ -156,7 +178,11 @@ const Header = () => {
             <button className="notif-btn" onClick={handleAbrirSinoCliente}
               style={{ position: 'relative' }}>
               <span className="material-symbols-outlined">notifications</span>
-              {(clienteHasNew || mensagensNaoLidas.length > 0) && (
+              {(() => {
+                const sinoAtivo = localStorage.getItem('notif_sino_ativo') !== 'false'
+                const msgAtivo = localStorage.getItem('notif_msg_ativo') !== 'false'
+                return (sinoAtivo && clienteHasNew) || (msgAtivo && mensagensNaoLidas.length > 0)
+              })() && (
                 <span style={{ position: 'absolute', top: 2, right: 2, width: 8, height: 8, borderRadius: '50%', background: '#E21B3C', border: '1.5px solid #0a0a0a' }} />
               )}
             </button>

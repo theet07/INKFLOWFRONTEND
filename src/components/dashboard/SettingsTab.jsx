@@ -19,7 +19,17 @@ const SettingsTab = ({ showToast, studioOpen, setStudioOpen, switchTab }) => {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  const [notifications, setNotifications] = useState({ email: true, push: true, audio: false })
+  const [notifications, setNotifications] = useState({
+    sino: localStorage.getItem('notif_sino_ativo') !== 'false',
+    msg: localStorage.getItem('notif_msg_ativo') !== 'false',
+    som: localStorage.getItem('notif_som_ativo') === 'true'
+  })
+
+  const handleToggleNotif = (key) => {
+    const newVal = !notifications[key]
+    setNotifications(prev => ({ ...prev, [key]: newVal }))
+    localStorage.setItem(`notif_${key}_ativo`, String(newVal))
+  }
 
   // Buscar dados atualizados do artista da API
   useEffect(() => {
@@ -305,9 +315,9 @@ const SettingsTab = ({ showToast, studioOpen, setStudioOpen, switchTab }) => {
             </div>
             <div className="ad-settings-notification-list">
               {[
-                { key: 'email', title: 'Alertas por E-mail', desc: 'Receba resumos diários e novos pedidos.' },
-                { key: 'push', title: 'Push Notifications', desc: 'Alertas no navegador e celular.' },
-                { key: 'audio', title: 'Desktop Audio', desc: 'Sinal sonoro para novas mensagens.' },
+                { key: 'sino', title: 'Notificações no Sino', desc: 'Exibe o badge vermelho no sino quando há novos agendamentos.' },
+                { key: 'msg', title: 'Notificações de Mensagens', desc: 'Exibe o badge vermelho no sino quando há mensagens não lidas.' },
+                { key: 'som', title: 'Som de Notificação', desc: 'Emite um som quando chega uma nova mensagem.' },
               ].map(n => (
                 <div key={n.key} className="ad-settings-notification-item">
                   <div>
@@ -315,7 +325,7 @@ const SettingsTab = ({ showToast, studioOpen, setStudioOpen, switchTab }) => {
                     <p style={{ fontSize: '0.75rem', color: 'var(--ad-on-surface-variant)' }}>{n.desc}</p>
                   </div>
                   <label className="ad-toggle">
-                    <input type="checkbox" checked={notifications[n.key]} onChange={() => setNotifications(prev => ({ ...prev, [n.key]: !prev[n.key] }))} />
+                    <input type="checkbox" checked={notifications[n.key]} onChange={() => handleToggleNotif(n.key)} />
                     <span className="ad-toggle-track-sm"></span>
                   </label>
                 </div>
