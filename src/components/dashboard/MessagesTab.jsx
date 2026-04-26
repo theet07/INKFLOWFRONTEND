@@ -8,7 +8,7 @@ const formatTime = (dt) => {
   return new Date(dt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })
 }
 
-const MessagesTab = ({ showToast }) => {
+const MessagesTab = ({ showToast, onMensagemLida }) => {
   const { user, token } = useAuth()
   const [conversas, setConversas] = useState([]) // [{ clienteId, nome, fotoUrl, ultimaMsg, naoLidas }]
   const [clienteSelecionado, setClienteSelecionado] = useState(null)
@@ -58,6 +58,8 @@ const MessagesTab = ({ showToast }) => {
       await fetch(`${API_BASE}/mensagens/marcar-lidas-por-remetente/${clienteId}`, { method: 'PATCH', headers })
       // Atualizar contador de não lidas na lista
       setConversas(prev => prev.map(c => c.clienteId === clienteId ? { ...c, naoLidas: 0 } : c))
+      // Notificar o ArtistDashboard para atualizar o badge
+      if (onMensagemLida) onMensagemLida(clienteId)
     } catch { }
   }
 
@@ -75,6 +77,8 @@ const MessagesTab = ({ showToast }) => {
           const novasDoCliente = novas.filter(m => m.remetenteId === clienteId && m.destinatarioId === artistaId)
           if (novasDoCliente.length > 0) {
             await fetch(`${API_BASE}/mensagens/marcar-lidas-por-remetente/${clienteId}`, { method: 'PATCH', headers })
+            // Notificar o ArtistDashboard para atualizar o badge
+            if (onMensagemLida) onMensagemLida(clienteId)
           }
         }
       } catch { }

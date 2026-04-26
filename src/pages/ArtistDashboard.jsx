@@ -220,7 +220,10 @@ const ArtistDashboard = () => {
       case 'schedule':
         return <ScheduleTab showToast={showToast} openDrawer={openDrawer} viewMode={viewMode} />
       case 'messages':
-        return <MessagesTab showToast={showToast} />
+        return <MessagesTab showToast={showToast} onMensagemLida={(clienteId) => {
+          // Remover mensagens deste remetente do estado global
+          setMensagensNaoLidas(prev => prev.filter(m => m.remetenteId !== clienteId))
+        }} />
       case 'portfolio':
         return <PortfolioTab showToast={showToast} />
       case 'settings':
@@ -258,13 +261,10 @@ const ArtistDashboard = () => {
               const abrindo = !notifOpen
               setNotifOpen(abrindo)
               if (!abrindo) {
+                // Ao fechar: apenas salvar lastSeen para controle de agendamentos
                 localStorage.setItem('notif_artista_lastSeen', new Date().toISOString())
                 setArtistaHasNew(false)
-                setMensagensNaoLidas([])
-                fetch(`${API_URL}/mensagens/marcar-todas-lidas`, {
-                  method: 'PATCH',
-                  headers: { Authorization: `Bearer ${token}` }
-                }).catch(() => {})
+                // NÃO marcar mensagens como lidas - isso só acontece ao abrir a conversa
               }
             }}>
               <span className="material-symbols-outlined">notifications</span>
