@@ -402,7 +402,7 @@ const ArtistLandingPage = () => {
                   />
                 </div>
                 <div className="alp-form-group">
-                  <label>E-mail Profissional</label>
+                  <label>E-mail Pessoal</label>
                   <input 
                     type="email" 
                     name="email"
