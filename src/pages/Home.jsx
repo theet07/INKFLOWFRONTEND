@@ -291,17 +291,6 @@ const Home = () => {
 
           </div>
         </div>
-        
-        {/* Scroll Indicator */}
-        <button 
-          className="hero-scroll-btn"
-          onClick={() => {
-            document.querySelector('.experience-section')?.scrollIntoView({ behavior: 'smooth' })
-          }}
-        >
-          <span>SCROLL</span>
-          <div className="hero-scroll-line"></div>
-        </button>
 
       </section>
 
