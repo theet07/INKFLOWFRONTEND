@@ -21,7 +21,7 @@ const Contact = () => {
         ...prev,
         nome: user.nome || user.fullName || prev.nome,
         email: user.email || prev.email,
-        telefone: user.telefone || prev.telefone
+        telefone: user.telefone ? formatTelefone(user.telefone) : prev.telefone
       }))
     }
   }, [user])
