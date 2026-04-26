@@ -63,6 +63,30 @@ const ArtistDashboard = () => {
     }, 3000)
   }, [])
 
+  const [viewMode, setViewMode] = useState('monthly')
+  const handleViewToggle = (mode) => setViewMode(mode)
+  const [studioOpen, setStudioOpen] = useState(true)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [notifItems, setNotifItems] = useState([])
+  const [artistaHasNew, setArtistaHasNew] = useState(false)
+  const [mensagensNaoLidas, setMensagensNaoLidas] = useState([])
+  const [prevMsgCount, setPrevMsgCount] = useState(0)
+
+  const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
+
+  const tocarBeep = () => {
+    const ctx = new AudioContext()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.frequency.value = 880
+    gain.gain.setValueAtTime(0.1, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+    osc.start(ctx.currentTime)
+    osc.stop(ctx.currentTime + 0.3)
+  }
+
   useEffect(() => {
     const loadNotifs = async () => {
       try {
@@ -171,30 +195,6 @@ const ArtistDashboard = () => {
     localStorage.removeItem('user')
     localStorage.removeItem('userType')
     navigate('/login')
-  }
-
-  const [viewMode, setViewMode] = useState('monthly')
-  const handleViewToggle = (mode) => setViewMode(mode)
-  const [studioOpen, setStudioOpen] = useState(true)
-  const [notifOpen, setNotifOpen] = useState(false)
-  const [notifItems, setNotifItems] = useState([])
-  const [artistaHasNew, setArtistaHasNew] = useState(false)
-  const [mensagensNaoLidas, setMensagensNaoLidas] = useState([])
-  const [prevMsgCount, setPrevMsgCount] = useState(0)
-
-  const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
-
-  const tocarBeep = () => {
-    const ctx = new AudioContext()
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.connect(gain)
-    gain.connect(ctx.destination)
-    osc.frequency.value = 880
-    gain.gain.setValueAtTime(0.1, ctx.currentTime)
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
-    osc.start(ctx.currentTime)
-    osc.stop(ctx.currentTime + 0.3)
   }
 
   const navItems = [
