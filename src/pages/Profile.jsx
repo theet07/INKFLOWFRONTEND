@@ -113,25 +113,6 @@ const Profile = () => {
     }
   }, [user, authLoading, navigate])
 
-  // Abrir chat automaticamente ao navegar com state
-  useEffect(() => {
-    if (location.state?.abrirChatComId && artistasUnicos.length > 0) {
-      const artista = artistasUnicos.find(a => a.id === location.state.abrirChatComId)
-      if (artista) {
-        abrirChat(artista)
-      } else {
-        // Se não encontrar nos artistasUnicos, monta o objeto manualmente
-        abrirChat({ 
-          id: location.state.abrirChatComId, 
-          nome: location.state.abrirChatNome, 
-          fotoUrl: null 
-        })
-      }
-      // Limpar o state para não reabrir no próximo render
-      window.history.replaceState({}, '')
-    }
-  }, [location.state, artistasUnicos])
-
   if (authLoading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0a0a0a', color: '#fff' }}>
@@ -157,6 +138,25 @@ const Profile = () => {
       if (!acc.find(x => x.id === a.artista.id)) acc.push(a.artista)
       return acc
     }, [])
+
+  // Abrir chat automaticamente ao navegar com state
+  useEffect(() => {
+    if (location.state?.abrirChatComId && artistasUnicos.length > 0) {
+      const artista = artistasUnicos.find(a => a.id === location.state.abrirChatComId)
+      if (artista) {
+        abrirChat(artista)
+      } else {
+        // Se não encontrar nos artistasUnicos, monta o objeto manualmente
+        abrirChat({ 
+          id: location.state.abrirChatComId, 
+          nome: location.state.abrirChatNome, 
+          fotoUrl: null 
+        })
+      }
+      // Limpar o state para não reabrir no próximo render
+      window.history.replaceState({}, '')
+    }
+  }, [location.state, artistasUnicos.length])
 
   const showToast = (message, icon = 'info') => {
     const id = Date.now() + Math.random()
