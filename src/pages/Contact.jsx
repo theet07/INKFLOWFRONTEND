@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import emailjs from '@emailjs/browser'
+import { useAuth } from '../contexts/AuthContext'
 
 const Contact = () => {
+  const { user } = useAuth()
+  
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -10,6 +13,18 @@ const Contact = () => {
   })
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState({ show: false, message: '', isError: false })
+
+  // Auto-preencher formulário com dados do usuário logado
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        nome: user.nome || user.fullName || prev.nome,
+        email: user.email || prev.email,
+        telefone: user.telefone || prev.telefone
+      }))
+    }
+  }, [user])
 
   const showToast = (message, isError = false) => {
     setToast({ show: true, message, isError })
