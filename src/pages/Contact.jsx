@@ -126,7 +126,7 @@ const Contact = () => {
             </div>
             
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <button type="submit" className="btn" disabled={loading} style={{ flex: 1, minWidth: '200px', opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
+              <button type="submit" className="btn" disabled={loading} style={{ width: 'fit-content', opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
                 {loading ? 'Enviando...' : 'Enviar Mensagem'}
               </button>
               
@@ -136,8 +136,7 @@ const Contact = () => {
                 rel="noopener noreferrer"
                 className="btn"
                 style={{
-                  flex: 1,
-                  minWidth: '200px',
+                  width: 'fit-content',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
