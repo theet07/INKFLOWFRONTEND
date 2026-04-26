@@ -54,9 +54,10 @@ const MessagesTab = ({ showToast }) => {
       if (msgs.length > 0) {
         ultimoTimestampRef.current = msgs[msgs.length - 1].createdAt
       }
-      // Marcar como lidas
-      msgs.filter(m => !m.lida && m.destinatarioId === artistaId)
-          .forEach(m => fetch(`${API_BASE}/mensagens/${m.id}/lida`, { method: 'PATCH', headers }))
+      // Marcar como lidas apenas as mensagens deste remetente
+      await fetch(`${API_BASE}/mensagens/marcar-lidas-por-remetente/${clienteId}`, { method: 'PATCH', headers })
+      // Atualizar contador de não lidas na lista
+      setConversas(prev => prev.map(c => c.clienteId === clienteId ? { ...c, naoLidas: 0 } : c))
     } catch { }
   }
 
@@ -70,8 +71,11 @@ const MessagesTab = ({ showToast }) => {
         if (novas.length > 0) {
           setMensagens(prev => [...prev, ...novas])
           ultimoTimestampRef.current = novas[novas.length - 1].createdAt
-          novas.filter(m => !m.lida && m.destinatarioId === artistaId)
-               .forEach(m => fetch(`${API_BASE}/mensagens/${m.id}/lida`, { method: 'PATCH', headers }))
+          // Marcar como lidas apenas as mensagens do cliente selecionado
+          const novasDoCliente = novas.filter(m => m.remetenteId === clienteId && m.destinatarioId === artistaId)
+          if (novasDoCliente.length > 0) {
+            await fetch(`${API_BASE}/mensagens/marcar-lidas-por-remetente/${clienteId}`, { method: 'PATCH', headers })
+          }
         }
       } catch { }
     }, 5000)

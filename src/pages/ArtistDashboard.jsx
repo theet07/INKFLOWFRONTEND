@@ -336,9 +336,15 @@ const ArtistDashboard = () => {
               href="#"
               onClick={(e) => { e.preventDefault(); switchTab(item.key) }}
               className={`ad-nav-item ${activeTab === item.key ? 'active' : ''}`}
+              style={{ position: 'relative' }}
             >
               <span className="material-symbols-outlined">{item.icon}</span>
               <span>{item.label}</span>
+              {item.key === 'messages' && mensagensNaoLidas.length > 0 && (
+                <span style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: '#E21B3C', color: '#fff', borderRadius: '50%', minWidth: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, padding: '0 6px' }}>
+                  {mensagensNaoLidas.length}
+                </span>
+              )}
             </a>
           ))}
         </nav>
@@ -472,12 +478,18 @@ const ArtistDashboard = () => {
             key={item.key}
             className={`ad-bottom-nav-item ${activeTab === item.key ? 'active' : ''}`}
             onClick={() => switchTab(item.key)}
+            style={{ position: 'relative' }}
           >
             <span
               className="material-symbols-outlined"
               style={activeTab === item.key ? { fontVariationSettings: "'FILL' 1" } : {}}
             >{item.icon}</span>
             <span>{item.label}</span>
+            {item.key === 'messages' && mensagensNaoLidas.length > 0 && (
+              <span style={{ position: 'absolute', top: 4, right: 8, background: '#E21B3C', color: '#fff', borderRadius: '50%', minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700, padding: '0 4px' }}>
+                {mensagensNaoLidas.length}
+              </span>
+            )}
           </button>
         ))}
       </nav>
