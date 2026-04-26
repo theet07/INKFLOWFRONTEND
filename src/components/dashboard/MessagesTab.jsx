@@ -177,7 +177,8 @@ const MessagesTab = ({ showToast, mensagensNaoLidas = [], onMensagemLida }) => {
                 </span>
               )}
             </div>
-          )})
+            )
+          })}
         </div>
       </div>
 
