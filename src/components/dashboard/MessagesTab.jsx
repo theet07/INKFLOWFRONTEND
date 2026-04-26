@@ -89,10 +89,21 @@ const MessagesTab = ({ showToast, mensagensNaoLidas = [], onMensagemLida }) => {
     if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null }
   }
 
+  // Polling da lista de conversas
   useEffect(() => {
-    carregarConversas()
-    return () => pararPolling()
-  }, [])
+    if (!token) return
+
+    carregarConversas() // Carrega imediatamente
+
+    const interval = setInterval(() => {
+      carregarConversas() // Recarrega a cada 5s
+    }, 5000)
+
+    return () => {
+      clearInterval(interval)
+      pararPolling()
+    }
+  }, [token])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
