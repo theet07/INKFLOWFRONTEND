@@ -183,7 +183,10 @@ const Header = () => {
                     </div>
                     {mensagensNaoLidas.map(m => (
                       <div key={m.id} className="notif-item"
-                        onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>
+                        onClick={() => {
+                          navigate('/perfil', { state: { abrirChatComId: m.remetenteId, abrirChatNome: m.remetenteNome } })
+                          setNotifOpen(false)
+                        }}>
                         <div className="notif-item-title">{m.remetenteNome}</div>
                         <div className="notif-item-sub">{m.conteudo.length > 40 ? m.conteudo.slice(0, 40) + '...' : m.conteudo}</div>
                       </div>

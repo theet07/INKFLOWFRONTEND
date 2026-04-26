@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { agendamentoService, clienteService } from '../services/inkflowApi'
 import { useAuth } from '../contexts/AuthContext'
 import './Profile.css'
@@ -58,6 +58,7 @@ const getFallbackImage = (servico) => {
 
 const Profile = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, token, loading: authLoading, logout } = useAuth()
 
   const [toasts, setToasts] = useState([])
@@ -111,6 +112,25 @@ const Profile = () => {
       if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null }
     }
   }, [user, authLoading, navigate])
+
+  // Abrir chat automaticamente ao navegar com state
+  useEffect(() => {
+    if (location.state?.abrirChatComId && artistasUnicos.length > 0) {
+      const artista = artistasUnicos.find(a => a.id === location.state.abrirChatComId)
+      if (artista) {
+        abrirChat(artista)
+      } else {
+        // Se não encontrar nos artistasUnicos, monta o objeto manualmente
+        abrirChat({ 
+          id: location.state.abrirChatComId, 
+          nome: location.state.abrirChatNome, 
+          fotoUrl: null 
+        })
+      }
+      // Limpar o state para não reabrir no próximo render
+      window.history.replaceState({}, '')
+    }
+  }, [location.state, artistasUnicos])
 
   if (authLoading) {
     return (
