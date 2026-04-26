@@ -61,56 +61,32 @@ const Portfolio = () => {
         <div style={{
           display: 'flex',
           justifyContent: 'center',
-          gap: '0.8rem',
-          marginBottom: '4rem',
+          gap: '0.5rem',
           flexWrap: 'wrap',
-          padding: '1rem',
-          background: 'rgba(255,255,255,0.02)',
-          borderRadius: '50px',
-          maxWidth: '800px',
+          maxWidth: '860px',
           margin: '0 auto 4rem auto',
-          border: '1px solid rgba(255,255,255,0.05)'
+          padding: '0.5rem',
+          background: '#1a1a1a',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '12px'
         }}>
           {['todos', 'realista', 'blackwork', 'geek', 'oriental', 'maori', 'floral'].map(filter => (
             <button
               key={filter}
               style={{
-                padding: '12px 24px',
-                background: activeFilter === filter 
-                  ? 'linear-gradient(135deg, var(--accent-red), #ff4757)' 
-                  : 'rgba(255,255,255,0.05)',
-                color: activeFilter === filter ? 'white' : 'var(--text-light)',
-                border: activeFilter === filter 
-                  ? '1px solid var(--accent-red)' 
-                  : '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '30px',
+                padding: '0.5rem 1.25rem',
+                background: activeFilter === filter ? '#E21B3C' : 'transparent',
+                color: activeFilter === filter ? '#ffffff' : 'rgba(255,255,255,0.5)',
+                border: 'none',
+                borderRadius: '8px',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                fontSize: '0.95rem',
-                fontWeight: activeFilter === filter ? '600' : '400',
+                fontSize: '0.75rem',
+                fontWeight: activeFilter === filter ? '700' : '600',
                 textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                boxShadow: activeFilter === filter 
-                  ? '0 4px 15px rgba(226, 27, 60, 0.3)' 
-                  : '0 2px 10px rgba(0,0,0,0.1)'
+                letterSpacing: '1px',
+                transition: 'all 0.2s ease'
               }}
               onClick={() => setActiveFilter(filter)}
-              onMouseEnter={(e) => {
-                if (activeFilter !== filter) {
-                  e.target.style.background = 'rgba(226, 27, 60, 0.15)'
-                  e.target.style.borderColor = 'rgba(226, 27, 60, 0.5)'
-                  e.target.style.transform = 'translateY(-2px)'
-                  e.target.style.boxShadow = '0 6px 20px rgba(226, 27, 60, 0.2)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (activeFilter !== filter) {
-                  e.target.style.background = 'rgba(255,255,255,0.05)'
-                  e.target.style.borderColor = 'rgba(255,255,255,0.1)'
-                  e.target.style.transform = 'translateY(0)'
-                  e.target.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)'
-                }
-              }}
             >
               {filter.charAt(0).toUpperCase() + filter.slice(1)}
             </button>
