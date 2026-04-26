@@ -35,6 +35,7 @@ const Header = () => {
     if (userType !== 'client' || !user?.id || !token) {
       setAgendamentos([])
       setMensagensNaoLidas([])
+      setPrevMsgCount(0)
       return
     }
 
@@ -53,11 +54,13 @@ const Header = () => {
         .then(r => r.json())
         .then(data => {
           const novasMsgs = data || []
-          if (novasMsgs.length > prevMsgCount && prevMsgCount > 0) {
-            const somAtivo = localStorage.getItem('notif_som_ativo') === 'true'
-            if (somAtivo) tocarBeep()
-          }
-          setPrevMsgCount(novasMsgs.length)
+          setPrevMsgCount(prev => {
+            if (novasMsgs.length > prev && prev > 0) {
+              const somAtivo = localStorage.getItem('notif_som_ativo') === 'true'
+              if (somAtivo) tocarBeep()
+            }
+            return novasMsgs.length
+          })
           setMensagensNaoLidas(novasMsgs)
         })
         .catch(() => {})
@@ -67,7 +70,7 @@ const Header = () => {
 
     const interval = setInterval(fetchNotifs, 10000) // Repete a cada 10s
     return () => clearInterval(interval) // Limpa ao desmontar
-  }, [user, userType, token])
+  }, [user, userType, token, API_URL])
 
   useEffect(() => {
     if (agendamentos.length === 0) return
