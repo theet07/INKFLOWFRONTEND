@@ -93,8 +93,12 @@ const Contact = () => {
                   onChange={handleChange}
                   className="contact-input"
                   style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: '#ffffff', colorScheme: 'dark' }}
+                  maxLength={60}
                   required
                 />
+                <p style={{ textAlign: 'right', fontSize: '0.7rem', color: formData.nome.length > 54 ? '#E21B3C' : 'rgba(255,255,255,0.3)', marginTop: '4px' }}>
+                  {formData.nome.length}/60
+                </p>
               </div>
               
               <div className="contact-form-group">
@@ -106,8 +110,12 @@ const Contact = () => {
                   onChange={handleChange}
                   className="contact-input"
                   style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: '#ffffff', colorScheme: 'dark' }}
+                  maxLength={50}
                   required
                 />
+                <p style={{ textAlign: 'right', fontSize: '0.7rem', color: formData.email.length > 45 ? '#E21B3C' : 'rgba(255,255,255,0.3)', marginTop: '4px' }}>
+                  {formData.email.length}/50
+                </p>
               </div>
               
               <div className="contact-form-group">
@@ -131,8 +139,12 @@ const Contact = () => {
                 onChange={handleChange}
                 className="contact-textarea"
                 style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: '#ffffff', colorScheme: 'dark' }}
+                maxLength={1000}
                 required
               ></textarea>
+              <p style={{ textAlign: 'right', fontSize: '0.7rem', color: formData.mensagem.length > 900 ? '#E21B3C' : 'rgba(255,255,255,0.3)', marginTop: '4px' }}>
+                {formData.mensagem.length}/1000
+              </p>
             </div>
             
             <div className="contact-buttons">
