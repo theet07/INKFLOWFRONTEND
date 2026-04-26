@@ -92,6 +92,7 @@ const Contact = () => {
                   value={formData.nome}
                   onChange={handleChange}
                   className="contact-input"
+                  style={{ backgroundColor: '#1a1a1a', color: '#ffffff', colorScheme: 'dark' }}
                   required
                 />
               </div>
@@ -104,6 +105,7 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className="contact-input"
+                  style={{ backgroundColor: '#1a1a1a', color: '#ffffff', colorScheme: 'dark' }}
                   required
                 />
               </div>
@@ -116,6 +118,7 @@ const Contact = () => {
                   value={formData.telefone}
                   onChange={handleChange}
                   className="contact-input"
+                  style={{ backgroundColor: '#1a1a1a', color: '#ffffff', colorScheme: 'dark' }}
                 />
               </div>
             </div>
@@ -127,6 +130,7 @@ const Contact = () => {
                 value={formData.mensagem}
                 onChange={handleChange}
                 className="contact-textarea"
+                style={{ backgroundColor: '#1a1a1a', color: '#ffffff', colorScheme: 'dark' }}
                 required
               ></textarea>
             </div>
