@@ -79,8 +79,37 @@ const ArtistDashboard = () => {
         }
       } catch {}
     }
+
+    const loadMensagens = () => {
+      if (!token) return
+      fetch(`${API_URL}/mensagens/nao-lidas`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(r => r.json())
+        .then(data => {
+          const novasMsgs = Array.isArray(data) ? data : []
+          setPrevMsgCount(prev => {
+            if (novasMsgs.length > prev && prev > 0) {
+              const somAtivo = localStorage.getItem('notif_som_ativo') === 'true'
+              if (somAtivo) tocarBeep()
+            }
+            return novasMsgs.length
+          })
+          setMensagensNaoLidas(novasMsgs)
+        })
+        .catch(() => {})
+    }
+
     loadNotifs()
-  }, [])
+    loadMensagens()
+
+    const interval = setInterval(() => {
+      loadNotifs()
+      loadMensagens()
+    }, 10000)
+
+    return () => clearInterval(interval)
+  }, [token, API_URL])
 
   useEffect(() => {
     const handleResize = () => {
@@ -150,6 +179,23 @@ const ArtistDashboard = () => {
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifItems, setNotifItems] = useState([])
   const [artistaHasNew, setArtistaHasNew] = useState(false)
+  const [mensagensNaoLidas, setMensagensNaoLidas] = useState([])
+  const [prevMsgCount, setPrevMsgCount] = useState(0)
+
+  const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
+
+  const tocarBeep = () => {
+    const ctx = new AudioContext()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.frequency.value = 880
+    gain.gain.setValueAtTime(0.1, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+    osc.start(ctx.currentTime)
+    osc.stop(ctx.currentTime + 0.3)
+  }
 
   const navItems = [
     { key: 'dashboard', icon: 'dashboard', label: 'Painel' },
@@ -209,14 +255,20 @@ const ArtistDashboard = () => {
           )}
           <div style={{ position: 'relative' }}>
             <button className="ad-icon-btn" title="Notificações" onClick={() => {
-              setNotifOpen(o => !o)
-              if (!notifOpen) {
+              const abrindo = !notifOpen
+              setNotifOpen(abrindo)
+              if (!abrindo) {
                 localStorage.setItem('notif_artista_lastSeen', new Date().toISOString())
                 setArtistaHasNew(false)
+                setMensagensNaoLidas([])
+                fetch(`${API_URL}/mensagens/marcar-todas-lidas`, {
+                  method: 'PATCH',
+                  headers: { Authorization: `Bearer ${token}` }
+                }).catch(() => {})
               }
             }}>
               <span className="material-symbols-outlined">notifications</span>
-              {artistaHasNew && (
+              {(artistaHasNew || mensagensNaoLidas.length > 0) && (
                 <span style={{ position: 'absolute', top: 2, right: 2, width: 8, height: 8, borderRadius: '50%', background: '#E21B3C', border: '1.5px solid #0a0a0a' }} />
               )}
             </button>
@@ -239,6 +291,22 @@ const ArtistDashboard = () => {
                     </div>
                   </div>
                 ))}
+                {mensagensNaoLidas.length > 0 && (
+                  <>
+                    <div style={{ padding: '8px 16px', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, borderTop: '1px solid rgba(255,255,255,0.08)' }}>Mensagens</div>
+                    {mensagensNaoLidas.map(m => (
+                      <div key={m.id} onClick={() => { switchTab('messages'); setNotifOpen(false) }}
+                        style={{ padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'background 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{m.remetenteNome}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>
+                          {m.conteudo.length > 40 ? m.conteudo.slice(0, 40) + '...' : m.conteudo}
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
                 <div onClick={() => { switchTab('requests'); setNotifOpen(false) }} style={{ padding: '10px 16px', textAlign: 'center', fontSize: '0.8rem', color: '#E21B3C', cursor: 'pointer', fontWeight: 600 }}>Ver todas</div>
               </div>
             )}
