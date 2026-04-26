@@ -62,7 +62,16 @@ const Header = () => {
     if (!notifOpen) {
       localStorage.setItem('notif_cliente_lastSeen', new Date().toISOString())
       setClienteHasNew(false)
-      setMsgNaoLidas(0)
+      
+      // Marcar mensagens como lidas no backend
+      if (msgNaoLidas > 0 && token) {
+        fetch(`${API_URL}/mensagens/marcar-todas-lidas`, {
+          method: 'PATCH',
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then(() => setMsgNaoLidas(0))
+          .catch(() => {})
+      }
     }
   }
 
