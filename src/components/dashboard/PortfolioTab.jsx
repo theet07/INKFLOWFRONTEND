@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { portfolioService } from '../../services/inkflowApi';
+import { portfolioService, uploadService } from '../../services/inkflowApi';
 
 const PortfolioTab = ({ showToast }) => {
   const [gallery, setGallery] = useState([]);
@@ -64,22 +64,15 @@ const PortfolioTab = ({ showToast }) => {
     showToast('Enviando obra ao portfólio...');
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-      formData.append('folder', 'portfolio');
+      // Upload via backend proxy (esconde credenciais do Cloudinary)
+      const uploadRes = await uploadService.uploadImage(file, 'portfolio');
+      const imageUrl = uploadRes.data.url;
 
-      const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-      const cloudData = await cloudRes.json();
-
-      if (!cloudData.secure_url) throw new Error('Upload falhou no Cloudinary');
+      if (!imageUrl) throw new Error('Upload falhou');
 
       const res = await portfolioService.create({
         artistaId: user.artistaId || user.id,
-        imagemUrl: cloudData.secure_url,
+        imagemUrl: imageUrl,
         categoria: activeFilter !== 'Todos' ? activeFilter : 'Geral',
         descricao: '',
       });

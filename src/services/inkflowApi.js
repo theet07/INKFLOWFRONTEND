@@ -143,4 +143,17 @@ export const authService = {
   }),
 };
 
+// Serviço de Upload (proxy para Cloudinary)
+export const uploadService = {
+  uploadImage: (file, folder = 'portfolio') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
+    return api.post('/upload', formData, { 
+      baseURL: API_BASE_URL.replace('/v1', ''),
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+};
+
 export default api;
