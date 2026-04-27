@@ -5,6 +5,7 @@ const ArtistLandingPage = () => {
   const [activeFaq, setActiveFaq] = useState(null)
   const [toasts, setToasts] = useState([])
   const [isDemoOpen, setIsDemoOpen] = useState(false)
+  const [lightboxImg, setLightboxImg] = useState(null)
   const [loading, setLoading] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [formData, setFormData] = useState({
@@ -220,8 +221,16 @@ const ArtistLandingPage = () => {
                 <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>1. Profile</h3>
                 <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Seu cartão de visitas digital brutalista. Links, regras do estúdio e disponibilidade clara e direta.</p>
               </div>
-              <div style={{ height: '100px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden' }}>
-                <img src="/assets/Para_Tatuadores_Ref/Configurações.webp" alt="Configurações" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div 
+                style={{ position: 'relative', height: '220px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden', cursor: 'zoom-in' }}
+                onClick={() => setLightboxImg('/assets/Para_Tatuadores_Ref/Configurações.webp')}
+                onMouseEnter={(e) => e.currentTarget.querySelector('.hover-overlay').style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.querySelector('.hover-overlay').style.opacity = '0'}
+              >
+                <img src="/assets/Para_Tatuadores_Ref/Configurações.webp" alt="Configurações" style={{ width: '100%', height: '220px', objectFit: 'cover' }} />
+                <div className="hover-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', color: '#fff' }}>zoom_in</span>
+                </div>
               </div>
             </div>
 
@@ -233,8 +242,16 @@ const ArtistLandingPage = () => {
                 <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>2. Portfolio</h3>
                 <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Galeria de alta resolução categorizada. Permita que clientes encontrem a inspiração perfeita.</p>
               </div>
-              <div style={{ height: '100px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden' }}>
-                <img src="/assets/Para_Tatuadores_Ref/Portfólio.webp" alt="Portfólio" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div 
+                style={{ position: 'relative', height: '220px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden', cursor: 'zoom-in' }}
+                onClick={() => setLightboxImg('/assets/Para_Tatuadores_Ref/Portfólio.webp')}
+                onMouseEnter={(e) => e.currentTarget.querySelector('.hover-overlay').style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.querySelector('.hover-overlay').style.opacity = '0'}
+              >
+                <img src="/assets/Para_Tatuadores_Ref/Portfólio.webp" alt="Portfólio" style={{ width: '100%', height: '220px', objectFit: 'cover' }} />
+                <div className="hover-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', color: '#fff' }}>zoom_in</span>
+                </div>
               </div>
             </div>
 
@@ -246,8 +263,16 @@ const ArtistLandingPage = () => {
                 <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>3. Requests</h3>
                 <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Formulários de orçamento precisos. Tamanho, local, referência. Chega de "quanto custa uma tattoo?".</p>
               </div>
-              <div style={{ height: '100px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden' }}>
-                <img src="/assets/Para_Tatuadores_Ref/Painel.webp" alt="Painel" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div 
+                style={{ position: 'relative', height: '220px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden', cursor: 'zoom-in' }}
+                onClick={() => setLightboxImg('/assets/Para_Tatuadores_Ref/Painel.webp')}
+                onMouseEnter={(e) => e.currentTarget.querySelector('.hover-overlay').style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.querySelector('.hover-overlay').style.opacity = '0'}
+              >
+                <img src="/assets/Para_Tatuadores_Ref/Painel.webp" alt="Painel" style={{ width: '100%', height: '220px', objectFit: 'cover' }} />
+                <div className="hover-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', color: '#fff' }}>zoom_in</span>
+                </div>
               </div>
             </div>
           </div>
@@ -261,7 +286,7 @@ const ArtistLandingPage = () => {
                 <h2 className="alp-headline" style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem' }}>Ferramentas de Precisão.</h2>
                 <p style={{ color: 'var(--on-surface-variant)', fontSize: '1.1rem' }}>Tudo que você precisa em um único painel. Simples, escuro, focado.</p>
               </div>
-              <button className="alp-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => showToast('Explorando novos mundos...')}>
+              <button className="alp-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => document.getElementById('registro')?.scrollIntoView({ behavior: 'smooth' })}>
                 Explorar Funcionalidades
                 <span className="material-symbols-outlined">arrow_forward</span>
               </button>
@@ -286,7 +311,7 @@ const ArtistLandingPage = () => {
                 <div style={{ flex: 1, textAlign: 'right' }}>
                   <p style={{ fontSize: '0.75rem', color: 'var(--primary-red)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>02 / Workflow</p>
                   <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Status Management</h3>
-                  <p style={{ color: 'var(--on-surface-variant)', maxWidth: '600px', marginLeft: 'auto' }}>Crie funis de atendimento. "Aguardando Referência", "Arte em Criação", "Pronto para Agendar". Saiba exatamente em que etapa cada cliente está.</p>
+                  <p style={{ color: 'var(--on-surface-variant)', maxWidth: '600px', marginLeft: 'auto' }}>Acompanhe cada cliente do primeiro contato até a sessão finalizada. Gerencie status como Pendente, Confirmado, Em Andamento e Realizado — tudo em um painel visual e intuitivo.</p>
                 </div>
               </div>
             </div>
@@ -321,7 +346,7 @@ const ArtistLandingPage = () => {
         <section 
           className="alp-section alp-register-section reveal-on-scroll" 
           ref={(el) => { registerRef.current = el; addToRefs(el); }} 
-          id="register"
+          id="registro"
         >
            <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <h2 className="alp-headline" style={{ fontSize: '3rem', fontWeight: 800 }}>Garanta seu acesso prioritário</h2>
@@ -475,7 +500,7 @@ const ArtistLandingPage = () => {
       {isDemoOpen && (
         <div className="alp-modal-overlay" onClick={() => setIsDemoOpen(false)}>
           <div className="alp-modal-container" onClick={e => e.stopPropagation()}>
-            <button className="alp-modal-close" onClick={() => setIsDemoOpen(false)}>
+            <button className="alp-modal-close" onClick={() => setIsDemoOpen(false)} style={{ top: '3rem' }}>
               <span className="material-symbols-outlined">close</span>
             </button>
             <div className="alp-video-wrapper">
@@ -487,6 +512,52 @@ const ArtistLandingPage = () => {
               ></iframe>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Lightbox Modal */}
+      {lightboxImg && (
+        <div 
+          style={{ 
+            position: 'fixed', 
+            inset: 0, 
+            background: 'rgba(0,0,0,0.9)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            zIndex: 9999,
+            cursor: 'zoom-out'
+          }}
+          onClick={() => setLightboxImg(null)}
+        >
+          <button 
+            onClick={() => setLightboxImg(null)}
+            style={{
+              position: 'absolute',
+              top: '2rem',
+              right: '2rem',
+              background: 'rgba(255,255,255,0.1)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '3rem',
+              height: '3rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+            onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
+            onMouseLeave={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
+          >
+            <span className="material-symbols-outlined" style={{ color: '#fff', fontSize: '1.5rem' }}>close</span>
+          </button>
+          <img 
+            src={lightboxImg} 
+            alt="Preview" 
+            style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px' }}
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
 
