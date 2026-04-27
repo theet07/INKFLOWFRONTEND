@@ -173,12 +173,12 @@ const ArtistLandingPage = () => {
                   <span className="material-symbols-outlined">calendar_month</span>
                 </div>
                 <div>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--on-surface-variant)', textTransform: 'uppercase' }}>Próxima Sessão</p>
-                  <p style={{ fontWeight: 700 }}>Realismo - Braço Esquerdo</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--on-surface-variant)', textTransform: 'uppercase' }}>Oferta de Lançamento</p>
+                  <p style={{ fontWeight: 700 }}>Comece sem pagar nada.</p>
                 </div>
                 <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                  <p style={{ color: 'var(--primary-red)', fontWeight: 600 }}>14:00</p>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--on-surface-variant)' }}>Hoje</p>
+                  <p style={{ color: 'var(--primary-red)', fontWeight: 600 }}>3 Meses</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--on-surface-variant)' }}>Grátis</p>
                 </div>
               </div>
             </div>
@@ -294,8 +294,16 @@ const ArtistLandingPage = () => {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div className="alp-card reveal-on-scroll" ref={addToRefs} style={{ minHeight: 'auto', flexDirection: 'row', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-                <div style={{ width: '300px', height: '180px', background: 'var(--surface-highest)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div 
+                  style={{ position: 'relative', width: '300px', height: '180px', background: 'var(--surface-highest)', borderRadius: '4px', overflow: 'hidden', cursor: 'zoom-in' }}
+                  onClick={() => setLightboxImg('/assets/Para_Tatuadores_Ref/Agenda.webp')}
+                  onMouseEnter={(e) => e.currentTarget.querySelector('.hover-overlay').style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.querySelector('.hover-overlay').style.opacity = '0'}
+                >
                   <img src="/assets/Para_Tatuadores_Ref/Agenda.webp" alt="Agenda Digital" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div className="hover-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', color: '#fff' }}>zoom_in</span>
+                  </div>
                 </div>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontSize: '0.75rem', color: 'var(--primary-red)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>01 / Agenda</p>
@@ -305,8 +313,16 @@ const ArtistLandingPage = () => {
               </div>
 
               <div className="alp-card reveal-on-scroll" ref={addToRefs} style={{ minHeight: 'auto', flexDirection: 'row-reverse', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-                <div style={{ width: '300px', height: '180px', background: 'var(--surface-highest)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div 
+                  style={{ position: 'relative', width: '300px', height: '180px', background: 'var(--surface-highest)', borderRadius: '4px', overflow: 'hidden', cursor: 'zoom-in' }}
+                  onClick={() => setLightboxImg('/assets/Para_Tatuadores_Ref/Solicitações.webp')}
+                  onMouseEnter={(e) => e.currentTarget.querySelector('.hover-overlay').style.opacity = '1'}
+                  onMouseLeave={(e) => e.currentTarget.querySelector('.hover-overlay').style.opacity = '0'}
+                >
                   <img src="/assets/Para_Tatuadores_Ref/Solicitações.webp" alt="Gerenciamento de Status" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div className="hover-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', color: '#fff' }}>zoom_in</span>
+                  </div>
                 </div>
                 <div style={{ flex: 1, textAlign: 'right' }}>
                   <p style={{ fontSize: '0.75rem', color: 'var(--primary-red)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>02 / Workflow</p>
