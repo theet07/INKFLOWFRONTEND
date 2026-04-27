@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { agendamentoService, clienteService, artistaService, portfolioService } from '../services/inkflowApi'
+import { agendamentoService, clienteService, artistaService, portfolioService, uploadService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
 import './Booking.css'
 
@@ -234,19 +234,12 @@ const Booking = () => {
     };
 
     const uploadImagemReferencia = async (file) => {
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET)
-
-        const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
-            { method: 'POST', body: formData }
-        )
-
-        if (!response.ok) throw new Error('Falha no upload da imagem de referência.')
-
-        const data = await response.json()
-        return data.secure_url
+        try {
+            const uploadRes = await uploadService.uploadImage(file, 'agendamentos')
+            return uploadRes.data.url
+        } catch (error) {
+            throw new Error('Falha no upload da imagem de referência.')
+        }
     }
 
     const handleSubmit = async (e) => {
