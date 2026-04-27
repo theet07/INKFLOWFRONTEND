@@ -86,6 +86,9 @@ function AppContent() {
           <Route path="/perfil" element={
             <ProtectedRoute allowedTypes={['client']} element={<Profile />} />
           } />
+
+          {/* Catch-all: redireciona URLs inválidas para Home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       {!hideShell && <Footer />}

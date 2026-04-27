@@ -36,7 +36,6 @@ const Chatbot = () => {
     setLoading(true)
 
     try {
-      const token = localStorage.getItem('token')
       const res = await chatService.sendMessage({
         messages: updatedMessages,
         sessionId: 'session_' + Date.now()

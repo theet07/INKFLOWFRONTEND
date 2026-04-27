@@ -58,10 +58,8 @@ export const AuthProvider = ({ children }) => {
     // Chamar endpoint de logout no backend para invalidar token
     if (token) {
       try {
-        await api.post('/auth/logout', {}, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        await api.post('/auth/logout', null, {
+          baseURL: (import.meta.env.VITE_API_URL || '/api/v1').replace('/v1', '')
         });
       } catch (error) {
         console.error('Erro ao fazer logout no backend:', error);

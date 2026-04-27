@@ -59,7 +59,7 @@ const getFallbackImage = (servico) => {
 const Profile = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, token, loading: authLoading, logout } = useAuth()
+  const { user, token, loading: authLoading, logout, login } = useAuth()
 
   const [toasts, setToasts] = useState([])
   const [modal, setModal] = useState({ isOpen: false, title: '', content: null, isImage: false })
@@ -79,6 +79,21 @@ const Profile = () => {
   const [editProfile, setEditProfile] = useState({ isOpen: false, nome: '', telefone: '', saving: false })
   const settingsRef = useRef(null)
   const fileInputRef = useRef(null)
+
+  // Dados derivados — computados antes dos hooks para que useEffect possa referenciá-los
+  const isAvaliado = (ag) => ag.avaliado === true
+  const proximas = agendamentos
+    .filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO')
+    .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora))
+  const colecao = agendamentos
+    .filter(a => a.status === 'REALIZADO' && isAvaliado(a))
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+  const artistasUnicos = agendamentos
+    .filter(a => a.artista)
+    .reduce((acc, a) => {
+      if (!acc.find(x => x.id === a.artista.id)) acc.push(a.artista)
+      return acc
+    }, [])
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -120,14 +135,12 @@ const Profile = () => {
       if (artista) {
         abrirChat(artista)
       } else {
-        // Se não encontrar nos artistasUnicos, monta o objeto manualmente
         abrirChat({ 
           id: location.state.abrirChatComId, 
           nome: location.state.abrirChatNome, 
           fotoUrl: null 
         })
       }
-      // Limpar o state para não reabrir no próximo render
       window.history.replaceState({}, '')
     }
   }, [location.state, artistasUnicos.length, user])
@@ -143,20 +156,6 @@ const Profile = () => {
   }
 
   if (!user || !user.email) return null
-
-  const isAvaliado = (ag) => ag.avaliado === true
-  const proximas = agendamentos
-    .filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO')
-    .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora))
-  const colecao = agendamentos
-    .filter(a => a.status === 'REALIZADO' && isAvaliado(a))
-    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-  const artistasUnicos = agendamentos
-    .filter(a => a.artista)
-    .reduce((acc, a) => {
-      if (!acc.find(x => x.id === a.artista.id)) acc.push(a.artista)
-      return acc
-    }, [])
 
   const showToast = (message, icon = 'info') => {
     const id = Date.now() + Math.random()
@@ -213,7 +212,7 @@ const Profile = () => {
           localStorage.setItem('user', JSON.stringify(updatedUser))
           showToast('Foto de perfil removida', 'check_circle')
           // Forçar re-render atualizando o contexto
-          window.location.href = window.location.href
+          login(updatedUser, 'client', token)
         } catch (err) {
           showToast('Erro ao remover foto', 'error')
         }
@@ -247,7 +246,7 @@ const Profile = () => {
         
         showToast('Foto atualizada com sucesso!', 'check_circle')
         // Forçar re-render atualizando o contexto
-        window.location.href = window.location.href
+        login(updatedUser, 'client', token)
       } catch (err) {
         console.error('Erro de Upload:', err.response?.data || err.message || err);
         const errorMessage = err.response?.data?.message || err.response?.data || 'Erro de comunicação com o servidor ao carregar foto.'
@@ -299,7 +298,7 @@ const Profile = () => {
       setEditProfile(prev => ({ ...prev, isOpen: false }))
       showToast('Perfil atualizado com sucesso!', 'check_circle')
       // Forçar re-render atualizando o contexto
-      window.location.href = window.location.href
+      login(updatedUser, 'client', token)
     } catch {
       showToast('Erro ao atualizar perfil.', 'error')
       setEditProfile(prev => ({ ...prev, saving: false }))
