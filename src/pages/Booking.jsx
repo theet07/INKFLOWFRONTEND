@@ -32,6 +32,7 @@ const Booking = () => {
     const [availableSlots, setAvailableSlots] = useState([])
     const [isLoadingAvailability, setIsLoadingAvailability] = useState(false)
     const [isLoadingSlots, setIsLoadingSlots] = useState(false)
+    const [currentMonthOffset, setCurrentMonthOffset] = useState(0)
 
     useEffect(() => {
         const userData = localStorage.getItem('user')
@@ -152,32 +153,33 @@ const Booking = () => {
     }, [bookingState.day, bookingState.artist, artistsOptions, availableDays])
 
     const brTime = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
-    const currentMonth = brTime.getMonth();
-    const currentYear = brTime.getFullYear();
-    const todayDate = brTime.getDate();
+    const currentMonth = brTime.getMonth() + currentMonthOffset;
+    const currentYear = brTime.getFullYear() + Math.floor(currentMonth / 12);
+    const adjustedMonth = ((currentMonth % 12) + 12) % 12;
+    const todayDate = currentMonthOffset === 0 ? brTime.getDate() : 0;
     const currentHourBr = brTime.getHours();
 
     const monthNames = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
-    const currentMonthName = monthNames[currentMonth];
+    const currentMonthName = monthNames[adjustedMonth];
 
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, adjustedMonth + 1, 0).getDate();
+    const firstDayOfMonth = new Date(currentYear, adjustedMonth, 1).getDay();
     const startPadding = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
-    const prevMonthDaysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+    const prevMonthDaysInMonth = new Date(currentYear, adjustedMonth, 0).getDate();
     const emptyDays = Array.from({ length: startPadding }, (_, i) => prevMonthDaysInMonth - startPadding + i + 1);
 
     const days = availableDays.length > 0 ? availableDays : Array.from({ length: daysInMonth }, (_, i) => {
         const d = i + 1;
-        const dayOfWeek = new Date(currentYear, currentMonth, d).getDay();
+        const dayOfWeek = new Date(currentYear, adjustedMonth, d).getDay();
         let active = true;
         if (dayOfWeek === 0) active = false; // Domingos fechados
-        if (d < todayDate) active = false; // Dias passados bloqueados
+        if (currentMonthOffset === 0 && d < todayDate) active = false; // Dias passados bloqueados apenas no mês atual
 
         return {
             day: d.toString(),
             active,
-            isDot: d === todayDate,
+            isDot: currentMonthOffset === 0 && d === todayDate,
             content: d.toString()
         };
     });
@@ -467,9 +469,9 @@ const Booking = () => {
                                 </div>
                                 <div className="calendar-panel">
                                     <div className="calendar-nav">
-                                        <button><span className="material-symbols-outlined">chevron_left</span></button>
+                                        <button onClick={() => setCurrentMonthOffset(prev => prev - 1)}><span className="material-symbols-outlined">chevron_left</span></button>
                                         <span>{`${currentMonthName} DE ${currentYear}`}</span>
-                                        <button><span className="material-symbols-outlined">chevron_right</span></button>
+                                        <button onClick={() => setCurrentMonthOffset(prev => prev + 1)}><span className="material-symbols-outlined">chevron_right</span></button>
                                     </div>
                                     <div className="calendar-weekdays">
                                         <span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span><span>DOM</span>

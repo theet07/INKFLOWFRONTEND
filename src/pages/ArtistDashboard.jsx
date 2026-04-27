@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashboardTab from '../components/dashboard/DashboardTab'
 import RequestsTab from '../components/dashboard/RequestsTab'
@@ -18,7 +18,7 @@ const ArtistDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const navigate = useNavigate()
 
-  const { token, loading } = useAuth()
+  const { token, loading, user } = useAuth()
 
   useEffect(() => {
     if (loading) return
@@ -71,9 +71,13 @@ const ArtistDashboard = () => {
   const [artistaHasNew, setArtistaHasNew] = useState(false)
   const [mensagensNaoLidas, setMensagensNaoLidas] = useState([])
   const [prevMsgCount, setPrevMsgCount] = useState(0)
+  const audioContextRef = useRef(null)
 
   const tocarBeep = () => {
-    const ctx = new AudioContext()
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContext()
+    }
+    const ctx = audioContextRef.current
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
     osc.connect(gain)
@@ -88,8 +92,7 @@ const ArtistDashboard = () => {
   useEffect(() => {
     const loadNotifs = async () => {
       try {
-        const stored = JSON.parse(localStorage.getItem('user') || '{}')
-        const artistaId = stored.artistaId || stored.id
+        const artistaId = user?.artistaId || user?.id
         if (!artistaId) return
         const res = await agendamentoService.getByArtista(artistaId)
         const all = Array.isArray(res.data) ? res.data : []
@@ -128,7 +131,7 @@ const ArtistDashboard = () => {
     }, 10000)
 
     return () => clearInterval(interval)
-  }, [token])
+  }, [token, user])
 
   useEffect(() => {
     const handleResize = () => {
@@ -316,7 +319,7 @@ const ArtistDashboard = () => {
           </div>
           <div className="ad-user-info">
             <div className="ad-user-text">
-              <p className="ad-user-name">{JSON.parse(localStorage.getItem('user') || '{}').nome || JSON.parse(localStorage.getItem('user') || '{}').fullName || 'Artista'}</p>
+              <p className="ad-user-name">{user?.nome || user?.fullName || 'Artista'}</p>
               <p className="ad-user-role">Artista</p>
             </div>
             <button className="ad-icon-btn" onClick={handleLogout} title="Sair">

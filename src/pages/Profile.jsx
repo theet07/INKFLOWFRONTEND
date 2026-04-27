@@ -212,7 +212,8 @@ const Profile = () => {
           delete updatedUser.fotoUrl
           localStorage.setItem('user', JSON.stringify(updatedUser))
           showToast('Foto de perfil removida', 'check_circle')
-          setTimeout(() => window.location.reload(), 500)
+          // Forçar re-render atualizando o contexto
+          window.location.href = window.location.href
         } catch (err) {
           showToast('Erro ao remover foto', 'error')
         }
@@ -245,7 +246,8 @@ const Profile = () => {
         localStorage.setItem('user', JSON.stringify(updatedUser))
         
         showToast('Foto atualizada com sucesso!', 'check_circle')
-        setTimeout(() => window.location.reload(), 500)
+        // Forçar re-render atualizando o contexto
+        window.location.href = window.location.href
       } catch (err) {
         console.error('Erro de Upload:', err.response?.data || err.message || err);
         const errorMessage = err.response?.data?.message || err.response?.data || 'Erro de comunicação com o servidor ao carregar foto.'
@@ -296,7 +298,8 @@ const Profile = () => {
       localStorage.setItem('user', JSON.stringify(updatedUser))
       setEditProfile(prev => ({ ...prev, isOpen: false }))
       showToast('Perfil atualizado com sucesso!', 'check_circle')
-      setTimeout(() => window.location.reload(), 500)
+      // Forçar re-render atualizando o contexto
+      window.location.href = window.location.href
     } catch {
       showToast('Erro ao atualizar perfil.', 'error')
       setEditProfile(prev => ({ ...prev, saving: false }))
@@ -765,7 +768,7 @@ const Profile = () => {
                     onChange={e => setDeleteAccountModal(prev => ({ ...prev, password: e.target.value }))}
                     placeholder="Sua senha"
                     disabled={deleteAccountModal.deleting}
-                    onKeyPress={e => e.key === 'Enter' && handleDeleteAccount()}
+                    onKeyDown={e => e.key === 'Enter' && handleDeleteAccount()}
                     style={{ 
                       width: '100%', 
                       background: 'rgba(255,255,255,0.05)', 

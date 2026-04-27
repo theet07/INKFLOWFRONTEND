@@ -115,7 +115,7 @@ const Chatbot = () => {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && !loading && handleSend()}
+              onKeyDown={(e) => e.key === 'Enter' && !loading && handleSend()}
               placeholder="Digite sua mensagem..."
               disabled={loading}
             />

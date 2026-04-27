@@ -53,7 +53,23 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', jwt);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Chamar endpoint de logout no backend para invalidar token
+    if (token) {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'http://localhost:8080/api';
+        await fetch(`${API_URL}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (error) {
+        console.error('Erro ao fazer logout no backend:', error);
+      }
+    }
+    
     setUser(null);
     setUserType(null);
     setToken(null);
