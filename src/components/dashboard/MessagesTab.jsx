@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
+import { mensagemServiceExtended } from '../../services/inkflowApi'
 
 const formatTime = (dt) => {
   if (!dt) return ''
@@ -30,11 +29,11 @@ const MessagesTab = ({ showToast, mensagensNaoLidas = [], onMensagemLida }) => {
   // Carrega lista de conversas
   const carregarConversas = async () => {
     try {
-      const res = await fetch(`${API_BASE}/mensagens/conversas`, { headers })
-      const lista = await res.json() // [{ clienteId, nome, fotoUrl }]
+      const res = await mensagemServiceExtended.getConversas()
+      const lista = res.data // [{ clienteId, nome, fotoUrl }]
       const enriquecida = await Promise.all(lista.map(async (c) => {
-        const r = await fetch(`${API_BASE}/mensagens/conversa/${c.clienteId}`, { headers })
-        const msgs = await r.json()
+        const r = await mensagemServiceExtended.getConversaSimples(c.clienteId)
+        const msgs = r.data
         const ultima = msgs[msgs.length - 1]
         const naoLidas = msgs.filter(m => !m.lida && m.destinatarioId === artistaId).length
         return { ...c, ultimaMsg: ultima?.conteudo || '', naoLidas, createdAt: ultima?.createdAt }
@@ -48,14 +47,14 @@ const MessagesTab = ({ showToast, mensagensNaoLidas = [], onMensagemLida }) => {
   // Carrega histórico da conversa selecionada
   const carregarConversa = async (clienteId) => {
     try {
-      const res = await fetch(`${API_BASE}/mensagens/conversa/${clienteId}`, { headers })
-      const msgs = await res.json()
+      const res = await mensagemServiceExtended.getConversaSimples(clienteId)
+      const msgs = res.data
       setMensagens(msgs)
       if (msgs.length > 0) {
         ultimoTimestampRef.current = msgs[msgs.length - 1].createdAt
       }
       // Marcar como lidas apenas as mensagens deste remetente
-      await fetch(`${API_BASE}/mensagens/marcar-lidas-por-remetente/${clienteId}`, { method: 'PATCH', headers })
+      await mensagemServiceExtended.marcarLidasPorRemetente(clienteId)
       // Atualizar contador de não lidas na lista
       setConversas(prev => prev.map(c => c.clienteId === clienteId ? { ...c, naoLidas: 0 } : c))
       // Notificar o ArtistDashboard para atualizar o badge
@@ -68,15 +67,15 @@ const MessagesTab = ({ showToast, mensagensNaoLidas = [], onMensagemLida }) => {
     pararPolling()
     pollingRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`${API_BASE}/mensagens/novas?desde=${ultimoTimestampRef.current}`, { headers })
-        const novas = await res.json()
+        const res = await mensagemServiceExtended.getNovas(ultimoTimestampRef.current)
+        const novas = res.data
         if (novas.length > 0) {
           setMensagens(prev => [...prev, ...novas])
           ultimoTimestampRef.current = novas[novas.length - 1].createdAt
           // Marcar como lidas apenas as mensagens do cliente selecionado
           const novasDoCliente = novas.filter(m => m.remetenteId === clienteId && m.destinatarioId === artistaId)
           if (novasDoCliente.length > 0) {
-            await fetch(`${API_BASE}/mensagens/marcar-lidas-por-remetente/${clienteId}`, { method: 'PATCH', headers })
+            await mensagemServiceExtended.marcarLidasPorRemetente(clienteId)
             // Notificar o ArtistDashboard para atualizar o badge
             if (onMensagemLida) onMensagemLida(clienteId)
           }
@@ -119,21 +118,19 @@ const MessagesTab = ({ showToast, mensagensNaoLidas = [], onMensagemLida }) => {
     if (!input.trim() || !clienteSelecionado) return
     setEnviando(true)
     try {
-      const res = await fetch(`${API_BASE}/mensagens`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ remetenteId: artistaId, destinatarioId: clienteSelecionado, conteudo: input.trim() })
+      const res = await mensagemServiceExtended.enviar({ 
+        remetenteId: artistaId, 
+        destinatarioId: clienteSelecionado, 
+        conteudo: input.trim() 
       })
-      if (!res.ok) {
-        const err = await res.json()
-        showToast(err.message || 'Erro ao enviar mensagem', true)
-        return
-      }
-      const nova = await res.json()
+      const nova = res.data
       setMensagens(prev => [...prev, nova])
       ultimoTimestampRef.current = nova.createdAt
       setInput('')
-    } catch { showToast('Erro ao enviar mensagem', true) }
+    } catch (error) { 
+      const errorMsg = error.response?.data?.message || 'Erro ao enviar mensagem'
+      showToast(errorMsg, true) 
+    }
     finally { setEnviando(false) }
   }
 

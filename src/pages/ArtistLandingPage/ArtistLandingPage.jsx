@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { leadService } from '../../services/inkflowApi'
 import './ArtistLandingPage.css'
 
 const ArtistLandingPage = () => {
@@ -104,24 +105,13 @@ const ArtistLandingPage = () => {
     e.preventDefault()
     setLoading(true)
 
-    const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
-
     try {
-      const res = await fetch(`${API_URL}/leads/artista`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-      const data = await res.json()
-      
-      if (!res.ok) {
-        throw new Error(data.error || 'Erro ao cadastrar')
-      }
-      
+      await leadService.criarLeadArtista(formData)
       setSubmitSuccess(true)
     } catch (err) {
       console.error('Erro ao cadastrar lead:', err)
-      showToast(err.message || 'Erro ao cadastrar. Tente novamente.', true)
+      const errorMsg = err.response?.data?.error || 'Erro ao cadastrar. Tente novamente.'
+      showToast(errorMsg, true)
     } finally {
       setLoading(false)
     }

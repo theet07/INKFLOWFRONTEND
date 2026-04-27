@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { chatService } from '../services/inkflowApi'
 import ReactMarkdown from 'react-markdown'
-
-const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
 
 const Chatbot = () => {
   const navigate = useNavigate()
@@ -38,29 +37,19 @@ const Chatbot = () => {
 
     try {
       const token = localStorage.getItem('token')
-      const res = await fetch(`${API_URL}/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({
-          messages: updatedMessages,
-          sessionId: 'session_' + Date.now()
-        })
+      const res = await chatService.sendMessage({
+        messages: updatedMessages,
+        sessionId: 'session_' + Date.now()
       })
 
-      if (res.status === 429) {
-        setMessages(prev => [...prev, { role: 'model', content: 'Muitas mensagens em pouco tempo. Aguarde um momento.' }])
-        return
-      }
-
-      if (!res.ok) throw new Error('Erro na resposta')
-
-      const data = await res.json()
+      const data = res.data
       setMessages(prev => [...prev, { role: 'model', content: data.response }])
-    } catch {
-      setMessages(prev => [...prev, { role: 'model', content: 'Desculpe, ocorreu um erro. Tente novamente em instantes.' }])
+    } catch (error) {
+      if (error.response?.status === 429) {
+        setMessages(prev => [...prev, { role: 'model', content: 'Muitas mensagens em pouco tempo. Aguarde um momento.' }])
+      } else {
+        setMessages(prev => [...prev, { role: 'model', content: 'Desculpe, ocorreu um erro. Tente novamente em instantes.' }])
+      }
     } finally {
       setLoading(false)
     }

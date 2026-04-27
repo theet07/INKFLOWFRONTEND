@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { contatoService } from '../services/inkflowApi'
 import './Contact.css'
 
 const Contact = () => {
@@ -42,21 +43,14 @@ const Contact = () => {
     e.preventDefault()
     setLoading(true)
 
-    const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
-
     try {
-      const res = await fetch(`${API_URL}/contato`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Erro ao enviar')
+      await contatoService.enviar(formData)
       showToast('Mensagem enviada com sucesso!')
       setFormData({ nome: '', email: '', telefone: '', mensagem: '' })
     } catch (err) {
       console.error('Erro ao enviar mensagem:', err)
-      showToast('Erro ao enviar mensagem. Tente novamente.', true)
+      const errorMsg = err.response?.data?.error || 'Erro ao enviar mensagem. Tente novamente.'
+      showToast(errorMsg, true)
     } finally {
       setLoading(false)
     }

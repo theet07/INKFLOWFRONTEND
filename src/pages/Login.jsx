@@ -1,13 +1,9 @@
 import { useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { clienteService } from '../services/inkflowApi'
+import { clienteService, authService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
 import './Login.css'
-
-const API_URL = import.meta.env.VITE_API_URL
-  ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
-  : 'https://inkflowbackend-4w1g.onrender.com'
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
@@ -111,19 +107,15 @@ const Login = () => {
         }
       } else {
         // Fase 1: Solicitar Código de Verificação
-        const response = await fetch(`${API_URL}/api/clientes/solicitar-codigo`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: formData.email.split('@')[0],
-            email: formData.email,
-            password: formData.password,
-            fullName: formData.fullName,
-            telefone: formData.telefone
-          })
+        const response = await authService.solicitarCodigo({
+          username: formData.email.split('@')[0],
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName,
+          telefone: formData.telefone
         })
 
-        if (response.ok) {
+        if (response.status === 200 || response.status === 201) {
           showToast('Código de verificação enviado para seu e-mail!', 'success')
           setRegisteredEmail(formData.email)
           setIsVerifying(true)
@@ -157,16 +149,12 @@ const Login = () => {
 
     setIsLoading(true)
     try {
-      const response = await fetch(`${API_URL}/api/clientes/verificar-codigo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: registeredEmail, 
-          codigo: code 
-        })
+      const response = await authService.verificarCodigo({ 
+        email: registeredEmail, 
+        codigo: code 
       })
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         showToast('Conta Ativada com Sucesso! Faça login para continuar.', 'success')
         setIsLogin(true)
         setIsVerifying(false)
@@ -176,7 +164,11 @@ const Login = () => {
         showToast('Código Inválido ou Expirado.', 'error')
       }
     } catch (error) {
-      showToast('Falha na verificação. Tente novamente.', 'error')
+      if (error.response?.status === 429) {
+        setOtpError('Código bloqueado por excesso de tentativas.')
+      } else {
+        showToast('Falha na verificação. Tente novamente.', 'error')
+      }
     } finally {
       setIsLoading(false)
     }

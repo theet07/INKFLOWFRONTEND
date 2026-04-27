@@ -104,4 +104,43 @@ export const adminService = {
 
 export const testConnection = () => api.get('/api/health', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') });
 
+// Serviços de Mensagens (sem /v1)
+export const mensagemServiceExtended = {
+  getNaoLidas: () => api.get('/mensagens/nao-lidas', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  marcarTodasLidas: () => api.patch('/mensagens/marcar-todas-lidas', {}, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getConversa: (artistaId, clienteId) => api.get(`/mensagens/conversa/${artistaId}/${clienteId}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getConversaSimples: (outroUsuarioId) => api.get(`/mensagens/conversa/${outroUsuarioId}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  marcarLidasPorRemetente: (remetenteId) => api.patch(`/mensagens/marcar-lidas-por-remetente/${remetenteId}`, {}, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getNovas: (desde) => api.get(`/mensagens/novas?desde=${desde}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  enviar: (data) => api.post('/mensagens', data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  marcarLida: (id) => api.patch(`/mensagens/${id}/lida`, {}, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getConversas: () => api.get('/mensagens/conversas', { baseURL: API_BASE_URL.replace('/v1', '') }),
+};
+
+// Serviços de Chatbot
+export const chatService = {
+  sendMessage: (message) => api.post('/chat', { message }, { baseURL: API_BASE_URL.replace('/v1', '') }),
+};
+
+// Serviços de Contato
+export const contatoService = {
+  enviar: (data) => api.post('/contato', data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+};
+
+// Serviços de Leads
+export const leadService = {
+  criarLeadArtista: (data) => api.post('/leads/artista', data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+};
+
+// Serviços de Autenticação (sem /v1)
+export const authService = {
+  solicitarCodigo: (data) => api.post('/clientes/solicitar-codigo', data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  verificarCodigo: (data) => api.post('/clientes/verificar-codigo', data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getMinhaContaCliente: () => api.get('/clientes/minha-conta', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  deleteMinhaContaCliente: (password) => api.delete('/clientes/minha-conta', { 
+    data: { password }, 
+    baseURL: API_BASE_URL.replace('/v1', '') 
+  }),
+};
+
 export default api;

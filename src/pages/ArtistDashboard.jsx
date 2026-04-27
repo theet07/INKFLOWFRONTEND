@@ -6,7 +6,7 @@ import ScheduleTab from '../components/dashboard/ScheduleTab'
 import PortfolioTab from '../components/dashboard/PortfolioTab'
 import SettingsTab from '../components/dashboard/SettingsTab'
 import MessagesTab from '../components/dashboard/MessagesTab'
-import { agendamentoService } from '../services/inkflowApi'
+import { agendamentoService, mensagemServiceExtended } from '../services/inkflowApi'
 import { useAuth } from '../contexts/AuthContext'
 import './ArtistDashboard.css'
 
@@ -72,8 +72,6 @@ const ArtistDashboard = () => {
   const [mensagensNaoLidas, setMensagensNaoLidas] = useState([])
   const [prevMsgCount, setPrevMsgCount] = useState(0)
 
-  const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
-
   const tocarBeep = () => {
     const ctx = new AudioContext()
     const osc = ctx.createOscillator()
@@ -106,12 +104,9 @@ const ArtistDashboard = () => {
 
     const loadMensagens = () => {
       if (!token) return
-      fetch(`${API_URL}/mensagens/nao-lidas`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then(r => r.json())
-        .then(data => {
-          const novasMsgs = Array.isArray(data) ? data : []
+      mensagemServiceExtended.getNaoLidas()
+        .then(res => {
+          const novasMsgs = Array.isArray(res.data) ? res.data : []
           setPrevMsgCount(prev => {
             if (novasMsgs.length > prev && prev > 0) {
               const somAtivo = localStorage.getItem('notif_som_ativo') === 'true'
@@ -133,7 +128,7 @@ const ArtistDashboard = () => {
     }, 10000)
 
     return () => clearInterval(interval)
-  }, [token, API_URL])
+  }, [token])
 
   useEffect(() => {
     const handleResize = () => {

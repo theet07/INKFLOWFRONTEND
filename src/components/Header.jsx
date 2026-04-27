@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { agendamentoService } from '../services/inkflowApi'
+import { agendamentoService, mensagemServiceExtended } from '../services/inkflowApi'
 import { useAuth } from '../contexts/AuthContext'
 import './Header.css'
 
@@ -15,8 +15,6 @@ const Header = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, userType, logout, token } = useAuth()
-
-  const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
 
   const tocarBeep = () => {
     const ctx = new AudioContext()
@@ -48,12 +46,9 @@ const Header = () => {
         .catch(() => {})
 
       // Fetch mensagens não lidas
-      fetch(`${API_URL}/mensagens/nao-lidas`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then(r => r.json())
-        .then(data => {
-          const novasMsgs = data || []
+      mensagemServiceExtended.getNaoLidas()
+        .then(res => {
+          const novasMsgs = res.data || []
           setPrevMsgCount(prev => {
             if (novasMsgs.length > prev && prev > 0) {
               const somAtivo = localStorage.getItem('notif_som_ativo') === 'true'
@@ -70,7 +65,7 @@ const Header = () => {
 
     const interval = setInterval(fetchNotifs, 10000) // Repete a cada 10s
     return () => clearInterval(interval) // Limpa ao desmontar
-  }, [user, userType, token, API_URL])
+  }, [user, userType, token])
 
   useEffect(() => {
     if (agendamentos.length === 0) return
@@ -91,10 +86,7 @@ const Header = () => {
       localStorage.setItem('notif_cliente_lastSeen', new Date().toISOString())
       setClienteHasNew(false)
       setMensagensNaoLidas([])
-      fetch(`${API_URL}/mensagens/marcar-todas-lidas`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
-      }).catch(() => {})
+      mensagemServiceExtended.marcarTodasLidas().catch(() => {})
     }
   }
 

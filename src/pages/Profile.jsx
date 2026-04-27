@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { agendamentoService, clienteService } from '../services/inkflowApi'
+import { agendamentoService, clienteService, mensagemServiceExtended, authService } from '../services/inkflowApi'
 import { useAuth } from '../contexts/AuthContext'
 import './Profile.css'
 
@@ -262,20 +262,7 @@ const Profile = () => {
     }
     setDeleteAccountModal(prev => ({ ...prev, deleting: true }))
     try {
-      const API_URL = import.meta.env.VITE_API_URL
-        ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
-        : 'https://inkflowbackend-4w1g.onrender.com'
-      const response = await fetch(`${API_URL}/api/clientes/minha-conta`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ password: deleteAccountModal.password })
-      })
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        showToast(data.message || 'Senha incorreta', 'error')
-        setDeleteAccountModal(prev => ({ ...prev, deleting: false }))
-        return
-      }
+      await authService.deleteMinhaContaCliente(deleteAccountModal.password)
       localStorage.removeItem('user')
       localStorage.removeItem('token')
       localStorage.removeItem('userType')
@@ -283,7 +270,8 @@ const Profile = () => {
       setTimeout(() => navigate('/'), 1500)
     } catch (error) {
       console.error('Erro ao excluir conta:', error)
-      showToast('Erro ao excluir conta. Tente novamente.', 'error')
+      const errorMsg = error.response?.data?.message || 'Senha incorreta'
+      showToast(errorMsg, 'error')
       setDeleteAccountModal(prev => ({ ...prev, deleting: false }))
     }
   }
@@ -329,30 +317,24 @@ const Profile = () => {
     }
   }
 
-  const API_BASE = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'https://inkflowbackend-4w1g.onrender.com/api'
-
   const abrirChat = async (artista) => {
     setArtistaDoChat(artista)
     setChatAberto(true)
     setMensagens([])
     try {
-      const res = await fetch(`${API_BASE}/mensagens/conversa/${artista.id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      const msgs = await res.json()
+      const res = await mensagemServiceExtended.getConversaSimples(artista.id)
+      const msgs = res.data
       setMensagens(Array.isArray(msgs) ? msgs : [])
       if (msgs.length > 0) ultimoTimestampRef.current = msgs[msgs.length - 1].createdAt
       msgs.filter(m => !m.lida && m.destinatarioId === user?.id)
-          .forEach(m => fetch(`${API_BASE}/mensagens/${m.id}/lida`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` } }))
+          .forEach(m => mensagemServiceExtended.marcarLida(m.id).catch(() => {}))
     } catch { }
     // Iniciar polling
     if (pollingRef.current) clearInterval(pollingRef.current)
     pollingRef.current = setInterval(async () => {
       try {
-        const r = await fetch(`${API_BASE}/mensagens/novas?desde=${ultimoTimestampRef.current}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        const novas = await r.json()
+        const r = await mensagemServiceExtended.getNovas(ultimoTimestampRef.current)
+        const novas = r.data
         if (novas.length > 0) {
           setMensagens(prev => [...prev, ...novas])
           ultimoTimestampRef.current = novas[novas.length - 1].createdAt
@@ -372,17 +354,19 @@ const Profile = () => {
     if (!inputMsg.trim() || !artistaDoChat) return
     setLoadingMsg(true)
     try {
-      const res = await fetch(`${API_BASE}/mensagens`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ remetenteId: user?.id, destinatarioId: artistaDoChat.id, conteudo: inputMsg.trim() })
+      const res = await mensagemServiceExtended.enviar({ 
+        remetenteId: user?.id, 
+        destinatarioId: artistaDoChat.id, 
+        conteudo: inputMsg.trim() 
       })
-      if (!res.ok) { const e = await res.json(); showToast(e.message || 'Erro ao enviar', 'error'); return }
-      const nova = await res.json()
+      const nova = res.data
       setMensagens(prev => [...prev, nova])
       ultimoTimestampRef.current = nova.createdAt
       setInputMsg('')
-    } catch { showToast('Erro ao enviar mensagem', 'error') }
+    } catch (error) { 
+      const errorMsg = error.response?.data?.message || 'Erro ao enviar mensagem'
+      showToast(errorMsg, 'error') 
+    }
     finally { setLoadingMsg(false) }
   }
 
