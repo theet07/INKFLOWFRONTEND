@@ -220,8 +220,8 @@ const ArtistLandingPage = () => {
                 <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>1. Profile</h3>
                 <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Seu cartão de visitas digital brutalista. Links, regras do estúdio e disponibilidade clara e direta.</p>
               </div>
-              <div style={{ height: '100px', background: 'var(--surface-color)', borderRadius: '4px', marginTop: '2rem', border: '1px solid var(--outline-variant)', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', right: '1rem', height: '8px', background: 'rgba(255,141,140,0.1)', borderRadius: '4px' }}></div>
+              <div style={{ height: '100px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden' }}>
+                <img src="/assets/Para_Tatuadores_Ref/Configurações.webp" alt="Configurações" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             </div>
 
@@ -233,9 +233,8 @@ const ArtistLandingPage = () => {
                 <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>2. Portfolio</h3>
                 <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Galeria de alta resolução categorizada. Permita que clientes encontrem a inspiração perfeita.</p>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', height: '100px', marginTop: '2rem' }}>
-                <div style={{ background: '#222', borderRadius: '4px' }}></div>
-                <div style={{ background: '#222', borderRadius: '4px' }}></div>
+              <div style={{ height: '100px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden' }}>
+                <img src="/assets/Para_Tatuadores_Ref/Portfólio.webp" alt="Portfólio" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             </div>
 
@@ -247,9 +246,8 @@ const ArtistLandingPage = () => {
                 <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>3. Requests</h3>
                 <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Formulários de orçamento precisos. Tamanho, local, referência. Chega de "quanto custa uma tattoo?".</p>
               </div>
-              <div style={{ height: '100px', background: 'var(--surface-color)', borderRadius: '4px', marginTop: '2rem', border: '1px solid var(--outline-variant)', padding: '1rem' }}>
-                 <div style={{ height: '8px', width: '40%', background: 'rgba(255,141,140,0.2)', marginBottom: '0.5rem' }}></div>
-                 <div style={{ height: '8px', width: '70%', background: 'rgba(255,141,140,0.1)' }}></div>
+              <div style={{ height: '100px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden' }}>
+                <img src="/assets/Para_Tatuadores_Ref/Painel.webp" alt="Painel" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             </div>
           </div>
@@ -271,8 +269,8 @@ const ArtistLandingPage = () => {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div className="alp-card reveal-on-scroll" ref={addToRefs} style={{ minHeight: 'auto', flexDirection: 'row', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-                <div style={{ width: '300px', height: '180px', background: 'var(--surface-highest)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '4rem', color: 'rgba(255,141,140,0.3)' }}>event_upcoming</span>
+                <div style={{ width: '300px', height: '180px', background: 'var(--surface-highest)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <img src="/assets/Para_Tatuadores_Ref/Agenda.webp" alt="Agenda Digital" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontSize: '0.75rem', color: 'var(--primary-red)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>01 / Agenda</p>
@@ -282,8 +280,8 @@ const ArtistLandingPage = () => {
               </div>
 
               <div className="alp-card reveal-on-scroll" ref={addToRefs} style={{ minHeight: 'auto', flexDirection: 'row-reverse', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-                <div style={{ width: '300px', height: '180px', background: 'var(--surface-highest)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '4rem', color: 'rgba(255,141,140,0.3)' }}>rule</span>
+                <div style={{ width: '300px', height: '180px', background: 'var(--surface-highest)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <img src="/assets/Para_Tatuadores_Ref/Solicitações.webp" alt="Gerenciamento de Status" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div style={{ flex: 1, textAlign: 'right' }}>
                   <p style={{ fontSize: '0.75rem', color: 'var(--primary-red)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>02 / Workflow</p>
@@ -482,7 +480,7 @@ const ArtistLandingPage = () => {
             </button>
             <div className="alp-video-wrapper">
               <iframe 
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" 
+                src="https://www.youtube.com/embed/y6RoOLqiyGQ?autoplay=1" 
                 title="InkFlow Demo" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowFullScreen
