@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../services/inkflowApi';
 
 const AuthContext = createContext();
 
@@ -57,12 +58,9 @@ export const AuthProvider = ({ children }) => {
     // Chamar endpoint de logout no backend para invalidar token
     if (token) {
       try {
-        const API_URL = import.meta.env.VITE_API_URL?.replace('/v1', '') || 'http://localhost:8080/api';
-        await fetch(`${API_URL}/auth/logout`, {
-          method: 'POST',
+        await api.post('/auth/logout', {}, {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Authorization': `Bearer ${token}`
           }
         });
       } catch (error) {
