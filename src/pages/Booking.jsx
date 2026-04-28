@@ -110,17 +110,25 @@ const Booking = () => {
         }
     }, [location.search, artistsOptions])
 
-    // Efeito para carregar disponibilidade do artista
+    // Calculo de mes/ano com base no offset
+    const brTime = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+    const rawMonth = brTime.getMonth() + currentMonthOffset;
+    const currentYear = brTime.getFullYear() + Math.floor(rawMonth / 12);
+    const adjustedMonth = ((rawMonth % 12) + 12) % 12;
+    const todayDate = currentMonthOffset === 0 ? brTime.getDate() : 0;
+    const currentHourBr = brTime.getHours();
+
+    // Efeito para carregar disponibilidade do artista (recarrega quando muda mes)
     useEffect(() => {
         const artistaSelecionado = artistsOptions.find(a => a?.name === bookingState.artist)
         if (artistaSelecionado) {
             setAvailableDays([]) // Limpa dados antigos
-            setBookingState(prev => ({ ...prev, day: '', time: '' })) // Reseta seleção
+            setBookingState(prev => ({ ...prev, day: '', time: '' })) // Reseta selecao
             setIsLoadingAvailability(true)
-            artistaService.getAvailability(artistaSelecionado.id)
+            artistaService.getAvailability(artistaSelecionado.id, currentYear, adjustedMonth + 1)
                 .then(res => {
                     const mappedDays = (res.data || []).map(d => ({
-                        day: d.data.split('-')[2].replace(/^0/, ''),
+                        day: parseInt(d.data.split('-')[2], 10).toString(),
                         fullDate: d.data,
                         active: d.disponivel
                     }))
@@ -129,7 +137,7 @@ const Booking = () => {
                 .catch(() => {})
                 .finally(() => setIsLoadingAvailability(false))
         }
-    }, [bookingState.artist, artistsOptions])
+    }, [bookingState.artist, artistsOptions, currentMonthOffset])
 
     // Efeito para carregar slots do dia selecionado
     useEffect(() => {
@@ -152,13 +160,6 @@ const Booking = () => {
         }
     }, [bookingState.day, bookingState.artist, artistsOptions, availableDays])
 
-    const brTime = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
-    const currentMonth = brTime.getMonth() + currentMonthOffset;
-    const currentYear = brTime.getFullYear() + Math.floor(currentMonth / 12);
-    const adjustedMonth = ((currentMonth % 12) + 12) % 12;
-    const todayDate = currentMonthOffset === 0 ? brTime.getDate() : 0;
-    const currentHourBr = brTime.getHours();
-
     const monthNames = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
     const currentMonthName = monthNames[adjustedMonth];
 
@@ -169,7 +170,13 @@ const Booking = () => {
     const prevMonthDaysInMonth = new Date(currentYear, adjustedMonth, 0).getDate();
     const emptyDays = Array.from({ length: startPadding }, (_, i) => prevMonthDaysInMonth - startPadding + i + 1);
 
-    const days = availableDays.length > 0 ? availableDays : Array.from({ length: daysInMonth }, (_, i) => {
+    const days = availableDays.length > 0 ? availableDays.map(d => {
+        // Desabilita dias passados mesmo nos dados do backend
+        let active = d.active;
+        const dayNum = parseInt(d.day, 10);
+        if (currentMonthOffset === 0 && dayNum < todayDate) active = false;
+        return { ...d, active, isDot: currentMonthOffset === 0 && dayNum === todayDate };
+    }) : Array.from({ length: daysInMonth }, (_, i) => {
         const d = i + 1;
         const dayOfWeek = new Date(currentYear, adjustedMonth, d).getDay();
         let active = true;
@@ -469,7 +476,11 @@ const Booking = () => {
                                 </div>
                                 <div className="calendar-panel">
                                     <div className="calendar-nav">
-                                        <button onClick={() => setCurrentMonthOffset(prev => prev - 1)}><span className="material-symbols-outlined">chevron_left</span></button>
+                                        <button 
+                                            onClick={() => setCurrentMonthOffset(prev => prev - 1)} 
+                                            disabled={currentMonthOffset <= 0}
+                                            style={currentMonthOffset <= 0 ? { opacity: 0.2, cursor: 'not-allowed' } : {}}
+                                        ><span className="material-symbols-outlined">chevron_left</span></button>
                                         <span>{`${currentMonthName} DE ${currentYear}`}</span>
                                         <button onClick={() => setCurrentMonthOffset(prev => prev + 1)}><span className="material-symbols-outlined">chevron_right</span></button>
                                     </div>
