@@ -128,6 +128,32 @@ const Profile = () => {
     }
   }, [user, authLoading, navigate])
 
+  const abrirChat = async (artista) => {
+    setArtistaDoChat(artista)
+    setChatAberto(true)
+    setMensagens([])
+    try {
+      const res = await mensagemServiceExtended.getConversaSimples(artista.id)
+      const msgs = res.data
+      setMensagens(Array.isArray(msgs) ? msgs : [])
+      if (msgs.length > 0) ultimoTimestampRef.current = msgs[msgs.length - 1].createdAt
+      msgs.filter(m => !m.lida && m.destinatarioId === user?.id)
+          .forEach(m => mensagemServiceExtended.marcarLida(m.id).catch(() => {}))
+    } catch { }
+    // Iniciar polling
+    if (pollingRef.current) clearInterval(pollingRef.current)
+    pollingRef.current = setInterval(async () => {
+      try {
+        const r = await mensagemServiceExtended.getNovas(ultimoTimestampRef.current)
+        const novas = r.data
+        if (novas.length > 0) {
+          setMensagens(prev => [...prev, ...novas])
+          ultimoTimestampRef.current = novas[novas.length - 1].createdAt
+        }
+      } catch { }
+    }, 5000)
+  }
+
   // Abrir chat automaticamente ao navegar com state
   useEffect(() => {
     if (user && location.state?.abrirChatComId && artistasUnicos.length > 0) {
@@ -317,32 +343,6 @@ const Profile = () => {
       const errorMsg = err.response?.data?.message || 'Erro ao atualizar sessão. Verifique sua conexão.'
       showToast(errorMsg, 'error')
     }
-  }
-
-  const abrirChat = async (artista) => {
-    setArtistaDoChat(artista)
-    setChatAberto(true)
-    setMensagens([])
-    try {
-      const res = await mensagemServiceExtended.getConversaSimples(artista.id)
-      const msgs = res.data
-      setMensagens(Array.isArray(msgs) ? msgs : [])
-      if (msgs.length > 0) ultimoTimestampRef.current = msgs[msgs.length - 1].createdAt
-      msgs.filter(m => !m.lida && m.destinatarioId === user?.id)
-          .forEach(m => mensagemServiceExtended.marcarLida(m.id).catch(() => {}))
-    } catch { }
-    // Iniciar polling
-    if (pollingRef.current) clearInterval(pollingRef.current)
-    pollingRef.current = setInterval(async () => {
-      try {
-        const r = await mensagemServiceExtended.getNovas(ultimoTimestampRef.current)
-        const novas = r.data
-        if (novas.length > 0) {
-          setMensagens(prev => [...prev, ...novas])
-          ultimoTimestampRef.current = novas[novas.length - 1].createdAt
-        }
-      } catch { }
-    }, 5000)
   }
 
   const fecharChat = () => {
