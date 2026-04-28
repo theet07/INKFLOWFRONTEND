@@ -100,15 +100,20 @@ const RequestsTab = ({ showToast, openDrawer, refreshKey }) => {
 
   const filteredRows = filter === 'all' ? agendamentos : agendamentos.filter(a => a.status === filter)
 
+  const statusMessages = {
+    'CONFIRMADO': { msg: 'confirmada', error: false },
+    'EM_ANDAMENTO': { msg: 'iniciada', error: false },
+    'REALIZADO': { msg: 'concluída', error: false },
+    'FINALIZADO': { msg: 'finalizada', error: false },
+    'CANCELADO': { msg: 'cancelada', error: true },
+  }
+
   const handleStatusUpdate = async (agId, novoStatus, clienteNome) => {
     try {
       await agendamentoService.updateStatus(agId, { status: novoStatus })
       setAgendamentos(prev => prev.map(a => a.id === agId ? { ...a, status: novoStatus } : a))
-      if (novoStatus === 'CONFIRMADO') {
-        showToast(`Solicitação de ${clienteNome} confirmada!`)
-      } else {
-        showToast(`Solicitação de ${clienteNome} recusada.`, true)
-      }
+      const info = statusMessages[novoStatus] || { msg: 'atualizada', error: false }
+      showToast(`Sessão de ${clienteNome} ${info.msg}!`, info.error)
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data || 'Erro ao atualizar status'
       showToast(typeof msg === 'string' ? msg : 'Erro ao atualizar status', true)
