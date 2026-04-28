@@ -52,7 +52,7 @@ const getNextStatus = (current) => {
   return flow[current] || null
 }
 
-const RequestsTab = ({ showToast, openDrawer }) => {
+const RequestsTab = ({ showToast, openDrawer, refreshKey }) => {
   const [filter, setFilter] = useState('all')
   const [agendamentos, setAgendamentos] = useState([])
   const [loading, setLoading] = useState(true)
@@ -86,7 +86,7 @@ const RequestsTab = ({ showToast, openDrawer }) => {
       }
     }
     fetchData()
-  }, [])
+  }, [refreshKey])
 
   const getClientName = (ag) => ag?.cliente?.fullName || ag?.cliente?.nome || 'Cliente'
   const getClientEmail = (ag) => ag?.cliente?.email || ''

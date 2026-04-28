@@ -16,6 +16,7 @@ const ArtistDashboard = () => {
   const [drawerAgendamento, setDrawerAgendamento] = useState(null)
   const [toasts, setToasts] = useState([])
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [refreshKey, setRefreshKey] = useState(0)
   const navigate = useNavigate()
 
   const { token, loading, user } = useAuth()
@@ -192,6 +193,7 @@ const ArtistDashboard = () => {
       const msg = err.response?.data?.message || err.response?.data || 'Erro ao atualizar status'
       showToast(typeof msg === 'string' ? msg : 'Erro ao atualizar status', true)
     }
+    setRefreshKey(k => k + 1)
     closeDrawer()
   }
 
@@ -219,11 +221,11 @@ const ArtistDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardTab showToast={showToast} openDrawer={openDrawer} onNewArt={() => switchTab('portfolio')} />
+        return <DashboardTab showToast={showToast} openDrawer={openDrawer} onNewArt={() => switchTab('portfolio')} refreshKey={refreshKey} />
       case 'requests':
-        return <RequestsTab showToast={showToast} openDrawer={openDrawer} />
+        return <RequestsTab showToast={showToast} openDrawer={openDrawer} refreshKey={refreshKey} />
       case 'schedule':
-        return <ScheduleTab showToast={showToast} openDrawer={openDrawer} viewMode={viewMode} />
+        return <ScheduleTab showToast={showToast} openDrawer={openDrawer} viewMode={viewMode} refreshKey={refreshKey} />
       case 'messages':
         return <MessagesTab 
           showToast={showToast} 

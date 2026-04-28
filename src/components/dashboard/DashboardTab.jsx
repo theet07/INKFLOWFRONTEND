@@ -60,7 +60,7 @@ const ClientAvatar = ({ ag, size = '0.9rem' }) => {
   )
 }
 
-const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
+const DashboardTab = ({ showToast, openDrawer, onNewArt, refreshKey }) => {
   const [agendamentos, setAgendamentos] = useState([])
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(null)
@@ -93,7 +93,7 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt }) => {
       }
     }
     fetchData()
-  }, [])
+  }, [refreshKey])
 
   const handleStatusUpdate = async (agId, novoStatus, clienteNome) => {
     try {

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { agendamentoService } from '../../services/inkflowApi'
 import { useAuth } from '../../contexts/AuthContext'
 
-const ScheduleTab = ({ showToast, openDrawer, viewMode: viewModeProp }) => {
+const ScheduleTab = ({ showToast, openDrawer, viewMode: viewModeProp, refreshKey }) => {
   const { user } = useAuth()
   const [selectedDay, setSelectedDay] = useState(null)
   const [agendamentos, setAgendamentos] = useState([])
@@ -38,7 +38,7 @@ const ScheduleTab = ({ showToast, openDrawer, viewMode: viewModeProp }) => {
       })
       .catch(() => showToast('Erro ao carregar agenda.', true))
       .finally(() => setLoading(false))
-  }, [user])
+  }, [user, refreshKey])
 
   // ── Datas base ────────────────────────────────────────────────
   const hoje = new Date()
