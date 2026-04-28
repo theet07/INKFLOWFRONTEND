@@ -276,7 +276,7 @@ const Booking = () => {
                 imagemUrl = await uploadImagemReferencia(formData.imagemReferenciaFile)
             }
 
-            const mm = (currentMonth + 1).toString().padStart(2, '0');
+            const mm = (adjustedMonth + 1).toString().padStart(2, '0');
             const formattedDate = `${currentYear}-${mm}-${bookingState.day.padStart(2, '0')}`;
             const isoTime = bookingState.time ? `${bookingState.time}:00` : '12:00:00';
             const dataHora = `${formattedDate}T${isoTime}`;
