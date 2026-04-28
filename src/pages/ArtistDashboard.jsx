@@ -178,12 +178,19 @@ const ArtistDashboard = () => {
       if (action === 'Declined') {
         await agendamentoService.updateStatus(drawerAgendamento.id, { status: 'CANCELADO' })
         showToast(`Solicitação de ${clientName} recusada.`, true)
-      } else {
+      } else if (action === 'Accepted') {
         await agendamentoService.updateStatus(drawerAgendamento.id, { status: 'CONFIRMADO' })
         showToast(`${clientName} agendado com sucesso!`)
+      } else if (action === 'StartSession') {
+        await agendamentoService.updateStatus(drawerAgendamento.id, { status: 'EM_ANDAMENTO' })
+        showToast(`Sessão de ${clientName} iniciada!`)
+      } else if (action === 'Complete') {
+        await agendamentoService.updateStatus(drawerAgendamento.id, { status: 'REALIZADO' })
+        showToast(`Sessão de ${clientName} concluída!`)
       }
     } catch (err) {
-      showToast('Erro ao atualizar status', true)
+      const msg = err.response?.data?.message || err.response?.data || 'Erro ao atualizar status'
+      showToast(typeof msg === 'string' ? msg : 'Erro ao atualizar status', true)
     }
     closeDrawer()
   }
@@ -444,7 +451,7 @@ const ArtistDashboard = () => {
                   ) : null}
                 </div>
               </div>
-              {drawerAgendamento?.status === 'AGENDADO' ? (
+              {(drawerAgendamento?.status === 'PENDENTE' || drawerAgendamento?.status === 'AGENDADO') ? (
                 <div className="ad-drawer-footer">
                   <button className="ad-drawer-btn-decline" onClick={() => handleDrawerAction('Declined')}>
                     Recusar
@@ -453,10 +460,25 @@ const ArtistDashboard = () => {
                     Aceitar e Agendar
                   </button>
                 </div>
+              ) : drawerAgendamento?.status === 'CONFIRMADO' ? (
+                <div className="ad-drawer-footer">
+                  <button className="ad-drawer-btn-decline" onClick={() => handleDrawerAction('Declined')}>
+                    Cancelar
+                  </button>
+                  <button className="ad-drawer-btn-accept" onClick={() => handleDrawerAction('StartSession')}>
+                    Iniciar Sessão
+                  </button>
+                </div>
+              ) : drawerAgendamento?.status === 'EM_ANDAMENTO' ? (
+                <div className="ad-drawer-footer">
+                  <button className="ad-drawer-btn-accept" style={{ width: '100%' }} onClick={() => handleDrawerAction('Complete')}>
+                    Concluir Sessão
+                  </button>
+                </div>
               ) : (
                 <div className="ad-drawer-footer">
                   <div style={{ width: '100%', textAlign: 'center', padding: '0.5rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    Status: {drawerAgendamento?.status || '—'}
+                    {drawerAgendamento?.status === 'CANCELADO' ? '✕ Cancelado' : drawerAgendamento?.status === 'REALIZADO' ? '✓ Sessão Concluída' : drawerAgendamento?.status === 'FINALIZADO' ? '✓ Finalizado' : `Status: ${drawerAgendamento?.status || '—'}`}
                   </div>
                 </div>
               )}
