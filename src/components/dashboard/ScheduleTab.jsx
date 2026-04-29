@@ -275,7 +275,7 @@ const ScheduleTab = ({ showToast, openDrawer, viewMode: viewModeProp, refreshKey
             </p>
           ) : (
             sessoesDoDia.map((ag) => {
-              const hora = new Date(ag.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+              const hora = new Date(ag.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })
               const isPrimary = ag.status === 'CONFIRMADO'
               return (
                 <div

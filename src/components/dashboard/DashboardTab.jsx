@@ -13,7 +13,7 @@ const formatDate = (dataHora) => {
 const formatTime = (dataHora) => {
   if (!dataHora) return ''
   const d = new Date(dataHora)
-  return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })
 }
 
 const getTimePeriod = (dataHora) => {

@@ -41,7 +41,7 @@ const formatDate = (dataHora) => {
 const formatTime = (dataHora) => {
   if (!dataHora) return ''
   const d = new Date(dataHora)
-  return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })
 }
 
 const getFallbackImage = (servico) => {
@@ -900,7 +900,7 @@ const Profile = () => {
                   <div key={m.id} style={{ display: 'flex', justifyContent: isCliente ? 'flex-end' : 'flex-start' }}>
                     <div style={{ maxWidth: '70%', padding: '10px 14px', borderRadius: isCliente ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isCliente ? '#e63946' : 'rgba(255,255,255,0.08)', color: '#fff', fontSize: '0.875rem', lineHeight: 1.5 }}>
                       <p style={{ margin: 0 }}>{m.conteudo}</p>
-                      <p style={{ margin: '4px 0 0', fontSize: '0.65rem', opacity: 0.6, textAlign: 'right' }}>{new Date(m.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.65rem', opacity: 0.6, textAlign: 'right' }}>{new Date(m.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}</p>
                     </div>
                   </div>
                 )
@@ -1000,7 +1000,7 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
       <div className="p-modal-grid">
         <div className="p-modal-card">
           <span>Data & Hora</span>
-          <strong>{new Date(ag.dataHora).toLocaleDateString('pt-BR')}<br/>{new Date(ag.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</strong>
+          <strong>{new Date(ag.dataHora).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}<br/>{new Date(ag.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}</strong>
         </div>
         <div className="p-modal-card">
           <span>Artista</span>

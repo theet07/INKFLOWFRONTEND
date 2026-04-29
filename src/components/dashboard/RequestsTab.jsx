@@ -12,7 +12,7 @@ const formatDate = (dataHora) => {
 
 const formatTime = (dataHora) => {
   if (!dataHora) return ''
-  return new Date(dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  return new Date(dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })
 }
 
 const statusConfig = {
