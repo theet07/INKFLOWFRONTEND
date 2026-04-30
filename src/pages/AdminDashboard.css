@@ -83,7 +83,6 @@
 .ap-main {
   flex: 1; padding: 2rem 2.5rem;
   overflow-y: auto;
-  max-width: 1200px;
 }
 
 /* ── Page Header ───────────────────────────────────────────── */
@@ -115,8 +114,8 @@
 .ap-stats-grid::-webkit-scrollbar { display: none; }
 
 .ap-stat-card {
-  flex: 1;
-  min-width: 140px;
+  flex: 1 1 0;
+  min-width: 120px;
   background: #1a1a1a;
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
