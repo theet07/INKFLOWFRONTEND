@@ -33,18 +33,21 @@ const ProtectedRoute = ({ element, allowedTypes }) => {
   return element
 }
 
-// Redireciona artistas logados para o dashboard em qualquer rota pública
-const ArtistGuard = ({ children }) => {
+// Redireciona artistas e admins logados para seus painéis em qualquer rota pública
+const RoleGuard = ({ children }) => {
   const { user, userType, loading } = useAuth()
   const { pathname } = useLocation()
 
   if (loading) return null
 
-  const isArtistArea = pathname === '/artist-dashboard'
-  const isLoginPage  = pathname === '/login'
+  const isLoginPage = pathname === '/login'
 
-  if (user && userType === 'artist' && !isArtistArea && !isLoginPage) {
+  if (user && userType === 'artist' && pathname !== '/artist-dashboard' && !isLoginPage) {
     return <Navigate to="/artist-dashboard" replace />
+  }
+
+  if (user && userType === 'admin' && pathname !== '/admin' && !isLoginPage) {
+    return <Navigate to="/admin" replace />
   }
 
   return children
@@ -63,16 +66,16 @@ function AppContent() {
       {!hideShell && <Header />}
       <main>
         <Routes>
-          {/* Rotas públicas — protegidas pelo ArtistGuard */}
-          <Route path="/" element={<ArtistGuard><Home /></ArtistGuard>} />
-          <Route path="/sobre" element={<ArtistGuard><About /></ArtistGuard>} />
-          <Route path="/portfolio" element={<ArtistGuard><Portfolio /></ArtistGuard>} />
-          <Route path="/servicos" element={<ArtistGuard><Services /></ArtistGuard>} />
-          <Route path="/contato" element={<ArtistGuard><Contact /></ArtistGuard>} />
-          <Route path="/agendamento" element={<ArtistGuard><Booking /></ArtistGuard>} />
-          <Route path="/artistas" element={<ArtistGuard><Artists /></ArtistGuard>} />
-          <Route path="/artista/:id" element={<ArtistGuard><ArtistProfile /></ArtistGuard>} />
-          <Route path="/para-tatuadores" element={<ArtistGuard><ArtistLandingPage /></ArtistGuard>} />
+          {/* Rotas públicas — protegidas pelo RoleGuard */}
+          <Route path="/" element={<RoleGuard><Home /></RoleGuard>} />
+          <Route path="/sobre" element={<RoleGuard><About /></RoleGuard>} />
+          <Route path="/portfolio" element={<RoleGuard><Portfolio /></RoleGuard>} />
+          <Route path="/servicos" element={<RoleGuard><Services /></RoleGuard>} />
+          <Route path="/contato" element={<RoleGuard><Contact /></RoleGuard>} />
+          <Route path="/agendamento" element={<RoleGuard><Booking /></RoleGuard>} />
+          <Route path="/artistas" element={<RoleGuard><Artists /></RoleGuard>} />
+          <Route path="/artista/:id" element={<RoleGuard><ArtistProfile /></RoleGuard>} />
+          <Route path="/para-tatuadores" element={<RoleGuard><ArtistLandingPage /></RoleGuard>} />
 
           {/* Login — sem guard (artista precisa acessar para logar) */}
           <Route path="/login" element={<Login />} />
