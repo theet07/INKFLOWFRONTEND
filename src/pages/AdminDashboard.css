@@ -56,8 +56,14 @@
 }
 
 .ap-sidebar-nav {
-  padding: 1rem 0.75rem; flex: 1;
+  padding: 1rem 0.75rem;
   display: flex; flex-direction: column; gap: 2px;
+  /* Reset global nav{} from Header.css */
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  max-width: none !important;
+  height: auto !important;
+  margin: 0 !important;
 }
 
 .ap-nav-btn {
