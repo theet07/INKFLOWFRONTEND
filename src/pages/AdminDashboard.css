@@ -107,15 +107,21 @@
 /* ── Stats Grid ────────────────────────────────────────────── */
 .ap-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-  gap: 1rem; margin-bottom: 1.75rem;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  overflow-x: auto;
 }
 
 .ap-stat-card {
-  background: #111116;
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px; padding: 1.25rem;
-  display: flex; align-items: center; gap: 1rem;
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
   transition: all 0.25s ease;
 }
 .ap-stat-card:hover {
@@ -133,33 +139,38 @@
 
 .ap-stat-value {
   font-size: 1.5rem; font-weight: 700; display: block;
-  letter-spacing: -0.02em;
+  color: #fff; letter-spacing: -0.02em;
 }
 .ap-stat-label {
   font-size: 0.75rem; color: rgba(255,255,255,0.4); display: block;
+  text-transform: uppercase; letter-spacing: 0.5px;
   margin-top: 2px;
 }
 
 /* ── Row layout ────────────────────────────────────────────── */
 .ap-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1rem; margin-bottom: 1.75rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
 }
 
 /* ── Cards ─────────────────────────────────────────────────── */
 .ap-card {
-  background: #111116;
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px; padding: 1.5rem;
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
   margin-bottom: 1.75rem;
 }
 .ap-card-flex {
   display: flex; flex-direction: column; margin-bottom: 0;
 }
 .ap-card-title {
-  font-size: 0.95rem; font-weight: 600; margin: 0 0 1.25rem;
-  color: rgba(255,255,255,0.85);
+  font-size: 0.875rem; font-weight: 600; margin: 0 0 1.25rem;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* ── Status bars ───────────────────────────────────────────── */
@@ -343,6 +354,9 @@
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .ap-stats-grid { grid-template-columns: repeat(3, 1fr); }
+}
 @media (max-width: 768px) {
   .ap-sidebar { display: none; }
   .ap-main { padding: 1.25rem; }
