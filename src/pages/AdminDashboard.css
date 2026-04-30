@@ -370,6 +370,139 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Pagination ────────────────────────────────────────────── */
+.ap-pagination {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.75rem; padding: 1rem 0 0.25rem;
+}
+.ap-pagination button {
+  width: 32px; height: 32px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.5); transition: all 0.2s;
+}
+.ap-pagination button:hover:not(:disabled) {
+  background: rgba(226,27,60,0.12); color: #ff4d6d;
+  border-color: rgba(226,27,60,0.25);
+}
+.ap-pagination button:disabled { opacity: 0.25; cursor: not-allowed; }
+.ap-pagination button .material-symbols-outlined { font-size: 1.1rem; }
+.ap-page-info {
+  font-size: 0.8rem; color: rgba(255,255,255,0.4); font-weight: 500;
+  min-width: 50px; text-align: center;
+}
+
+/* ── Artist Cards ──────────────────────────────────────────── */
+.ap-artist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+.ap-artist-card {
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 1.5rem;
+  position: relative; transition: all 0.25s;
+}
+.ap-artist-card:hover {
+  border-color: rgba(255,255,255,0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+.ap-artist-header {
+  display: flex; align-items: center; margin-bottom: 1rem;
+}
+.ap-artist-avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  object-fit: cover; border: 2px solid rgba(255,255,255,0.08);
+}
+.ap-artist-avatar-fb {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(139,92,246,0.15); color: #8b5cf6;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1.2rem;
+}
+.ap-artist-name {
+  font-size: 1rem; font-weight: 600; margin: 0 0 0.25rem;
+  color: #fff;
+}
+.ap-artist-esp {
+  font-size: 0.78rem; color: rgba(255,255,255,0.4);
+  margin: 0 0 1rem;
+}
+.ap-artist-stats {
+  display: flex; gap: 1.5rem; padding-top: 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.ap-artist-stat-val {
+  font-size: 1rem; font-weight: 700; display: block; color: #fff;
+}
+.ap-artist-stat-lbl {
+  font-size: 0.7rem; color: rgba(255,255,255,0.35);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* ── Detail Modal ──────────────────────────────────────────── */
+.ap-modal-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  animation: ap-fade-in 0.2s ease;
+}
+@keyframes ap-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.ap-modal {
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  width: 90%; max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  animation: ap-modal-in 0.25s ease;
+}
+@keyframes ap-modal-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.ap-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.ap-modal-header h2 {
+  font-size: 1.05rem; font-weight: 700; margin: 0;
+}
+.ap-modal-close {
+  width: 32px; height: 32px; border-radius: 6px;
+  border: none; background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.5); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.ap-modal-close:hover { background: rgba(239,68,68,0.15); color: #ef4444; }
+.ap-modal-close .material-symbols-outlined { font-size: 1.1rem; }
+
+.ap-modal-body { padding: 1.25rem 1.5rem; }
+
+.ap-detail-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.ap-detail-row:last-child { border-bottom: none; }
+.ap-detail-col { flex-direction: column; align-items: flex-start; }
+.ap-detail-label {
+  font-size: 0.78rem; color: rgba(255,255,255,0.4);
+  font-weight: 500; flex-shrink: 0;
+}
+
+/* ── Action view button ────────────────────────────────────── */
+.ap-action-view:hover { background: rgba(139,92,246,0.15); color: #8b5cf6; border-color: rgba(139,92,246,0.25); }
+
+/* ── Chart ─────────────────────────────────────────────────── */
+.ap-chart { display: block; margin-top: 0.5rem; }
+
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 1100px) {
   .ap-stats-grid { flex-wrap: wrap; }

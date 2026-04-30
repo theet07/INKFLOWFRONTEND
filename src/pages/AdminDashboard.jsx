@@ -14,18 +14,24 @@ const STATUS_CONFIG = {
   'CANCELADO':    { label: 'Cancelado',    color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
 }
 
+const ITEMS_PER_PAGE = 10
+
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [stats, setStats] = useState(null)
   const [usuarios, setUsuarios] = useState([])
   const [agendamentos, setAgendamentos] = useState([])
+  const [artistas, setArtistas] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterTipo, setFilterTipo] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [filterEsp, setFilterEsp] = useState('all')
   const [backupStatus, setBackupStatus] = useState(null)
   const [isDownloading, setIsDownloading] = useState(false)
   const [toast, setToast] = useState(null)
+  const [modal, setModal] = useState(null)
+  const [page, setPage] = useState(1)
 
   const navigate = useNavigate()
   const { token, loading: authLoading, logout } = useAuth()
@@ -44,14 +50,16 @@ const AdminDashboard = () => {
   const loadData = async () => {
     setLoading(true)
     try {
-      const [statsRes, usersRes, agRes] = await Promise.all([
+      const [statsRes, usersRes, agRes, artRes] = await Promise.all([
         adminService.getStats(),
         adminService.getUsuarios(),
         adminService.getAgendamentos(),
+        adminService.getArtistas(),
       ])
       setStats(statsRes.data)
       setUsuarios(usersRes.data || [])
       setAgendamentos(agRes.data || [])
+      setArtistas(artRes.data || [])
     } catch (err) {
       console.error('Erro ao carregar dados admin:', err)
     } finally {
@@ -140,6 +148,7 @@ const AdminDashboard = () => {
   const tabs = [
     { key: 'dashboard', icon: 'dashboard', label: 'Painel' },
     { key: 'usuarios', icon: 'group', label: 'Usuários' },
+    { key: 'artistas', icon: 'brush', label: 'Artistas' },
     { key: 'agendamentos', icon: 'calendar_month', label: 'Agendamentos' },
     { key: 'seguranca', icon: 'shield', label: 'Segurança' },
   ]
@@ -173,7 +182,7 @@ const AdminDashboard = () => {
         <nav className="ap-sidebar-nav">
           {tabs.map(t => (
             <button key={t.key} className={`ap-nav-btn ${activeTab === t.key ? 'active' : ''}`}
-              onClick={() => { setActiveTab(t.key); setSearch(''); setFilterTipo('all'); setFilterStatus('all') }}>
+              onClick={() => { setActiveTab(t.key); setSearch(''); setFilterTipo('all'); setFilterStatus('all'); setFilterEsp('all'); setPage(1) }}>
               <span className="material-symbols-outlined">{t.icon}</span>
               {t.label}
             </button>
@@ -197,6 +206,15 @@ const AdminDashboard = () => {
             filterTipo={filterTipo} setFilterTipo={setFilterTipo}
             formatDate={formatDate}
             totalCount={usuarios.length}
+            page={page} setPage={setPage}
+          />
+        )}
+        {activeTab === 'artistas' && (
+          <ArtistasView
+            artistas={artistas}
+            agendamentos={agendamentos}
+            search={search} setSearch={setSearch}
+            filterEsp={filterEsp} setFilterEsp={setFilterEsp}
           />
         )}
         {activeTab === 'agendamentos' && (
@@ -208,6 +226,8 @@ const AdminDashboard = () => {
             onUpdateStatus={handleUpdateStatus}
             onDelete={handleDeleteAgendamento}
             totalCount={agendamentos.length}
+            onOpenDetail={setModal}
+            page={page} setPage={setPage}
           />
         )}
         {activeTab === 'seguranca' && (
@@ -216,6 +236,7 @@ const AdminDashboard = () => {
             isDownloading={isDownloading}
           />
         )}
+        {modal && <DetailModal ag={modal} onClose={() => setModal(null)} formatDateTime={formatDateTime} />}
       </main>
     </div>
   )
@@ -314,6 +335,9 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
         </div>
       </div>
 
+      {/* Chart */}
+      <MiniChart agendamentos={agendamentos} />
+
       {/* Recent */}
       <div className="ap-card">
         <h3 className="ap-card-title">Últimos Agendamentos</h3>
@@ -349,7 +373,9 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
 // ═══════════════════════════════════════════════════════════════
 // Usuarios View
 // ═══════════════════════════════════════════════════════════════
-const UsuariosView = ({ usuarios, search, setSearch, filterTipo, setFilterTipo, formatDate, totalCount }) => (
+const UsuariosView = ({ usuarios, search, setSearch, filterTipo, setFilterTipo, formatDate, totalCount, page, setPage }) => {
+  const paged = usuarios.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+  return (
   <>
     <header className="ap-page-header">
       <div>
@@ -383,7 +409,7 @@ const UsuariosView = ({ usuarios, search, setSearch, filterTipo, setFilterTipo, 
             </tr>
           </thead>
           <tbody>
-            {usuarios.map(u => (
+            {paged.map(u => (
               <tr key={`${u.tipo}-${u.id}`}>
                 <td>
                   <div className="ap-user-cell">
@@ -411,18 +437,22 @@ const UsuariosView = ({ usuarios, search, setSearch, filterTipo, setFilterTipo, 
                 <td className="ap-text-dim">{formatDate(u.createdAt)}</td>
               </tr>
             ))}
-            {usuarios.length === 0 && <tr><td colSpan={6} className="ap-empty">Nenhum usuário encontrado</td></tr>}
+            {paged.length === 0 && <tr><td colSpan={6} className="ap-empty">Nenhum usuário encontrado</td></tr>}
           </tbody>
         </table>
       </div>
+      <Pagination total={usuarios.length} page={page} setPage={setPage} />
     </div>
   </>
-)
+  )
+}
 
 // ═══════════════════════════════════════════════════════════════
 // Agendamentos View
 // ═══════════════════════════════════════════════════════════════
-const AgendamentosView = ({ agendamentos, search, setSearch, filterStatus, setFilterStatus, formatDateTime, onUpdateStatus, onDelete, totalCount }) => (
+const AgendamentosView = ({ agendamentos, search, setSearch, filterStatus, setFilterStatus, formatDateTime, onUpdateStatus, onDelete, totalCount, onOpenDetail, page, setPage }) => {
+  const paged = agendamentos.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+  return (
   <>
     <header className="ap-page-header">
       <div>
@@ -456,7 +486,7 @@ const AgendamentosView = ({ agendamentos, search, setSearch, filterStatus, setFi
             </tr>
           </thead>
           <tbody>
-            {agendamentos.map(a => {
+            {paged.map(a => {
               const sc = STATUS_CONFIG[a.status] || { label: a.status, color: '#888', bg: 'rgba(136,136,136,0.12)' }
               const nextFlow = { 'PENDENTE': 'CONFIRMADO', 'AGENDADO': 'CONFIRMADO', 'CONFIRMADO': 'EM_ANDAMENTO', 'EM_ANDAMENTO': 'REALIZADO' }
               const next = nextFlow[a.status]
@@ -470,6 +500,10 @@ const AgendamentosView = ({ agendamentos, search, setSearch, filterStatus, setFi
                   <td><span className="ap-badge" style={{ color: sc.color, background: sc.bg }}>{sc.label}</span></td>
                   <td>
                     <div className="ap-actions">
+                      <button className="ap-action-btn ap-action-view" title="Ver detalhes"
+                        onClick={() => onOpenDetail(a)}>
+                        <span className="material-symbols-outlined">visibility</span>
+                      </button>
                       {next && (
                         <button className="ap-action-btn ap-action-advance" title={`Avançar para ${STATUS_CONFIG[next]?.label}`}
                           onClick={() => onUpdateStatus(a.id, next)}>
@@ -491,13 +525,15 @@ const AgendamentosView = ({ agendamentos, search, setSearch, filterStatus, setFi
                 </tr>
               )
             })}
-            {agendamentos.length === 0 && <tr><td colSpan={6} className="ap-empty">Nenhum agendamento encontrado</td></tr>}
+            {paged.length === 0 && <tr><td colSpan={6} className="ap-empty">Nenhum agendamento encontrado</td></tr>}
           </tbody>
         </table>
       </div>
+      <Pagination total={agendamentos.length} page={page} setPage={setPage} />
     </div>
   </>
-)
+  )
+}
 
 // ═══════════════════════════════════════════════════════════════
 // Seguranca View
@@ -542,5 +578,204 @@ const SegurancaView = ({ onDownload, isDownloading }) => (
     </div>
   </>
 )
+
+// ═══════════════════════════════════════════════════════════════
+// Pagination
+// ═══════════════════════════════════════════════════════════════
+const Pagination = ({ total, page, setPage }) => {
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE)
+  if (totalPages <= 1) return null
+  return (
+    <div className="ap-pagination">
+      <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
+        <span className="material-symbols-outlined">chevron_left</span>
+      </button>
+      <span className="ap-page-info">{page} / {totalPages}</span>
+      <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
+        <span className="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Artistas View
+// ═══════════════════════════════════════════════════════════════
+const ArtistasView = ({ artistas, agendamentos, search, setSearch, filterEsp, setFilterEsp }) => {
+  const especialidades = useMemo(() => {
+    const set = new Set()
+    artistas.forEach(a => (a.especialidades || '').split(',').forEach(e => { if (e.trim()) set.add(e.trim()) }))
+    return ['all', ...Array.from(set)]
+  }, [artistas])
+
+  const filtered = useMemo(() => {
+    return artistas.filter(a => {
+      const matchSearch = !search || (a.nome || '').toLowerCase().includes(search.toLowerCase())
+      const matchEsp = filterEsp === 'all' || (a.especialidades || '').toLowerCase().includes(filterEsp.toLowerCase())
+      return matchSearch && matchEsp
+    })
+  }, [artistas, search, filterEsp])
+
+  const getAgCount = (artistaId) => agendamentos.filter(ag => ag.artista?.id === artistaId).length
+
+  return (
+    <>
+      <header className="ap-page-header">
+        <div>
+          <h1 className="ap-page-title">Artistas</h1>
+          <p className="ap-page-sub">Gerencie os tatuadores cadastrados na plataforma</p>
+        </div>
+        <span className="ap-header-count">{artistas.length} artistas</span>
+      </header>
+
+      <div className="ap-toolbar">
+        <div className="ap-search-box">
+          <span className="material-symbols-outlined">search</span>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar artista..." />
+        </div>
+        <div className="ap-filter-group ap-filter-scroll">
+          {especialidades.map(e => (
+            <button key={e} className={`ap-filter-btn ${filterEsp === e ? 'active' : ''}`}
+              onClick={() => setFilterEsp(e)}>
+              {e === 'all' ? 'Todas' : e}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="ap-artist-grid">
+        {filtered.map(a => (
+          <div key={a.id} className="ap-artist-card">
+            <div className="ap-artist-header">
+              {a.fotoUrl
+                ? <img src={a.fotoUrl} alt={a.nome} className="ap-artist-avatar" />
+                : <div className="ap-artist-avatar-fb">{(a.nome || '?').charAt(0)}</div>
+              }
+              <span className="ap-badge" style={{
+                color: a.ativo ? '#10b981' : '#ef4444',
+                background: a.ativo ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+                position: 'absolute', top: '0.75rem', right: '0.75rem'
+              }}>{a.ativo ? 'Ativo' : 'Inativo'}</span>
+            </div>
+            <h4 className="ap-artist-name">{a.nome || 'Sem nome'}</h4>
+            <p className="ap-artist-esp">{a.especialidades || 'Sem especialidade'}</p>
+            <div className="ap-artist-stats">
+              <div><span className="ap-artist-stat-val">{getAgCount(a.id)}</span><span className="ap-artist-stat-lbl">Agendamentos</span></div>
+              <div><span className="ap-artist-stat-val">{a.role || '—'}</span><span className="ap-artist-stat-lbl">Função</span></div>
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && <p className="ap-empty" style={{ gridColumn: '1/-1' }}>Nenhum artista encontrado</p>}
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Detail Modal
+// ═══════════════════════════════════════════════════════════════
+const DetailModal = ({ ag, onClose, formatDateTime }) => {
+  const sc = STATUS_CONFIG[ag.status] || { label: ag.status, color: '#888', bg: 'rgba(136,136,136,0.12)' }
+  return (
+    <div className="ap-modal-overlay" onClick={onClose}>
+      <div className="ap-modal" onClick={e => e.stopPropagation()}>
+        <div className="ap-modal-header">
+          <h2>Detalhes do Agendamento</h2>
+          <button className="ap-modal-close" onClick={onClose}>
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div className="ap-modal-body">
+          <div className="ap-detail-row">
+            <span className="ap-detail-label">Status</span>
+            <span className="ap-badge" style={{ color: sc.color, background: sc.bg }}>{sc.label}</span>
+          </div>
+          <div className="ap-detail-row">
+            <span className="ap-detail-label">Cliente</span>
+            <span>{ag.cliente?.fullName || ag.cliente?.nome || '—'}</span>
+          </div>
+          <div className="ap-detail-row">
+            <span className="ap-detail-label">Email</span>
+            <span className="ap-text-dim">{ag.cliente?.email || '—'}</span>
+          </div>
+          <div className="ap-detail-row">
+            <span className="ap-detail-label">Telefone</span>
+            <span className="ap-text-dim">{ag.cliente?.telefone || '—'}</span>
+          </div>
+          <div className="ap-detail-row">
+            <span className="ap-detail-label">Artista</span>
+            <span>{ag.artista?.nome || '—'}</span>
+          </div>
+          <div className="ap-detail-row">
+            <span className="ap-detail-label">Serviço</span>
+            <span>{ag.servico || '—'}</span>
+          </div>
+          <div className="ap-detail-row">
+            <span className="ap-detail-label">Data/Hora</span>
+            <span>{formatDateTime(ag.dataHora)}</span>
+          </div>
+          {ag.descricao && (
+            <div className="ap-detail-row ap-detail-col">
+              <span className="ap-detail-label">Descrição</span>
+              <p className="ap-text-dim" style={{ margin: '0.25rem 0 0', lineHeight: 1.5 }}>{ag.descricao}</p>
+            </div>
+          )}
+          {ag.avaliacao > 0 && (
+            <div className="ap-detail-row">
+              <span className="ap-detail-label">Avaliação</span>
+              <span style={{ color: '#f59e0b' }}>{'★'.repeat(ag.avaliacao)}{'☆'.repeat(5 - ag.avaliacao)}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Mini Chart (SVG bar chart - no dependency)
+// ═══════════════════════════════════════════════════════════════
+const MiniChart = ({ agendamentos }) => {
+  const monthData = useMemo(() => {
+    const now = new Date()
+    const months = []
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      const label = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')
+      const count = agendamentos.filter(a => {
+        if (!a.dataHora) return false
+        const ad = new Date(a.dataHora)
+        return ad.getFullYear() === d.getFullYear() && ad.getMonth() === d.getMonth()
+      }).length
+      months.push({ key, label, count })
+    }
+    return months
+  }, [agendamentos])
+
+  const max = Math.max(...monthData.map(m => m.count), 1)
+  const barW = 40, gap = 12, h = 140
+  const w = monthData.length * (barW + gap) - gap
+
+  return (
+    <div className="ap-card">
+      <h3 className="ap-card-title">Agendamentos por Mês</h3>
+      <svg width="100%" viewBox={`0 0 ${w + 20} ${h + 30}`} className="ap-chart">
+        {monthData.map((m, i) => {
+          const barH = (m.count / max) * (h - 20)
+          const x = i * (barW + gap) + 10
+          const y = h - barH
+          return (
+            <g key={m.key}>
+              <rect x={x} y={y} width={barW} height={barH} rx={4} fill="#E21B3C" opacity={0.8} />
+              <text x={x + barW / 2} y={y - 6} textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="11" fontWeight="600">{m.count}</text>
+              <text x={x + barW / 2} y={h + 16} textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="10" textTransform="uppercase">{m.label}</text>
+            </g>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
 
 export default AdminDashboard
