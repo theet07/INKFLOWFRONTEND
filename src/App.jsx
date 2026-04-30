@@ -54,7 +54,8 @@ function AppContent() {
   const location = useLocation()
   const isLoginPage       = location.pathname === '/login'
   const isArtistDashboard = location.pathname === '/artist-dashboard'
-  const hideShell = isLoginPage || isArtistDashboard
+  const isAdminDashboard  = location.pathname === '/admin'
+  const hideShell = isLoginPage || isArtistDashboard || isAdminDashboard
 
   return (
     <div className="App">

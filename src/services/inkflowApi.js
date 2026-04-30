@@ -100,6 +100,11 @@ export const mensagemService = {
 export const adminService = {
   exportBackup: () => api.get('/api/v1/admin/backup/download', { responseType: 'blob', baseURL: API_BASE_URL.replace(/\/api.*$/, '') }),
   getBackupStatus: () => api.get('/api/v1/admin/backup/status', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') }),
+  getStats: () => api.get('/admin/stats', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getUsuarios: () => api.get('/admin/usuarios', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getAgendamentos: () => api.get('/admin/agendamentos', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getArtistas: () => api.get('/admin/artistas', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getClientes: () => api.get('/admin/clientes', { baseURL: API_BASE_URL.replace('/v1', '') }),
 };
 
 export const testConnection = () => api.get('/api/health', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') });
