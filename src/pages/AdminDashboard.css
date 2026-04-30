@@ -90,6 +90,14 @@
 .ap-page-header {
   display: flex; align-items: flex-end; justify-content: space-between;
   margin-bottom: 2rem; gap: 1rem;
+  /* Reset global header{position:fixed} from Header.css */
+  position: static !important;
+  width: auto !important;
+  z-index: auto !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-bottom: none !important;
+  padding: 0 !important;
 }
 .ap-page-title {
   font-size: 1.6rem; font-weight: 700; margin: 0;
