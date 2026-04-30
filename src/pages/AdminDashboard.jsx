@@ -149,6 +149,7 @@ const AdminDashboard = () => {
               <div className="bookings-grid">
                 {bookings.map(booking => {
                   const statusColors = {
+                    'PENDENTE': '#f39c12',
                     'AGENDADO': '#f39c12',
                     'CONFIRMADO': '#3498db',
                     'EM_ANDAMENTO': '#9b59b6',
@@ -165,7 +166,7 @@ const AdminDashboard = () => {
                           <p className="text-light">{booking.cliente?.email || '—'}</p>
                           <p className="text-light">{booking.cliente?.telefone || '—'}</p>
                           <p className="text-gray">Serviço: {booking.servico}</p>
-                          <p className="text-gray">Data: {new Date(booking.dataHora || booking.data).toLocaleString('pt-BR')}</p>
+                          <p className="text-gray">Data: {new Date(booking.dataHora || booking.data).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</p>
                           {booking.descricao && (
                             <p className="text-gray">Descrição: {booking.descricao}</p>
                           )}
@@ -232,7 +233,7 @@ const AdminDashboard = () => {
               </div>
               <div className="card-equal">
                 <div className="icon-circle">
-                  {bookings.filter(b => (!b.status || b.status === 'AGENDADO')).length}
+                  {bookings.filter(b => (!b.status || b.status === 'AGENDADO' || b.status === 'PENDENTE')).length}
                 </div>
                 <h3 className="text-primary">Agendados</h3>
               </div>
@@ -270,7 +271,7 @@ const AdminDashboard = () => {
                 </p>
                 <div style={{ textAlign: 'left', marginTop: 'auto' }}>
                   <p className="text-gray">
-                    <strong>Último Backup:</strong> {loadingBackup ? 'Carregando...' : (backupStatus?.lastBackup ? new Date(backupStatus.lastBackup).toLocaleString('pt-BR') : 'Nenhum registro encontrado')}
+                    <strong>Último Backup:</strong> {loadingBackup ? 'Carregando...' : (backupStatus?.lastBackup ? new Date(backupStatus.lastBackup).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'Nenhum registro encontrado')}
                   </p>
                 </div>
               </div>

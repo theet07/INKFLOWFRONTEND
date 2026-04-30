@@ -4,10 +4,10 @@ import { agendamentoService } from '../../services/inkflowApi'
 
 const formatDate = (dataHora) => {
   if (!dataHora) return ''
-  const d = new Date(dataHora)
-  const day = d.getDate()
   const months = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ']
-  return `${day} ${months[d.getMonth()]}`
+  const d = new Date(dataHora)
+  const parts = d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'numeric', timeZone: 'America/Sao_Paulo' }).split('/')
+  return `${parts[0]} ${months[parseInt(parts[1], 10) - 1]}`
 }
 
 const formatTime = (dataHora) => {
@@ -18,7 +18,7 @@ const formatTime = (dataHora) => {
 
 const getTimePeriod = (dataHora) => {
   if (!dataHora) return ''
-  const h = new Date(dataHora).getHours()
+  const h = parseInt(new Date(dataHora).toLocaleTimeString('pt-BR', { hour: 'numeric', hour12: false, timeZone: 'America/Sao_Paulo' }), 10)
   return h < 12 ? 'AM' : 'PM'
 }
 
@@ -150,6 +150,7 @@ const DashboardTab = ({ showToast, openDrawer, onNewArt, refreshKey }) => {
   const getNextStatus = (current) => {
     const flow = { 
       'PENDENTE': 'CONFIRMADO',
+      'AGENDADO': 'CONFIRMADO',
       'CONFIRMADO': 'EM_ANDAMENTO', 
       'EM_ANDAMENTO': 'REALIZADO' 
     }

@@ -127,7 +127,7 @@ const Booking = () => {
             setIsLoadingAvailability(true)
             artistaService.getAvailability(artistaSelecionado.id, currentYear, adjustedMonth + 1)
                 .then(res => {
-                    const mappedDays = (res.data || []).map(d => ({
+                    const mappedDays = (res.data || []).filter(d => d.data).map(d => ({
                         day: parseInt(d.data.split('-')[2], 10).toString(),
                         fullDate: d.data,
                         active: d.disponivel
@@ -255,15 +255,15 @@ const Booking = () => {
         e.preventDefault()
 
         if (!bookingState.style || !bookingState.artist || !bookingState.day || !bookingState.time) {
-            alert('Por favor, complete as etapas de Estilo, Artista, Data e Horário.');
+            showToast('Por favor, complete as etapas de Estilo, Artista, Data e Horário.', 'error');
             return;
         }
         if (!formData.name || !formData.phone || !formData.email || !formData.desc) {
-            alert('Por favor, preencha todos os seus dados.');
+            showToast('Por favor, preencha todos os seus dados.', 'error');
             return;
         }
         if (!formData.terms) {
-            alert('Você precisa aceitar os termos de agendamento para continuar.');
+            showToast('Você precisa aceitar os termos de agendamento para continuar.', 'error');
             return;
         }
 

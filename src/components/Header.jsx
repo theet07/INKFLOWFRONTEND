@@ -16,8 +16,12 @@ const Header = () => {
   const navigate = useNavigate()
   const { user, userType, logout, token } = useAuth()
 
+  const audioCtxRef = useRef(null)
+
   const tocarBeep = () => {
-    const ctx = new AudioContext()
+    if (!audioCtxRef.current) audioCtxRef.current = new AudioContext()
+    const ctx = audioCtxRef.current
+    if (ctx.state === 'suspended') ctx.resume()
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
     osc.connect(gain)
@@ -102,13 +106,16 @@ const Header = () => {
 
   const formatDate = (dataHora) => {
     if (!dataHora) return ''
-    return new Date(dataHora).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase()
+    return new Date(dataHora).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', timeZone: 'America/Sao_Paulo' }).toUpperCase()
   }
 
   const statusColor = {
+    'PENDENTE': '#f59e0b',
     'AGENDADO': '#ff0000',
     'CONFIRMADO': '#10b981',
+    'EM_ANDAMENTO': '#8b5cf6',
     'REALIZADO': '#6366f1',
+    'FINALIZADO': '#14b8a6',
     'CANCELADO': 'rgba(255,255,255,0.3)'
   }
 

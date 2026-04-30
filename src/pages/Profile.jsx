@@ -35,7 +35,7 @@ const StarRating = ({ value, onChange }) => (
 const formatDate = (dataHora) => {
   if (!dataHora) return ''
   const d = new Date(dataHora)
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase().replace('.', '')
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', timeZone: 'America/Sao_Paulo' }).toUpperCase().replace('.', '')
 }
 
 const formatTime = (dataHora) => {
