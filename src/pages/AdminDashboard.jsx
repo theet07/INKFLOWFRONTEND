@@ -593,7 +593,6 @@ const UsuariosView = ({ usuarios, requisicoes, requisicoesCount, search, setSear
         </table>
       </div>
       <Pagination total={localUsuarios.length} page={page} setPage={setPage} />
-    </div>
       )}
     </div>
     {editModal && <EditUserModal user={editModal} onClose={() => setEditModal(null)} onSave={handleSaveUser} />}
