@@ -2,7 +2,11 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { adminService, agendamentoService } from '../services/inkflowApi'
 import { useAuth } from '../contexts/AuthContext'
+import { Bar } from 'react-chartjs-2'
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import './AdminDashboard.css'
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const STATUS_CONFIG = {
   'PENDENTE':     { label: 'Pendente',     color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
@@ -247,12 +251,12 @@ const AdminDashboard = () => {
 // ═══════════════════════════════════════════════════════════════
 const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
   const cards = [
-    { icon: 'group', label: 'Total Usuários', value: stats.totalUsuarios, color: '#3b82f6' },
-    { icon: 'brush', label: 'Artistas', value: stats.totalArtistas, color: '#8b5cf6' },
-    { icon: 'person', label: 'Clientes', value: stats.totalClientes, color: '#10b981' },
-    { icon: 'calendar_month', label: 'Agendamentos', value: stats.totalAgendamentos, color: '#f59e0b' },
-    { icon: 'pending', label: 'Pendentes', value: stats.pendentes, color: '#ef4444' },
-    { icon: 'today', label: 'Hoje', value: stats.agendamentosHoje, color: '#14b8a6' },
+    { icon: 'group', label: 'Total Usuários', value: stats.totalUsuarios, color: '#3b82f6', alert: false },
+    { icon: 'brush', label: 'Artistas', value: stats.totalArtistas, color: '#8b5cf6', alert: false },
+    { icon: 'person', label: 'Clientes', value: stats.totalClientes, color: '#10b981', alert: false },
+    { icon: 'calendar_month', label: 'Agendamentos', value: stats.totalAgendamentos, color: '#f59e0b', alert: false },
+    { icon: 'pending', label: 'Pendentes', value: stats.pendentes, color: '#e8294c', alert: true },
+    { icon: 'today', label: 'Hoje', value: stats.agendamentosHoje, color: '#14b8a6', alert: false },
   ]
 
   const recentAg = [...agendamentos]
@@ -270,19 +274,19 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
 
       <div className="ap-stats-grid">
         {cards.map(c => (
-          <div key={c.label} className="ap-stat-card">
+          <div key={c.label} className={`ap-stat-card ${c.alert ? 'ap-stat-alert' : ''}`}>
             <div className="ap-stat-icon" style={{ background: c.color + '18', color: c.color }}>
               <span className="material-symbols-outlined">{c.icon}</span>
             </div>
             <div className="ap-stat-info">
-              <span className="ap-stat-value">{c.value}</span>
+              <span className="ap-stat-value" style={c.alert ? { color: c.color } : {}}>{c.value}</span>
               <span className="ap-stat-label">{c.label}</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Status breakdown */}
+      {/* Layout 2 colunas: Status + Métricas | Gráfico */}
       <div className="ap-row">
         <div className="ap-card ap-card-flex">
           <h3 className="ap-card-title">Distribuição de Status</h3>
@@ -291,7 +295,7 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
               { label: 'Pendentes', value: stats.pendentes, color: '#f59e0b' },
               { label: 'Confirmados', value: stats.confirmados, color: '#3b82f6' },
               { label: 'Concluídos', value: stats.concluidos, color: '#10b981' },
-              { label: 'Cancelados', value: stats.cancelados, color: '#ef4444' },
+              { label: 'Cancelados', value: stats.cancelados, color: '#e8294c' },
             ].map(s => (
               <div key={s.label} className="ap-bar-row">
                 <span className="ap-bar-label">{s.label}</span>
@@ -305,26 +309,23 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="ap-card ap-card-flex">
-          <h3 className="ap-card-title">Métricas</h3>
-          <div className="ap-metrics">
-            <div className="ap-metric">
+          <h3 className="ap-card-title" style={{ marginTop: '1.5rem' }}>Métricas</h3>
+          <div className="ap-metrics-grid">
+            <div className="ap-metric-item">
               <span className="material-symbols-outlined" style={{ color: '#f59e0b' }}>star</span>
               <div>
                 <span className="ap-metric-value">{stats.mediaAvaliacao || '—'}</span>
                 <span className="ap-metric-label">Avaliação Média</span>
               </div>
             </div>
-            <div className="ap-metric">
+            <div className="ap-metric-item">
               <span className="material-symbols-outlined" style={{ color: '#10b981' }}>person_add</span>
               <div>
                 <span className="ap-metric-value">{stats.novosClientes30d}</span>
                 <span className="ap-metric-label">Novos (30 dias)</span>
               </div>
             </div>
-            <div className="ap-metric">
+            <div className="ap-metric-item">
               <span className="material-symbols-outlined" style={{ color: '#3b82f6' }}>event_available</span>
               <div>
                 <span className="ap-metric-value">{stats.concluidos}</span>
@@ -333,37 +334,45 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
             </div>
           </div>
         </div>
+
+        <ChartJSBar agendamentos={agendamentos} />
       </div>
 
-      {/* Chart */}
-      <MiniChart agendamentos={agendamentos} />
-
-      {/* Recent */}
-      <div className="ap-card">
-        <h3 className="ap-card-title">Últimos Agendamentos</h3>
-        <div className="ap-table-wrap">
-          <table className="ap-table">
-            <thead>
-              <tr>
-                <th>Cliente</th><th>Artista</th><th>Data/Hora</th><th>Serviço</th><th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentAg.map(a => {
-                const sc = STATUS_CONFIG[a.status] || { label: a.status, color: '#888', bg: 'rgba(136,136,136,0.12)' }
-                return (
-                  <tr key={a.id}>
-                    <td>{a.cliente?.fullName || a.cliente?.nome || '—'}</td>
-                    <td>{a.artista?.nome || '—'}</td>
-                    <td>{formatDateTime(a.dataHora)}</td>
-                    <td>{a.servico || '—'}</td>
-                    <td><span className="ap-badge" style={{ color: sc.color, background: sc.bg }}>{sc.label}</span></td>
-                  </tr>
-                )
-              })}
-              {recentAg.length === 0 && <tr><td colSpan={5} className="ap-empty">Nenhum agendamento</td></tr>}
-            </tbody>
-          </table>
+      {/* Recent - Cards separados */}
+      <div>
+        <h3 className="ap-section-title">Últimos Agendamentos</h3>
+        <div className="ap-recent-grid">
+          {recentAg.map(a => {
+            const sc = STATUS_CONFIG[a.status] || { label: a.status, color: '#888', bg: 'rgba(136,136,136,0.12)' }
+            return (
+              <div key={a.id} className="ap-recent-card">
+                <div className="ap-recent-row">
+                  <span className="ap-recent-label">Cliente</span>
+                  <span className="ap-recent-value">{a.cliente?.fullName || a.cliente?.nome || '—'}</span>
+                </div>
+                <div className="ap-recent-row">
+                  <span className="ap-recent-label">Artista</span>
+                  <span className="ap-recent-value">{a.artista?.nome || '—'}</span>
+                </div>
+                <div className="ap-recent-row">
+                  <span className="ap-recent-label">Data/Hora</span>
+                  <span className="ap-recent-value">{formatDateTime(a.dataHora)}</span>
+                </div>
+                <div className="ap-recent-row">
+                  <span className="ap-recent-label">Serviço</span>
+                  <span className="ap-recent-value">{a.servico || '—'}</span>
+                </div>
+                <div className="ap-recent-row">
+                  <span className="ap-recent-label">Status</span>
+                  <span className="ap-badge" style={{ color: sc.color, background: sc.bg }}>{sc.label}</span>
+                </div>
+                <button className="ap-recent-options" title="Opções">
+                  <span className="material-symbols-outlined">more_vert</span>
+                </button>
+              </div>
+            )
+          })}
+          {recentAg.length === 0 && <p className="ap-empty">Nenhum agendamento</p>}
         </div>
       </div>
     </>
@@ -733,61 +742,72 @@ const DetailModal = ({ ag, onClose, formatDateTime }) => {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Mini Chart (SVG bar chart - no dependency)
+// Chart.js Bar Chart
 // ═══════════════════════════════════════════════════════════════
-const MiniChart = ({ agendamentos }) => {
+const ChartJSBar = ({ agendamentos }) => {
   const monthData = useMemo(() => {
     const now = new Date()
     const months = []
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      const label = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')
+      const label = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase()
       const count = agendamentos.filter(a => {
         if (!a.dataHora) return false
         const ad = new Date(a.dataHora)
         return ad.getFullYear() === d.getFullYear() && ad.getMonth() === d.getMonth()
       }).length
-      months.push({ key, label, count })
+      months.push({ label, count })
     }
     return months
   }, [agendamentos])
 
-  const max = Math.max(...monthData.map(m => m.count), 1)
-  const CHART_H = 220          // area útil para as barras (px dentro do viewBox)
-  const MIN_BAR_H = 4          // altura mínima visível para valor 0
-  const TOP_PAD = 28            // espaço para o número acima da barra
-  const BOTTOM_PAD = 24         // espaço para o label do mês
-  const viewH = TOP_PAD + CHART_H + BOTTOM_PAD
-  const barW = 48, gap = 20
-  const w = monthData.length * (barW + gap) - gap
+  const maxValue = Math.max(...monthData.map(m => m.count), 1)
+
+  const data = {
+    labels: monthData.map(m => m.label),
+    datasets: [{
+      data: monthData.map(m => m.count),
+      backgroundColor: monthData.map(m => m.count === maxValue ? '#e8294c' : '#7a1020'),
+      borderRadius: 6,
+      minBarLength: 4,
+    }]
+  }
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1a1a1a',
+        titleColor: '#f0f0f0',
+        bodyColor: '#888',
+        borderColor: '#2a2a2a',
+        borderWidth: 1,
+        padding: 10,
+        displayColors: false,
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: '#888', font: { size: 11, weight: '500' } },
+        border: { display: false }
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: { color: '#888', font: { size: 11 } },
+        border: { display: false }
+      }
+    }
+  }
 
   return (
-    <div className="ap-card">
+    <div className="ap-card ap-card-flex">
       <h3 className="ap-card-title">Agendamentos por Mês</h3>
-      <div style={{ width: '100%', maxHeight: 300, overflow: 'hidden' }}>
-        <svg
-          width="100%"
-          viewBox={`0 0 ${w + 20} ${viewH}`}
-          preserveAspectRatio="xMidYMid meet"
-          className="ap-chart"
-          style={{ display: 'block', maxHeight: 300 }}
-        >
-          {monthData.map((m, i) => {
-            const ratio = m.count / max
-            const barH = m.count === 0 ? MIN_BAR_H : Math.max(MIN_BAR_H, ratio * CHART_H)
-            const x = i * (barW + gap) + 10
-            const baseline = TOP_PAD + CHART_H   // base das barras
-            const y = baseline - barH
-            return (
-              <g key={m.key}>
-                <rect x={x} y={y} width={barW} height={barH} rx={6} fill="#e8294c" opacity={0.85} />
-                <text x={x + barW / 2} y={y - 8} textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="13" fontWeight="700">{m.count}</text>
-                <text x={x + barW / 2} y={baseline + 18} textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="12" fontWeight="500">{m.label}</text>
-              </g>
-            )
-          })}
-        </svg>
+      <div style={{ height: 240 }}>
+        <Bar data={data} options={options} />
       </div>
     </div>
   )

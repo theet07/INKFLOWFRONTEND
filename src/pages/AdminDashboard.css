@@ -6,14 +6,14 @@
 .ap-root {
   display: flex;
   min-height: 100vh;
-  background: #060608;
-  color: #f0f0f5;
+  background: #111;
+  color: #f0f0f0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .ap-loading {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: 100vh; width: 100%; background: #060608; color: rgba(255,255,255,0.5);
+  min-height: 100vh; width: 100%; background: #111; color: #888;
   gap: 1rem; font-size: 0.9rem;
 }
 .ap-spinner {
@@ -133,7 +133,7 @@
   flex: 1 1 0;
   min-width: 120px;
   background: #1a1a1a;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 0.5px solid #2a2a2a;
   border-radius: 12px;
   padding: 1.25rem;
   display: flex;
@@ -145,6 +145,12 @@
   border-color: rgba(255,255,255,0.1);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+.ap-stat-alert {
+  border-color: rgba(232,41,76,0.4);
+}
+.ap-stat-alert .ap-stat-value {
+  color: #e8294c;
 }
 
 .ap-stat-icon {
@@ -159,7 +165,7 @@
   color: #fff; letter-spacing: -0.02em;
 }
 .ap-stat-label {
-  font-size: 0.75rem; color: rgba(255,255,255,0.4); display: block;
+  font-size: 0.75rem; color: #888; display: block;
   text-transform: uppercase; letter-spacing: 0.5px;
   margin-top: 2px;
 }
@@ -175,7 +181,7 @@
 /* ── Cards ─────────────────────────────────────────────────── */
 .ap-card {
   background: #1a1a1a;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 0.5px solid #2a2a2a;
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.75rem;
@@ -184,16 +190,16 @@
   display: flex; flex-direction: column; margin-bottom: 0;
 }
 .ap-card-title {
-  font-size: 0.875rem; font-weight: 600; margin: 0 0 1.25rem;
-  color: rgba(255,255,255,0.7);
+  font-size: 11px; font-weight: 600; margin: 0 0 1.25rem;
+  color: #888;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 /* ── Status bars ───────────────────────────────────────────── */
-.ap-status-bars { display: flex; flex-direction: column; gap: 0.85rem; }
+.ap-status-bars { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem; }
 .ap-bar-row { display: flex; align-items: center; gap: 0.75rem; }
-.ap-bar-label { width: 100px; font-size: 0.78rem; color: rgba(255,255,255,0.5); flex-shrink: 0; }
+.ap-bar-label { width: 100px; font-size: 0.78rem; color: #555; flex-shrink: 0; }
 .ap-bar-track {
   flex: 1; height: 8px; background: rgba(255,255,255,0.05);
   border-radius: 4px; overflow: hidden;
@@ -205,20 +211,26 @@
 }
 .ap-bar-value {
   width: 30px; font-size: 0.8rem; font-weight: 600;
-  text-align: right; color: rgba(255,255,255,0.7);
+  text-align: right; color: #f0f0f0;
 }
 
-/* ── Metrics ───────────────────────────────────────────────── */
-.ap-metrics { display: flex; flex-direction: column; gap: 1.1rem; }
-.ap-metric {
-  display: flex; align-items: center; gap: 0.85rem;
-  padding: 0.65rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+/* ── Metrics Grid ──────────────────────────────────────────── */
+.ap-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
 }
-.ap-metric:last-child { border-bottom: none; }
-.ap-metric .material-symbols-outlined { font-size: 1.5rem; }
-.ap-metric-value { font-size: 1.1rem; font-weight: 700; display: block; }
-.ap-metric-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); display: block; margin-top: 1px; }
+.ap-metric-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.02);
+  border-radius: 8px;
+}
+.ap-metric-item .material-symbols-outlined { font-size: 1.5rem; }
+.ap-metric-value { font-size: 1.1rem; font-weight: 700; display: block; color: #f0f0f0; }
+.ap-metric-label { font-size: 0.7rem; color: #555; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* ── Toolbar ───────────────────────────────────────────────── */
 .ap-toolbar {
@@ -500,8 +512,70 @@
 /* ── Action view button ────────────────────────────────────── */
 .ap-action-view:hover { background: rgba(139,92,246,0.15); color: #8b5cf6; border-color: rgba(139,92,246,0.25); }
 
-/* ── Chart ─────────────────────────────────────────────────── */
-.ap-chart { display: block; margin-top: 0.5rem; }
+/* ── Recent Cards ──────────────────────────────────────────── */
+.ap-section-title {
+  font-size: 11px; font-weight: 600; margin: 0 0 1rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.ap-recent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+.ap-recent-card {
+  background: #1a1a1a;
+  border: 0.5px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 1.25rem;
+  position: relative;
+  transition: all 0.2s;
+}
+.ap-recent-card:hover {
+  border-color: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
+.ap-recent-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.ap-recent-row:last-of-type { border-bottom: none; }
+.ap-recent-label {
+  font-size: 0.75rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ap-recent-value {
+  font-size: 0.85rem;
+  color: #f0f0f0;
+  font-weight: 500;
+}
+.ap-recent-options {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255,255,255,0.03);
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.ap-recent-options:hover {
+  background: rgba(255,255,255,0.08);
+  color: #f0f0f0;
+}
+.ap-recent-options .material-symbols-outlined { font-size: 1rem; }
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 1100px) {
