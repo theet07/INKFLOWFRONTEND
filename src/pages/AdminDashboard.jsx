@@ -540,59 +540,61 @@ const UsuariosView = ({ usuarios, requisicoes, requisicoesCount, search, setSear
       {filterTipo === 'REQUISICOES' ? (
         <RequisicoesTable requisicoes={requisicoes} formatDate={formatDate} onReloadData={onReloadData} />
       ) : (
-      <div className="ap-table-wrap">
-        <table className="ap-table">
-          <thead>
-            <tr>
-              <th>Usuário</th><th>Email</th><th>Tipo</th><th>Telefone</th><th>Status</th><th>Cadastro</th><th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paged.map(u => (
-              <tr key={`${u.tipo}-${u.id}`}>
-                <td>
-                  <div className="ap-user-cell">
-                    {u.foto
-                      ? <img src={u.foto} alt="" className="ap-avatar" />
-                      : <div className="ap-avatar-fallback">{(u.nome || '?').charAt(0).toUpperCase()}</div>
-                    }
-                    <span>{u.nome || 'Sem nome'}</span>
-                  </div>
-                </td>
-                <td className="ap-text-dim">{u.email || '—'}</td>
-                <td>
-                  <span className="ap-badge" style={{
-                    color: u.tipo === 'ARTISTA' ? '#8b5cf6' : '#3b82f6',
-                    background: u.tipo === 'ARTISTA' ? 'rgba(139,92,246,0.12)' : 'rgba(59,130,246,0.12)'
-                  }}>{u.tipo === 'ARTISTA' ? 'Artista' : 'Cliente'}</span>
-                </td>
-                <td className="ap-text-dim">{u.telefone || '—'}</td>
-                <td>
-                  <span className="ap-badge" style={{
-                    color: u.verificado ? '#10b981' : '#ef4444',
-                    background: u.verificado ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)'
-                  }}>{u.verificado ? 'Ativo' : 'Inativo'}</span>
-                </td>
-                <td className="ap-text-dim">{formatDate(u.createdAt)}</td>
-                <td>
-                  <button 
-                    className="ap-edit-btn"
-                    onClick={() => setEditModal(u)}
-                    title="Editar usuário"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {paged.length === 0 && <tr><td colSpan={7} className="ap-empty">Nenhum usuário encontrado</td></tr>}
-          </tbody>
-        </table>
-      </div>
-      <Pagination total={localUsuarios.length} page={page} setPage={setPage} />
+        <>
+          <div className="ap-table-wrap">
+            <table className="ap-table">
+              <thead>
+                <tr>
+                  <th>Usuário</th><th>Email</th><th>Tipo</th><th>Telefone</th><th>Status</th><th>Cadastro</th><th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paged.map(u => (
+                  <tr key={`${u.tipo}-${u.id}`}>
+                    <td>
+                      <div className="ap-user-cell">
+                        {u.foto
+                          ? <img src={u.foto} alt="" className="ap-avatar" />
+                          : <div className="ap-avatar-fallback">{(u.nome || '?').charAt(0).toUpperCase()}</div>
+                        }
+                        <span>{u.nome || 'Sem nome'}</span>
+                      </div>
+                    </td>
+                    <td className="ap-text-dim">{u.email || '—'}</td>
+                    <td>
+                      <span className="ap-badge" style={{
+                        color: u.tipo === 'ARTISTA' ? '#8b5cf6' : '#3b82f6',
+                        background: u.tipo === 'ARTISTA' ? 'rgba(139,92,246,0.12)' : 'rgba(59,130,246,0.12)'
+                      }}>{u.tipo === 'ARTISTA' ? 'Artista' : 'Cliente'}</span>
+                    </td>
+                    <td className="ap-text-dim">{u.telefone || '—'}</td>
+                    <td>
+                      <span className="ap-badge" style={{
+                        color: u.verificado ? '#10b981' : '#ef4444',
+                        background: u.verificado ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)'
+                      }}>{u.verificado ? 'Ativo' : 'Inativo'}</span>
+                    </td>
+                    <td className="ap-text-dim">{formatDate(u.createdAt)}</td>
+                    <td>
+                      <button 
+                        className="ap-edit-btn"
+                        onClick={() => setEditModal(u)}
+                        title="Editar usuário"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {paged.length === 0 && <tr><td colSpan={7} className="ap-empty">Nenhum usuário encontrado</td></tr>}
+              </tbody>
+            </table>
+          </div>
+          <Pagination total={localUsuarios.length} page={page} setPage={setPage} />
+        </>
       )}
     </div>
     {editModal && <EditUserModal user={editModal} onClose={() => setEditModal(null)} onSave={handleSaveUser} />}
