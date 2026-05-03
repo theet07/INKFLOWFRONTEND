@@ -250,6 +250,37 @@ const AdminDashboard = () => {
 // Dashboard View
 // ═══════════════════════════════════════════════════════════════
 const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
+  const [openDropdown, setOpenDropdown] = useState(null)
+  const [modalAg, setModalAg] = useState(null)
+  const [localAgendamentos, setLocalAgendamentos] = useState(agendamentos)
+
+  useEffect(() => {
+    setLocalAgendamentos(agendamentos)
+  }, [agendamentos])
+
+  useEffect(() => {
+    const handleClickOutside = () => setOpenDropdown(null)
+    if (openDropdown) {
+      document.addEventListener('click', handleClickOutside)
+      return () => document.removeEventListener('click', handleClickOutside)
+    }
+  }, [openDropdown])
+
+  const handleStatusChange = async (agId, newStatus) => {
+    setLocalAgendamentos(prev => prev.map(a => a.id === agId ? { ...a, status: newStatus } : a))
+    setOpenDropdown(null)
+    try {
+      await agendamentoService.updateStatus(agId, { status: newStatus })
+    } catch (err) {
+      console.error('Erro ao atualizar status:', err)
+      setLocalAgendamentos(agendamentos)
+    }
+  }
+
+  const handleCancelAgendamento = (agId) => {
+    if (!confirm('Tem certeza que deseja cancelar este agendamento?')) return
+    handleStatusChange(agId, 'CANCELADO')
+  }
   const cards = [
     { icon: 'group', label: 'Total Usuários', value: stats.totalUsuarios, color: '#3b82f6', alert: false },
     { icon: 'brush', label: 'Artistas', value: stats.totalArtistas, color: '#8b5cf6', alert: false },
@@ -259,7 +290,7 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
     { icon: 'today', label: 'Hoje', value: stats.agendamentosHoje, color: '#14b8a6', alert: false },
   ]
 
-  const recentAg = [...agendamentos]
+  const recentAg = [...localAgendamentos]
     .sort((a, b) => new Date(b.dataHora || b.createdAt) - new Date(a.dataHora || a.createdAt))
     .slice(0, 6)
 
@@ -367,7 +398,53 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
                     </span>
                   </td>
                   <td>
-                    <button className="ap-table-options">⋯</button>
+                    <div className="ap-dropdown-wrapper">
+                      <button 
+                        className="ap-table-options"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setOpenDropdown(openDropdown === a.id ? null : a.id)
+                        }}
+                      >
+                        ⋯
+                      </button>
+                      {openDropdown === a.id && (
+                        <div className="ap-dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                          <button 
+                            className="ap-dropdown-item"
+                            onClick={() => {
+                              setModalAg(a)
+                              setOpenDropdown(null)
+                            }}
+                          >
+                            <span>👁️</span>
+                            Ver detalhes
+                          </button>
+                          <div className="ap-dropdown-divider" />
+                          <div className="ap-dropdown-label">Editar status</div>
+                          {['PENDENTE', 'CONFIRMADO', 'REALIZADO', 'CANCELADO'].map(status => (
+                            <button
+                              key={status}
+                              className="ap-dropdown-item ap-dropdown-status"
+                              onClick={() => handleStatusChange(a.id, status)}
+                            >
+                              {STATUS_CONFIG[status]?.label || status}
+                            </button>
+                          ))}
+                          <div className="ap-dropdown-divider" />
+                          <button 
+                            className="ap-dropdown-item ap-dropdown-danger"
+                            onClick={() => {
+                              setOpenDropdown(null)
+                              handleCancelAgendamento(a.id)
+                            }}
+                          >
+                            <span>🗑️</span>
+                            Cancelar agendamento
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               )
@@ -378,6 +455,7 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
           </tbody>
         </table>
       </div>
+      {modalAg && <DetailModal ag={modalAg} onClose={() => setModalAg(null)} formatDateTime={formatDateTime} />}
     </>
   )
 }
