@@ -754,26 +754,41 @@ const MiniChart = ({ agendamentos }) => {
   }, [agendamentos])
 
   const max = Math.max(...monthData.map(m => m.count), 1)
-  const barW = 40, gap = 12, h = 140
+  const CHART_H = 220          // area útil para as barras (px dentro do viewBox)
+  const MIN_BAR_H = 4          // altura mínima visível para valor 0
+  const TOP_PAD = 28            // espaço para o número acima da barra
+  const BOTTOM_PAD = 24         // espaço para o label do mês
+  const viewH = TOP_PAD + CHART_H + BOTTOM_PAD
+  const barW = 48, gap = 20
   const w = monthData.length * (barW + gap) - gap
 
   return (
     <div className="ap-card">
       <h3 className="ap-card-title">Agendamentos por Mês</h3>
-      <svg width="100%" viewBox={`0 0 ${w + 20} ${h + 30}`} className="ap-chart">
-        {monthData.map((m, i) => {
-          const barH = (m.count / max) * (h - 20)
-          const x = i * (barW + gap) + 10
-          const y = h - barH
-          return (
-            <g key={m.key}>
-              <rect x={x} y={y} width={barW} height={barH} rx={4} fill="#E21B3C" opacity={0.8} />
-              <text x={x + barW / 2} y={y - 6} textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="11" fontWeight="600">{m.count}</text>
-              <text x={x + barW / 2} y={h + 16} textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="10" textTransform="uppercase">{m.label}</text>
-            </g>
-          )
-        })}
-      </svg>
+      <div style={{ width: '100%', maxHeight: 300, overflow: 'hidden' }}>
+        <svg
+          width="100%"
+          viewBox={`0 0 ${w + 20} ${viewH}`}
+          preserveAspectRatio="xMidYMid meet"
+          className="ap-chart"
+          style={{ display: 'block', maxHeight: 300 }}
+        >
+          {monthData.map((m, i) => {
+            const ratio = m.count / max
+            const barH = m.count === 0 ? MIN_BAR_H : Math.max(MIN_BAR_H, ratio * CHART_H)
+            const x = i * (barW + gap) + 10
+            const baseline = TOP_PAD + CHART_H   // base das barras
+            const y = baseline - barH
+            return (
+              <g key={m.key}>
+                <rect x={x} y={y} width={barW} height={barH} rx={6} fill="#e8294c" opacity={0.85} />
+                <text x={x + barW / 2} y={y - 8} textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="13" fontWeight="700">{m.count}</text>
+                <text x={x + barW / 2} y={baseline + 18} textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="12" fontWeight="500">{m.label}</text>
+              </g>
+            )
+          })}
+        </svg>
+      </div>
     </div>
   )
 }
