@@ -26,6 +26,8 @@ const AdminDashboard = () => {
   const [usuarios, setUsuarios] = useState([])
   const [agendamentos, setAgendamentos] = useState([])
   const [artistas, setArtistas] = useState([])
+  const [requisicoes, setRequisicoes] = useState([])
+  const [requisicoesCount, setRequisicoesCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterTipo, setFilterTipo] = useState('all')
@@ -54,16 +56,20 @@ const AdminDashboard = () => {
   const loadData = async () => {
     setLoading(true)
     try {
-      const [statsRes, usersRes, agRes, artRes] = await Promise.all([
+      const [statsRes, usersRes, agRes, artRes, reqRes, reqCountRes] = await Promise.all([
         adminService.getStats(),
         adminService.getUsuarios(),
         adminService.getAgendamentos(),
         adminService.getArtistas(),
+        adminService.getRequisicoesArtista(),
+        adminService.getRequisicoesArtistaCount(),
       ])
       setStats(statsRes.data)
       setUsuarios(usersRes.data || [])
       setAgendamentos(agRes.data || [])
       setArtistas(artRes.data || [])
+      setRequisicoes(reqRes.data || [])
+      setRequisicoesCount(reqCountRes.data?.count || 0)
     } catch (err) {
       console.error('Erro ao carregar dados admin:', err)
     } finally {
@@ -206,11 +212,14 @@ const AdminDashboard = () => {
         {activeTab === 'usuarios' && (
           <UsuariosView
             usuarios={filteredUsuarios}
+            requisicoes={requisicoes}
+            requisicoesCount={requisicoesCount}
             search={search} setSearch={setSearch}
             filterTipo={filterTipo} setFilterTipo={setFilterTipo}
             formatDate={formatDate}
             totalCount={usuarios.length}
             page={page} setPage={setPage}
+            onReloadData={loadData}
           />
         )}
         {activeTab === 'artistas' && (
@@ -476,7 +485,7 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
 // ═══════════════════════════════════════════════════════════════
 // Usuarios View
 // ═══════════════════════════════════════════════════════════════
-const UsuariosView = ({ usuarios, search, setSearch, filterTipo, setFilterTipo, formatDate, totalCount, page, setPage }) => {
+const UsuariosView = ({ usuarios, requisicoes, requisicoesCount, search, setSearch, filterTipo, setFilterTipo, formatDate, totalCount, page, setPage, onReloadData }) => {
   const [editModal, setEditModal] = useState(null)
   const [localUsuarios, setLocalUsuarios] = useState(usuarios)
 
@@ -514,10 +523,23 @@ const UsuariosView = ({ usuarios, search, setSearch, filterTipo, setFilterTipo, 
             {v === 'all' ? 'Todos' : v === 'CLIENTE' ? 'Clientes' : 'Artistas'}
           </button>
         ))}
+        <button 
+          className={`ap-filter-btn ${filterTipo === 'REQUISICOES' ? 'active' : ''}`}
+          onClick={() => setFilterTipo('REQUISICOES')}
+          style={{ position: 'relative' }}
+        >
+          Req. Artistas
+          {requisicoesCount > 0 && (
+            <span className="ap-badge-count">{requisicoesCount}</span>
+          )}
+        </button>
       </div>
     </div>
 
     <div className="ap-card">
+      {filterTipo === 'REQUISICOES' ? (
+        <RequisicoesTable requisicoes={requisicoes} formatDate={formatDate} onReloadData={onReloadData} />
+      ) : (
       <div className="ap-table-wrap">
         <table className="ap-table">
           <thead>
@@ -572,8 +594,215 @@ const UsuariosView = ({ usuarios, search, setSearch, filterTipo, setFilterTipo, 
       </div>
       <Pagination total={localUsuarios.length} page={page} setPage={setPage} />
     </div>
+      )}
+    </div>
     {editModal && <EditUserModal user={editModal} onClose={() => setEditModal(null)} onSave={handleSaveUser} />}
   </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Requisicoes Table
+// ═══════════════════════════════════════════════════════════════
+const RequisicoesTable = ({ requisicoes, formatDate, onReloadData }) => {
+  const [approvalModal, setApprovalModal] = useState(null)
+
+  return (
+    <>
+    <div className="ap-table-wrap">
+      <table className="ap-table">
+        <thead>
+          <tr>
+            <th>Nome</th><th>Estúdio</th><th>Email</th><th>WhatsApp</th><th>Especialidade</th><th>Data</th><th>Status</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {requisicoes.map(req => (
+            <tr key={req.id}>
+              <td>{req.nomeCompleto}</td>
+              <td>{req.nomeEstudio}</td>
+              <td className="ap-text-dim">{req.email}</td>
+              <td className="ap-text-dim">{req.whatsapp}</td>
+              <td>{req.especialidade}</td>
+              <td className="ap-text-dim">{formatDate(req.createdAt || req.dataCadastro)}</td>
+              <td>
+                <span className="ap-badge" style={{
+                  color: req.status === 'PENDENTE' ? '#f59e0b' : req.status === 'APROVADO' ? '#10b981' : '#ef4444',
+                  background: req.status === 'PENDENTE' ? 'rgba(245,158,11,0.12)' : req.status === 'APROVADO' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)'
+                }}>
+                  {req.status === 'PENDENTE' ? 'Pendente' : req.status === 'APROVADO' ? 'Aprovado' : 'Rejeitado'}
+                </span>
+              </td>
+              <td>
+                {req.status === 'PENDENTE' && (
+                  <div className="ap-actions">
+                    <button 
+                      className="ap-action-btn ap-action-approve" 
+                      title="Aprovar"
+                      onClick={() => setApprovalModal(req)}
+                    >
+                      <span className="material-symbols-outlined">check</span>
+                    </button>
+                    <button 
+                      className="ap-action-btn ap-action-reject" 
+                      title="Rejeitar"
+                      onClick={async () => {
+                        if (confirm(`Tem certeza que deseja rejeitar a requisição de ${req.nomeCompleto}?`)) {
+                          try {
+                            await adminService.rejeitarRequisicao(req.id)
+                            onReloadData()
+                          } catch (err) {
+                            alert('Erro ao rejeitar requisição')
+                          }
+                        }
+                      }}
+                    >
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                )}
+                {req.status !== 'PENDENTE' && (
+                  <span className="ap-text-dim" style={{ fontSize: '0.75rem' }}>—</span>
+                )}
+              </td>
+            </tr>
+          ))}
+          {requisicoes.length === 0 && (
+            <tr><td colSpan={8} className="ap-empty">Nenhuma requisição encontrada</td></tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+    {approvalModal && (
+      <ApprovalModal 
+        requisicao={approvalModal} 
+        onClose={() => setApprovalModal(null)} 
+        onSuccess={() => {
+          setApprovalModal(null)
+          onReloadData()
+        }}
+      />
+    )}
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Approval Modal
+// ═══════════════════════════════════════════════════════════════
+const ApprovalModal = ({ requisicao, onClose, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    email: requisicao.email || '',
+    senha: '',
+    confirmarSenha: ''
+  })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+
+    // Validação
+    if (formData.senha.length < 6) {
+      setError('Senha deve ter no mínimo 6 caracteres')
+      return
+    }
+
+    if (formData.senha !== formData.confirmarSenha) {
+      setError('As senhas não coincidem')
+      return
+    }
+
+    setLoading(true)
+    try {
+      await adminService.aprovarRequisicao(requisicao.id, {
+        email: formData.email,
+        senha: formData.senha
+      })
+      onSuccess()
+    } catch (err) {
+      setError(err.response?.data?.message || 'Erro ao aprovar requisição')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="ap-modal-overlay" onClick={onClose}>
+      <div className="ap-modal ap-modal-form" onClick={e => e.stopPropagation()}>
+        <div className="ap-modal-header">
+          <h2>Criar conta do artista</h2>
+          <button className="ap-modal-close" onClick={onClose}>
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <form className="ap-modal-body" onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+            <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.25rem' }}>Artista</div>
+            <div style={{ fontSize: '0.95rem', fontWeight: '600' }}>{requisicao.nomeCompleto}</div>
+            <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.25rem' }}>{requisicao.nomeEstudio} • {requisicao.especialidade}</div>
+          </div>
+
+          {error && (
+            <div style={{ 
+              padding: '0.75rem', 
+              background: 'rgba(239,68,68,0.12)', 
+              border: '1px solid rgba(239,68,68,0.3)',
+              borderRadius: '8px', 
+              color: '#ef4444', 
+              fontSize: '0.85rem',
+              marginBottom: '1rem'
+            }}>
+              {error}
+            </div>
+          )}
+
+          <div className="ap-form-group">
+            <label>Email</label>
+            <input 
+              type="email" 
+              value={formData.email}
+              onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              required
+              placeholder="email@exemplo.com"
+            />
+          </div>
+
+          <div className="ap-form-group">
+            <label>Senha</label>
+            <input 
+              type="password" 
+              value={formData.senha}
+              onChange={e => setFormData(prev => ({ ...prev, senha: e.target.value }))}
+              required
+              placeholder="Mínimo 6 caracteres"
+              minLength={6}
+            />
+          </div>
+
+          <div className="ap-form-group">
+            <label>Confirmar Senha</label>
+            <input 
+              type="password" 
+              value={formData.confirmarSenha}
+              onChange={e => setFormData(prev => ({ ...prev, confirmarSenha: e.target.value }))}
+              required
+              placeholder="Digite a senha novamente"
+            />
+          </div>
+
+          <div className="ap-modal-actions">
+            <button type="button" className="ap-btn-secondary" onClick={onClose} disabled={loading}>
+              Cancelar
+            </button>
+            <button type="submit" className="ap-btn-primary" disabled={loading}>
+              {loading ? 'Criando...' : 'Criar e ativar'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 
