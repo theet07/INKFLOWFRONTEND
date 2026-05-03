@@ -113,6 +113,9 @@ export const adminService = {
   // Atualizar usuários
   updateCliente: (id, data) => api.put(`/admin/usuarios/cliente/${id}`, data, { baseURL: API_BASE_URL.replace('/v1', '') }),
   updateArtista: (id, data) => api.put(`/admin/usuarios/artista/${id}`, data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  // Excluir usuários
+  deleteCliente: (id) => api.delete(`/admin/usuarios/cliente/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  deleteArtista: (id) => api.delete(`/admin/usuarios/artista/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
 };
 
 export const testConnection = () => api.get('/api/health', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') });

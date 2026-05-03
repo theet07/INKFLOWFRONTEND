@@ -1070,10 +1070,30 @@ const EditUserModal = ({ user, onClose, onSave }) => {
     telefone: user.telefone || '',
     verificado: user.verificado || false
   })
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault()
     onSave({ ...user, ...formData })
+  }
+
+  const handleDelete = async () => {
+    if (!showDeleteConfirm) {
+      setShowDeleteConfirm(true)
+      return
+    }
+
+    try {
+      if (user.tipo === 'CLIENTE') {
+        await adminService.deleteCliente(user.id)
+      } else if (user.tipo === 'ARTISTA') {
+        await adminService.deleteArtista(user.id)
+      }
+      onClose()
+      window.location.reload()
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erro ao excluir usuário')
+    }
   }
 
   return (
@@ -1132,7 +1152,40 @@ const EditUserModal = ({ user, onClose, onSave }) => {
               <option value="false">Inativo</option>
             </select>
           </div>
+          
+          {showDeleteConfirm && (
+            <div style={{ 
+              padding: '0.75rem', 
+              background: 'rgba(239,68,68,0.12)', 
+              border: '1px solid rgba(239,68,68,0.3)',
+              borderRadius: '8px', 
+              color: '#ef4444', 
+              fontSize: '0.85rem',
+              marginBottom: '1rem'
+            }}>
+              <strong>Atenção:</strong> Esta ação é irreversível. Clique novamente em "Excluir Conta" para confirmar.
+            </div>
+          )}
+
           <div className="ap-modal-actions">
+            <button 
+              type="button" 
+              onClick={handleDelete}
+              style={{
+                background: showDeleteConfirm ? '#ef4444' : 'transparent',
+                color: showDeleteConfirm ? '#fff' : '#ef4444',
+                border: '1px solid #ef4444',
+                padding: '0.5rem 1rem',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                marginRight: 'auto',
+                transition: 'all 0.2s'
+              }}
+            >
+              {showDeleteConfirm ? 'Confirmar Exclusão' : 'Excluir Conta'}
+            </button>
             <button type="button" className="ap-btn-secondary" onClick={onClose}>
               Cancelar
             </button>
