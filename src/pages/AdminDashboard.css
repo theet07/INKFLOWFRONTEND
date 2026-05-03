@@ -526,6 +526,10 @@
   border-collapse: collapse;
 }
 
+.ap-card {
+  overflow: visible;
+}
+
 .ap-recent-table thead th {
   text-align: left;
   padding: 0.75rem 1rem;
@@ -632,6 +636,13 @@
   z-index: 1000;
   padding: 0.5rem 0;
   animation: ap-dropdown-in 0.15s ease;
+}
+
+.ap-dropdown-menu.ap-dropdown-up {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
 }
 
 @keyframes ap-dropdown-in {

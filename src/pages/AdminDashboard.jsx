@@ -251,6 +251,7 @@ const AdminDashboard = () => {
 // ═══════════════════════════════════════════════════════════════
 const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
   const [openDropdown, setOpenDropdown] = useState(null)
+  const [dropdownPosition, setDropdownPosition] = useState('down')
   const [modalAg, setModalAg] = useState(null)
   const [localAgendamentos, setLocalAgendamentos] = useState(agendamentos)
 
@@ -265,6 +266,15 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
       return () => document.removeEventListener('click', handleClickOutside)
     }
   }, [openDropdown])
+
+  const handleDropdownClick = (e, agId) => {
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+    const spaceBelow = window.innerHeight - rect.bottom
+    const openUpward = spaceBelow < 150
+    setDropdownPosition(openUpward ? 'up' : 'down')
+    setOpenDropdown(openDropdown === agId ? null : agId)
+  }
 
   const handleStatusChange = async (agId, newStatus) => {
     setLocalAgendamentos(prev => prev.map(a => a.id === agId ? { ...a, status: newStatus } : a))
@@ -401,15 +411,12 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
                     <div className="ap-dropdown-wrapper">
                       <button 
                         className="ap-table-options"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setOpenDropdown(openDropdown === a.id ? null : a.id)
-                        }}
+                        onClick={(e) => handleDropdownClick(e, a.id)}
                       >
                         ⋯
                       </button>
                       {openDropdown === a.id && (
-                        <div className="ap-dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                        <div className={`ap-dropdown-menu ${dropdownPosition === 'up' ? 'ap-dropdown-up' : ''}`} onClick={(e) => e.stopPropagation()}>
                           <button 
                             className="ap-dropdown-item"
                             onClick={() => {
