@@ -110,6 +110,9 @@ export const adminService = {
   getRequisicoesArtistaCount: () => api.get('/admin/requisicoes-artista/pendentes/count', { baseURL: API_BASE_URL.replace('/v1', '') }),
   aprovarRequisicao: (id, data) => api.post(`/admin/requisicoes-artista/${id}/aprovar`, data, { baseURL: API_BASE_URL.replace('/v1', '') }),
   rejeitarRequisicao: (id) => api.post(`/admin/requisicoes-artista/${id}/rejeitar`, {}, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  // Atualizar usuários
+  updateCliente: (id, data) => api.put(`/admin/usuarios/cliente/${id}`, data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  updateArtista: (id, data) => api.put(`/admin/usuarios/artista/${id}`, data, { baseURL: API_BASE_URL.replace('/v1', '') }),
 };
 
 export const testConnection = () => api.get('/api/health', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') });

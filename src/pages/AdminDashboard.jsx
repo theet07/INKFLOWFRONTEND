@@ -220,6 +220,7 @@ const AdminDashboard = () => {
             totalCount={usuarios.length}
             page={page} setPage={setPage}
             onReloadData={loadData}
+            showToast={showToast}
           />
         )}
         {activeTab === 'artistas' && (
@@ -485,7 +486,7 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
 // ═══════════════════════════════════════════════════════════════
 // Usuarios View
 // ═══════════════════════════════════════════════════════════════
-const UsuariosView = ({ usuarios, requisicoes, requisicoesCount, search, setSearch, filterTipo, setFilterTipo, formatDate, totalCount, page, setPage, onReloadData }) => {
+const UsuariosView = ({ usuarios, requisicoes, requisicoesCount, search, setSearch, filterTipo, setFilterTipo, formatDate, totalCount, page, setPage, onReloadData, showToast }) => {
   const [editModal, setEditModal] = useState(null)
   const [localUsuarios, setLocalUsuarios] = useState(usuarios)
 
@@ -493,11 +494,37 @@ const UsuariosView = ({ usuarios, requisicoes, requisicoesCount, search, setSear
     setLocalUsuarios(usuarios)
   }, [usuarios])
 
-  const handleSaveUser = (updatedUser) => {
-    setLocalUsuarios(prev => prev.map(u => 
-      (u.tipo === updatedUser.tipo && u.id === updatedUser.id) ? updatedUser : u
-    ))
-    setEditModal(null)
+  const handleSaveUser = async (updatedUser) => {
+    try {
+      // Preparar dados para envio
+      const updateData = {
+        nome: updatedUser.nome,
+        email: updatedUser.email,
+        telefone: updatedUser.telefone,
+        verificado: updatedUser.verificado
+      }
+
+      // Chamar API apropriada baseado no tipo
+      if (updatedUser.tipo === 'CLIENTE') {
+        await adminService.updateCliente(updatedUser.id, updateData)
+      } else if (updatedUser.tipo === 'ARTISTA') {
+        await adminService.updateArtista(updatedUser.id, updateData)
+      }
+
+      // Atualizar estado local
+      setLocalUsuarios(prev => prev.map(u => 
+        (u.tipo === updatedUser.tipo && u.id === updatedUser.id) ? updatedUser : u
+      ))
+      
+      setEditModal(null)
+      showToast('Usuário atualizado com sucesso')
+      
+      // Recarregar dados para garantir sincronização
+      onReloadData()
+    } catch (err) {
+      console.error('Erro ao atualizar usuário:', err)
+      showToast(err.response?.data?.message || 'Erro ao atualizar usuário', true)
+    }
   }
 
   const paged = localUsuarios.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
