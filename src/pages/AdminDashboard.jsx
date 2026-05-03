@@ -470,7 +470,21 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
 // Usuarios View
 // ═══════════════════════════════════════════════════════════════
 const UsuariosView = ({ usuarios, search, setSearch, filterTipo, setFilterTipo, formatDate, totalCount, page, setPage }) => {
-  const paged = usuarios.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+  const [editModal, setEditModal] = useState(null)
+  const [localUsuarios, setLocalUsuarios] = useState(usuarios)
+
+  useEffect(() => {
+    setLocalUsuarios(usuarios)
+  }, [usuarios])
+
+  const handleSaveUser = (updatedUser) => {
+    setLocalUsuarios(prev => prev.map(u => 
+      (u.tipo === updatedUser.tipo && u.id === updatedUser.id) ? updatedUser : u
+    ))
+    setEditModal(null)
+  }
+
+  const paged = localUsuarios.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
   return (
   <>
     <header className="ap-page-header">
@@ -501,7 +515,7 @@ const UsuariosView = ({ usuarios, search, setSearch, filterTipo, setFilterTipo, 
         <table className="ap-table">
           <thead>
             <tr>
-              <th>Usuário</th><th>Email</th><th>Tipo</th><th>Telefone</th><th>Status</th><th>Cadastro</th>
+              <th>Usuário</th><th>Email</th><th>Tipo</th><th>Telefone</th><th>Status</th><th>Cadastro</th><th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -531,14 +545,27 @@ const UsuariosView = ({ usuarios, search, setSearch, filterTipo, setFilterTipo, 
                   }}>{u.verificado ? 'Ativo' : 'Inativo'}</span>
                 </td>
                 <td className="ap-text-dim">{formatDate(u.createdAt)}</td>
+                <td>
+                  <button 
+                    className="ap-edit-btn"
+                    onClick={() => setEditModal(u)}
+                    title="Editar usuário"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                </td>
               </tr>
             ))}
-            {paged.length === 0 && <tr><td colSpan={6} className="ap-empty">Nenhum usuário encontrado</td></tr>}
+            {paged.length === 0 && <tr><td colSpan={7} className="ap-empty">Nenhum usuário encontrado</td></tr>}
           </tbody>
         </table>
       </div>
-      <Pagination total={usuarios.length} page={page} setPage={setPage} />
+      <Pagination total={localUsuarios.length} page={page} setPage={setPage} />
     </div>
+    {editModal && <EditUserModal user={editModal} onClose={() => setEditModal(null)} onSave={handleSaveUser} />}
   </>
   )
 }
@@ -764,6 +791,94 @@ const ArtistasView = ({ artistas, agendamentos, search, setSearch, filterEsp, se
         {filtered.length === 0 && <p className="ap-empty" style={{ gridColumn: '1/-1' }}>Nenhum artista encontrado</p>}
       </div>
     </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Edit User Modal
+// ═══════════════════════════════════════════════════════════════
+const EditUserModal = ({ user, onClose, onSave }) => {
+  const [formData, setFormData] = useState({
+    id: user.id,
+    tipo: user.tipo,
+    nome: user.nome || '',
+    email: user.email || '',
+    telefone: user.telefone || '',
+    verificado: user.verificado || false
+  })
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    onSave({ ...user, ...formData })
+  }
+
+  return (
+    <div className="ap-modal-overlay" onClick={onClose}>
+      <div className="ap-modal ap-modal-form" onClick={e => e.stopPropagation()}>
+        <div className="ap-modal-header">
+          <h2>Editar usuário</h2>
+          <button className="ap-modal-close" onClick={onClose}>
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <form className="ap-modal-body" onSubmit={handleSubmit}>
+          <div className="ap-form-group">
+            <label>Nome</label>
+            <input 
+              type="text" 
+              value={formData.nome}
+              onChange={e => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+              required
+            />
+          </div>
+          <div className="ap-form-group">
+            <label>Email</label>
+            <input 
+              type="email" 
+              value={formData.email}
+              onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              required
+            />
+          </div>
+          <div className="ap-form-group">
+            <label>Telefone</label>
+            <input 
+              type="tel" 
+              value={formData.telefone}
+              onChange={e => setFormData(prev => ({ ...prev, telefone: e.target.value }))}
+            />
+          </div>
+          <div className="ap-form-group">
+            <label>Tipo</label>
+            <select 
+              value={formData.tipo}
+              onChange={e => setFormData(prev => ({ ...prev, tipo: e.target.value }))}
+            >
+              <option value="CLIENTE">Cliente</option>
+              <option value="ARTISTA">Artista</option>
+            </select>
+          </div>
+          <div className="ap-form-group">
+            <label>Status</label>
+            <select 
+              value={formData.verificado ? 'true' : 'false'}
+              onChange={e => setFormData(prev => ({ ...prev, verificado: e.target.value === 'true' }))}
+            >
+              <option value="true">Ativo</option>
+              <option value="false">Inativo</option>
+            </select>
+          </div>
+          <div className="ap-modal-actions">
+            <button type="button" className="ap-btn-secondary" onClick={onClose}>
+              Cancelar
+            </button>
+            <button type="submit" className="ap-btn-primary">
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 

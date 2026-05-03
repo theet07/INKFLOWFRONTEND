@@ -697,3 +697,96 @@
   letter-spacing: 0.5px;
   font-weight: 600;
 }
+
+/* ── Edit Button ───────────────────────────────────────────── */
+.ap-edit-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.ap-edit-btn:hover {
+  background: rgba(232,41,76,0.12);
+  color: #e8294c;
+}
+
+.ap-edit-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Form Modal ────────────────────────────────────────────── */
+.ap-modal-form {
+  max-width: 520px;
+}
+
+.ap-form-group {
+  margin-bottom: 1.25rem;
+}
+
+.ap-form-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #888;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ap-form-group input,
+.ap-form-group select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  color: #f0f0f0;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.ap-form-group input:focus,
+.ap-form-group select:focus {
+  outline: none;
+  border-color: rgba(232,41,76,0.4);
+}
+
+.ap-form-group select {
+  cursor: pointer;
+}
+
+.ap-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.ap-btn-secondary {
+  padding: 0.7rem 1.5rem;
+  border: 1px solid #2a2a2a;
+  background: transparent;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ap-btn-secondary:hover {
+  background: rgba(255,255,255,0.05);
+  color: #f0f0f0;
+  border-color: rgba(255,255,255,0.1);
+}
