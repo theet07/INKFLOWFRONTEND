@@ -209,7 +209,7 @@ const ArtistLandingPage = () => {
                   <span className="material-symbols-outlined">person_pin</span>
                 </div>
                 <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>1. Profile</h3>
-                <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Seu cartão de visitas digital brutalista. Links, regras do estúdio e disponibilidade clara e direta.</p>
+                <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Seu portfólio profissional em uma única página. Mostre seu trabalho, defina suas regras e deixe claro quando você está disponível — sem precisar repetir as mesmas informações mil vezes.</p>
               </div>
               <div 
                 style={{ position: 'relative', height: '220px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden', cursor: 'zoom-in' }}
@@ -251,7 +251,7 @@ const ArtistLandingPage = () => {
                   <span className="material-symbols-outlined">edit_document</span>
                 </div>
                 <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>3. Requests</h3>
-                <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Formulários de orçamento precisos. Tamanho, local, referência. Chega de "quanto custa uma tattoo?".</p>
+                <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Receba orçamentos completos desde o início. Tamanho, região do corpo, referências visuais — todas as informações que você precisa para dar um preço justo, sem perder tempo com perguntas básicas.</p>
               </div>
               <div 
                 style={{ position: 'relative', height: '220px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden', cursor: 'zoom-in' }}
@@ -317,7 +317,7 @@ const ArtistLandingPage = () => {
                 <div style={{ flex: 1, textAlign: 'right' }}>
                   <p style={{ fontSize: '0.75rem', color: 'var(--primary-red)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>02 / Workflow</p>
                   <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Status Management</h3>
-                  <p style={{ color: 'var(--on-surface-variant)', maxWidth: '600px', marginLeft: 'auto' }}>Acompanhe cada cliente do primeiro contato até a sessão finalizada. Gerencie status como Pendente, Confirmado, Em Andamento e Realizado — tudo em um painel visual e intuitivo.</p>
+                  <p style={{ color: 'var(--on-surface-variant)', maxWidth: '600px', marginLeft: 'auto' }}>Profissionalize sua gestão de clientes. Acompanhe cada etapa do atendimento com status claros (Pendente → Confirmado → Em Andamento → Realizado) e mantenha seu estúdio organizado.</p>
                 </div>
               </div>
             </div>
