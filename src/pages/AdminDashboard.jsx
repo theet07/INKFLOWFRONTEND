@@ -338,42 +338,45 @@ const DashboardView = ({ stats, agendamentos, formatDateTime }) => {
         <ChartJSBar agendamentos={agendamentos} />
       </div>
 
-      {/* Recent - Cards separados */}
-      <div>
+      {/* Recent - Tabela */}
+      <div className="ap-card">
         <h3 className="ap-section-title">Últimos Agendamentos</h3>
-        <div className="ap-recent-grid">
-          {recentAg.map(a => {
-            const sc = STATUS_CONFIG[a.status] || { label: a.status, color: '#888', bg: 'rgba(136,136,136,0.12)' }
-            return (
-              <div key={a.id} className="ap-recent-card">
-                <div className="ap-recent-row">
-                  <span className="ap-recent-label">Cliente</span>
-                  <span className="ap-recent-value">{a.cliente?.fullName || a.cliente?.nome || '—'}</span>
-                </div>
-                <div className="ap-recent-row">
-                  <span className="ap-recent-label">Artista</span>
-                  <span className="ap-recent-value">{a.artista?.nome || '—'}</span>
-                </div>
-                <div className="ap-recent-row">
-                  <span className="ap-recent-label">Data/Hora</span>
-                  <span className="ap-recent-value">{formatDateTime(a.dataHora)}</span>
-                </div>
-                <div className="ap-recent-row">
-                  <span className="ap-recent-label">Serviço</span>
-                  <span className="ap-recent-value">{a.servico || '—'}</span>
-                </div>
-                <div className="ap-recent-row">
-                  <span className="ap-recent-label">Status</span>
-                  <span className="ap-badge" style={{ color: sc.color, background: sc.bg }}>{sc.label}</span>
-                </div>
-                <button className="ap-recent-options" title="Opções">
-                  <span className="material-symbols-outlined">more_vert</span>
-                </button>
-              </div>
-            )
-          })}
-          {recentAg.length === 0 && <p className="ap-empty">Nenhum agendamento</p>}
-        </div>
+        <table className="ap-recent-table">
+          <thead>
+            <tr>
+              <th>CLIENTE</th>
+              <th>ARTISTA</th>
+              <th>DATA/HORA</th>
+              <th>SERVIÇO</th>
+              <th>STATUS</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {recentAg.map(a => {
+              const sc = STATUS_CONFIG[a.status] || { label: a.status, color: '#888', bg: 'rgba(136,136,136,0.12)' }
+              return (
+                <tr key={a.id}>
+                  <td>{a.cliente?.fullName || a.cliente?.nome || '—'}</td>
+                  <td>{a.artista?.nome || '—'}</td>
+                  <td>{formatDateTime(a.dataHora)}</td>
+                  <td>{a.servico || '—'}</td>
+                  <td>
+                    <span className={`ap-status-pill ap-status-${a.status.toLowerCase()}`}>
+                      {sc.label}
+                    </span>
+                  </td>
+                  <td>
+                    <button className="ap-table-options">⋯</button>
+                  </td>
+                </tr>
+              )
+            })}
+            {recentAg.length === 0 && (
+              <tr><td colSpan={6} className="ap-empty">Nenhum agendamento</td></tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </>
   )

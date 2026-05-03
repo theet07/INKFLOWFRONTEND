@@ -519,63 +519,86 @@
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-.ap-recent-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+
+/* Recent Appointments - Tabela */
+.ap-recent-table {
+  width: 100%;
+  border-collapse: collapse;
 }
-.ap-recent-card {
-  background: #1a1a1a;
-  border: 0.5px solid #2a2a2a;
-  border-radius: 12px;
-  padding: 1.25rem;
-  position: relative;
-  transition: all 0.2s;
-}
-.ap-recent-card:hover {
-  border-color: rgba(255,255,255,0.1);
-  transform: translateY(-2px);
-}
-.ap-recent-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-.ap-recent-row:last-of-type { border-bottom: none; }
-.ap-recent-label {
-  font-size: 0.75rem;
+
+.ap-recent-table thead th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 10px;
+  font-weight: 600;
   color: #555;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
+  border-bottom: 0.5px solid #2a2a2a;
 }
-.ap-recent-value {
-  font-size: 0.85rem;
+
+.ap-recent-table tbody tr {
+  border-bottom: 0.5px solid #2a2a2a;
+  transition: background 0.15s;
+}
+
+.ap-recent-table tbody tr:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+.ap-recent-table tbody td {
+  padding: 1rem;
+  font-size: 13px;
   color: #f0f0f0;
+}
+
+.ap-status-pill {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
-.ap-recent-options {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  border: none;
-  background: rgba(255,255,255,0.03);
-  color: #888;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
+
+.ap-status-pill.ap-status-realizado,
+.ap-status-pill.ap-status-finalizado {
+  background: rgba(16,185,129,0.12);
+  color: #10b981;
 }
-.ap-recent-options:hover {
-  background: rgba(255,255,255,0.08);
+
+.ap-status-pill.ap-status-pendente,
+.ap-status-pill.ap-status-agendado {
+  background: rgba(245,158,11,0.12);
+  color: #f59e0b;
+}
+
+.ap-status-pill.ap-status-cancelado {
+  background: rgba(239,68,68,0.12);
+  color: #ef4444;
+}
+
+.ap-status-pill.ap-status-confirmado {
+  background: rgba(59,130,246,0.12);
+  color: #3b82f6;
+}
+
+.ap-status-pill.ap-status-em_andamento {
+  background: rgba(139,92,246,0.12);
+  color: #8b5cf6;
+}
+
+.ap-table-options {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color 0.15s;
+}
+
+.ap-table-options:hover {
   color: #f0f0f0;
 }
-.ap-recent-options .material-symbols-outlined { font-size: 1rem; }
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 1100px) {
