@@ -250,8 +250,8 @@ const ArtistLandingPage = () => {
                 <div className="alp-icon-box">
                   <span className="material-symbols-outlined">edit_document</span>
                 </div>
-                <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>3. Requests</h3>
-                <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Receba orçamentos completos desde o início. Tamanho, região do corpo, referências visuais — todas as informações que você precisa para dar um preço justo, sem perder tempo com perguntas básicas.</p>
+                <h3 className="alp-headline" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>3. Dashboard</h3>
+                <p style={{ color: 'var(--on-surface-variant)', lineHeight: 1.6 }}>Centralize tudo em um só lugar. Visualize solicitações pendentes, gerencie agendamentos confirmados e acompanhe o histórico completo de cada cliente — sem precisar alternar entre apps.</p>
               </div>
               <div 
                 style={{ position: 'relative', height: '220px', borderRadius: '4px', marginTop: '2rem', overflow: 'hidden', cursor: 'zoom-in' }}
