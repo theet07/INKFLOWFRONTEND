@@ -634,6 +634,17 @@ const UsuariosView = ({ usuarios, requisicoes, requisicoesCount, search, setSear
 // ═══════════════════════════════════════════════════════════════
 const RequisicoesTable = ({ requisicoes, formatDate, onReloadData }) => {
   const [approvalModal, setApprovalModal] = useState(null)
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+
+  const handleDelete = async (id) => {
+    try {
+      await adminService.deleteRequisicao(id)
+      setDeleteConfirm(null)
+      onReloadData()
+    } catch (err) {
+      alert('Erro ao excluir requisição')
+    }
+  }
 
   return (
     <>
@@ -662,36 +673,67 @@ const RequisicoesTable = ({ requisicoes, formatDate, onReloadData }) => {
                 </span>
               </td>
               <td>
-                {req.status === 'PENDENTE' && (
-                  <div className="ap-actions">
-                    <button 
-                      className="ap-action-btn ap-action-approve" 
-                      title="Aprovar"
-                      onClick={() => setApprovalModal(req)}
-                    >
-                      <span className="material-symbols-outlined">check</span>
-                    </button>
-                    <button 
-                      className="ap-action-btn ap-action-reject" 
-                      title="Rejeitar"
-                      onClick={async () => {
-                        if (confirm(`Tem certeza que deseja rejeitar a requisição de ${req.nomeCompleto}?`)) {
-                          try {
-                            await adminService.rejeitarRequisicao(req.id)
-                            onReloadData()
-                          } catch (err) {
-                            alert('Erro ao rejeitar requisição')
+                <div className="ap-actions">
+                  {req.status === 'PENDENTE' && (
+                    <>
+                      <button 
+                        className="ap-action-btn ap-action-approve" 
+                        title="Aprovar"
+                        onClick={() => setApprovalModal(req)}
+                      >
+                        <span className="material-symbols-outlined">check</span>
+                      </button>
+                      <button 
+                        className="ap-action-btn ap-action-reject" 
+                        title="Rejeitar"
+                        onClick={async () => {
+                          if (confirm(`Tem certeza que deseja rejeitar a requisição de ${req.nomeCompleto}?`)) {
+                            try {
+                              await adminService.rejeitarRequisicao(req.id)
+                              onReloadData()
+                            } catch (err) {
+                              alert('Erro ao rejeitar requisição')
+                            }
                           }
-                        }
-                      }}
+                        }}
+                      >
+                        <span className="material-symbols-outlined">close</span>
+                      </button>
+                    </>
+                  )}
+                  {deleteConfirm === req.id ? (
+                    <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#888', marginRight: '0.25rem' }}>Excluir?</span>
+                      <button
+                        className="ap-action-btn ap-action-approve"
+                        title="Sim"
+                        onClick={() => handleDelete(req.id)}
+                        style={{ padding: '0.25rem' }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check</span>
+                      </button>
+                      <button
+                        className="ap-action-btn ap-action-reject"
+                        title="Não"
+                        onClick={() => setDeleteConfirm(null)}
+                        style={{ padding: '0.25rem' }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="ap-action-btn ap-action-delete-req"
+                      title="Excluir requisição"
+                      onClick={() => setDeleteConfirm(req.id)}
                     >
-                      <span className="material-symbols-outlined">close</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
                     </button>
-                  </div>
-                )}
-                {req.status !== 'PENDENTE' && (
-                  <span className="ap-text-dim" style={{ fontSize: '0.75rem' }}>—</span>
-                )}
+                  )}
+                </div>
               </td>
             </tr>
           ))}

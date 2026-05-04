@@ -830,3 +830,29 @@
   color: #ef4444;
   border-color: rgba(239,68,68,0.25);
 }
+
+/* ── Delete Requisicao Button ──────────────────────────────── */
+.ap-action-delete-req {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: #555;
+}
+
+.ap-action-delete-req:hover {
+  background: rgba(232,41,76,0.15);
+  color: #e8294c;
+  border-color: rgba(232,41,76,0.25);
+}
+
+.ap-action-delete-req svg {
+  width: 16px;
+  height: 16px;
+}
