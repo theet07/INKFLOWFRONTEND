@@ -116,7 +116,8 @@ const AdminDashboard = () => {
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
-      showToast('Backup gerado com sucesso')
+      adminService.enviarBackupEmail().catch(() => {})
+      showToast('Backup gerado e enviado por e-mail')
     } catch {
       showToast('Falha ao gerar backup', true)
     } finally {
