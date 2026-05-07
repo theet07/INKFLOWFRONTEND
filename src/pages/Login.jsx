@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useCallback, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { clienteService, authService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
@@ -29,7 +29,16 @@ const Login = () => {
   const [loginError, setLoginError] = useState('')
   const [otpError, setOtpError] = useState('')
   const navigate = useNavigate()
+  const location = useLocation()
   const { login } = useAuth()
+
+  // Se a pessoa acessar /cadastro ou vier com um parâmetro redirect do app mobile, abrir a aba de cadastro
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search)
+    if (location.pathname === '/cadastro' || urlParams.get('redirect')) {
+      setIsLogin(false)
+    }
+  }, [location])
 
   const showToast = useCallback((message, type = 'info') => {
     const id = Date.now() + Math.random()
@@ -155,9 +164,20 @@ const Login = () => {
       })
 
       if (response.status === 200 || response.status === 201) {
-        showToast('Conta Ativada com Sucesso! Faça login para continuar.', 'success')
-        setIsLogin(true)
-        setIsVerifying(false)
+        // Verifica se veio do mobile
+        const urlParams = new URLSearchParams(window.location.search)
+        const redirectUrl = urlParams.get('redirect')
+
+        if (redirectUrl) {
+          showToast('Conta criada com sucesso! Retornando ao aplicativo...', 'success')
+          setTimeout(() => {
+            window.location.href = redirectUrl
+          }, 1500)
+        } else {
+          showToast('Conta Ativada com Sucesso! Faça login para continuar.', 'success')
+          setIsLogin(true)
+          setIsVerifying(false)
+        }
       } else if (response.status === 429) {
         setOtpError('Código bloqueado por excesso de tentativas.')
       } else {
