@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { artistaService, disponibilidadeService } from '../../services/inkflowApi'
 
-const SettingsTab = ({ showToast }) => {
+const SettingsTab = ({ showToast, studioOpen, setStudioOpen, switchTab }) => {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
 
-  const [studioOpen, setStudioOpen] = useState(true)
   const [artistName, setArtistName] = useState(storedUser.nome || storedUser.fullName || '')
   const [artistEmail, setArtistEmail] = useState(storedUser.email || '')
   const [artistBio, setArtistBio] = useState(storedUser.bio || '')
@@ -19,8 +17,53 @@ const SettingsTab = ({ showToast }) => {
   )
   const [avatarPreview, setAvatarPreview] = useState(storedUser.fotoUrl || '')
   const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const [notifications, setNotifications] = useState({ email: true, push: true, audio: false })
+  const [notifications, setNotifications] = useState({
+    sino: localStorage.getItem('notif_sino_ativo') !== 'false',
+    msg: localStorage.getItem('notif_msg_ativo') !== 'false',
+    som: localStorage.getItem('notif_som_ativo') !== 'false'
+  })
+
+  const handleToggleNotif = (key) => {
+    const newVal = !notifications[key]
+    setNotifications(prev => ({ ...prev, [key]: newVal }))
+    localStorage.setItem(`notif_${key}_ativo`, String(newVal))
+  }
+
+  // Buscar dados atualizados do artista da API
+  useEffect(() => {
+    const fetchArtistaData = async () => {
+      try {
+        const artistaId = user?.artistaId || user?.id || storedUser.artistaId || storedUser.id
+        if (!artistaId) return
+        
+        const response = await artistaService.getById(artistaId)
+        const artistaData = response.data
+        
+        // Atualizar estados com dados da API
+        setArtistName(artistaData.nome || '')
+        setArtistEmail(artistaData.email || '')
+        setArtistBio(artistaData.bio || '')
+        setTags(
+          artistaData.especialidades
+            ? artistaData.especialidades.split(',').map(t => t.trim()).filter(Boolean)
+            : []
+        )
+        setAvatarPreview(artistaData.fotoUrl || '')
+        
+        // Atualizar localStorage com dados mais recentes
+        const updatedUser = { ...storedUser, ...artistaData }
+        localStorage.setItem('user', JSON.stringify(updatedUser))
+      } catch (err) {
+        console.error('Erro ao buscar dados do artista:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchArtistaData()
+  }, [user])
 
   const diasMap = { 'Seg': 0, 'Ter': 1, 'Qua': 2, 'Qui': 3, 'Sex': 4, 'Sáb': 5, 'Dom': 6 }
   const [disponibilidadeIds, setDisponibilidadeIds] = useState({})
@@ -112,6 +155,15 @@ const SettingsTab = ({ showToast }) => {
         especialidades: tags.join(',')
       })
 
+      // Atualizar localStorage após salvar
+      const updatedUser = {
+        ...storedUser,
+        nome: artistName,
+        bio: artistBio,
+        especialidades: tags.join(',')
+      }
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+
       await Promise.all(schedule.map(async (item) => {
         const diaIndex = diasMap[item.day]
         if (item.active) {
@@ -138,7 +190,17 @@ const SettingsTab = ({ showToast }) => {
 
   const handleDiscard = () => {
     if (confirm('Tem certeza que deseja descartar as alterações não salvas?')) {
-      showToast('Alterações descartadas.', true)
+      const original = JSON.parse(localStorage.getItem('user') || '{}')
+      setArtistName(original.nome || original.fullName || '')
+      setArtistEmail(original.email || '')
+      setArtistBio(original.bio || '')
+      setTags(
+        original.especialidades
+          ? original.especialidades.split(',').map(t => t.trim()).filter(Boolean)
+          : []
+      )
+      setAvatarPreview(original.fotoUrl || '')
+      showToast('Alterações descartadas.')
     }
   }
 
@@ -161,9 +223,17 @@ const SettingsTab = ({ showToast }) => {
             </p>
           </div>
           <label className="ad-toggle-large">
-            <input type="checkbox" checked={studioOpen} onChange={(e) => {
-              setStudioOpen(e.target.checked)
-              showToast(e.target.checked ? 'Estúdio aberto para agendamentos' : 'Agendamentos pausados', !e.target.checked)
+            <input type="checkbox" checked={studioOpen} onChange={async (e) => {
+              const val = e.target.checked
+              setStudioOpen(val)
+              try {
+                const artistaId = user?.artistaId || user?.id
+                await artistaService.update(artistaId, { aceitandoAgendamentos: val })
+                showToast(val ? 'Estúdio aberto para agendamentos' : 'Agendamentos pausados', !val)
+              } catch {
+                setStudioOpen(!val)
+                showToast('Erro ao atualizar status do estúdio', true)
+              }
             }} />
             <span className="ad-toggle-track"></span>
           </label>
@@ -245,9 +315,9 @@ const SettingsTab = ({ showToast }) => {
             </div>
             <div className="ad-settings-notification-list">
               {[
-                { key: 'email', title: 'Alertas por E-mail', desc: 'Receba resumos diários e novos pedidos.' },
-                { key: 'push', title: 'Push Notifications', desc: 'Alertas no navegador e celular.' },
-                { key: 'audio', title: 'Desktop Audio', desc: 'Sinal sonoro para novas mensagens.' },
+                { key: 'sino', title: 'Notificações no Sino', desc: 'Exibe o badge vermelho no sino quando há novos agendamentos.' },
+                { key: 'msg', title: 'Notificações de Mensagens', desc: 'Exibe o badge vermelho no sino quando há mensagens não lidas.' },
+                { key: 'som', title: 'Som de Notificação', desc: 'Emite um som quando chega uma nova mensagem.' },
               ].map(n => (
                 <div key={n.key} className="ad-settings-notification-item">
                   <div>
@@ -255,7 +325,7 @@ const SettingsTab = ({ showToast }) => {
                     <p style={{ fontSize: '0.75rem', color: 'var(--ad-on-surface-variant)' }}>{n.desc}</p>
                   </div>
                   <label className="ad-toggle">
-                    <input type="checkbox" checked={notifications[n.key]} onChange={() => setNotifications(prev => ({ ...prev, [n.key]: !prev[n.key] }))} />
+                    <input type="checkbox" checked={notifications[n.key]} onChange={() => handleToggleNotif(n.key)} />
                     <span className="ad-toggle-track-sm"></span>
                   </label>
                 </div>
@@ -300,7 +370,7 @@ const SettingsTab = ({ showToast }) => {
           </div>
 
           {/* Gallery Card */}
-          <div className="ad-settings-gallery-card" onClick={() => navigate('/artist-dashboard', { state: { tab: 'portfolio' } })}>
+          <div className="ad-settings-gallery-card" onClick={() => switchTab('portfolio')}>
             <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiOPlnuw0EiTf19Kk2sGebpOT-L3mhUXcquQCO2PGsYLT-d5knirK8hD3aeFl9AtV_UvaYen96VeqQVmimX7O72j2MGaxCAZqUC6QfUZveFkYnNeRQ3NWcJfBR88RHFqatHYWqQ5CByYFKD1fqMPVOfTE5ovPKJHPDjo2pBc_Tv34V3vOn3Ks-Sa-vsDUmIU14N2TAyz7mw2uS_mJ2w7xAKzSCx41Ctn-wsDyYXkd70S2_7cyKNLtC0-JIMb4frXd_eRIsBPRR5OU" alt="Gallery" />
             <div className="ad-settings-gallery-overlay"></div>
             <div className="ad-settings-gallery-text">

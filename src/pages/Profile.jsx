@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { agendamentoService, clienteService } from '../services/inkflowApi'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { agendamentoService, clienteService, mensagemServiceExtended, authService } from '../services/inkflowApi'
 import { useAuth } from '../contexts/AuthContext'
 import './Profile.css'
 
@@ -35,13 +35,13 @@ const StarRating = ({ value, onChange }) => (
 const formatDate = (dataHora) => {
   if (!dataHora) return ''
   const d = new Date(dataHora)
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase().replace('.', '')
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', timeZone: 'America/Sao_Paulo' }).toUpperCase().replace('.', '')
 }
 
 const formatTime = (dataHora) => {
   if (!dataHora) return ''
   const d = new Date(dataHora)
-  return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })
 }
 
 const getFallbackImage = (servico) => {
@@ -58,18 +58,42 @@ const getFallbackImage = (servico) => {
 
 const Profile = () => {
   const navigate = useNavigate()
-  const { user, token, loading: authLoading, logout } = useAuth()
+  const location = useLocation()
+  const { user, token, loading: authLoading, logout, login } = useAuth()
 
   const [toasts, setToasts] = useState([])
   const [modal, setModal] = useState({ isOpen: false, title: '', content: null, isImage: false })
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [avatarModalOpen, setAvatarModalOpen] = useState(false)
   const [deleteAccountModal, setDeleteAccountModal] = useState({ isOpen: false, password: '', deleting: false })
+  const [chatAberto, setChatAberto] = useState(false)
+  const [artistaDoChat, setArtistaDoChat] = useState(null)
+  const [mensagens, setMensagens] = useState([])
+  const [inputMsg, setInputMsg] = useState('')
+  const [loadingMsg, setLoadingMsg] = useState(false)
+  const pollingRef = useRef(null)
+  const ultimoTimestampRef = useRef(new Date().toISOString())
+  const chatEndRef = useRef(null)
   const [agendamentos, setAgendamentos] = useState([])
   const [loadingAg, setLoadingAg] = useState(true)
   const [editProfile, setEditProfile] = useState({ isOpen: false, nome: '', telefone: '', saving: false })
   const settingsRef = useRef(null)
   const fileInputRef = useRef(null)
+
+  // Dados derivados — computados antes dos hooks para que useEffect possa referenciá-los
+  const isAvaliado = (ag) => ag.avaliado === true
+  const proximas = agendamentos
+    .filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO')
+    .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora))
+  const colecao = agendamentos
+    .filter(a => a.status === 'REALIZADO' && isAvaliado(a))
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+  const artistasUnicos = agendamentos
+    .filter(a => a.artista)
+    .reduce((acc, a) => {
+      if (!acc.find(x => x.id === a.artista.id)) acc.push(a.artista)
+      return acc
+    }, [])
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -99,7 +123,53 @@ const Profile = () => {
       }
       fetchMeusAgendamentos();
     }
+    return () => {
+      if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null }
+    }
   }, [user, authLoading, navigate])
+
+  const abrirChat = async (artista) => {
+    setArtistaDoChat(artista)
+    setChatAberto(true)
+    setMensagens([])
+    try {
+      const res = await mensagemServiceExtended.getConversaSimples(artista.id)
+      const msgs = res.data
+      setMensagens(Array.isArray(msgs) ? msgs : [])
+      if (msgs.length > 0) ultimoTimestampRef.current = msgs[msgs.length - 1].createdAt
+      msgs.filter(m => !m.lida && m.destinatarioId === user?.id)
+          .forEach(m => mensagemServiceExtended.marcarLida(m.id).catch(() => {}))
+    } catch { }
+    // Iniciar polling
+    if (pollingRef.current) clearInterval(pollingRef.current)
+    pollingRef.current = setInterval(async () => {
+      try {
+        const r = await mensagemServiceExtended.getNovas(ultimoTimestampRef.current)
+        const novas = r.data
+        if (novas.length > 0) {
+          setMensagens(prev => [...prev, ...novas])
+          ultimoTimestampRef.current = novas[novas.length - 1].createdAt
+        }
+      } catch { }
+    }, 5000)
+  }
+
+  // Abrir chat automaticamente ao navegar com state
+  useEffect(() => {
+    if (user && location.state?.abrirChatComId && artistasUnicos.length > 0) {
+      const artista = artistasUnicos.find(a => a.id === location.state.abrirChatComId)
+      if (artista) {
+        abrirChat(artista)
+      } else {
+        abrirChat({ 
+          id: location.state.abrirChatComId, 
+          nome: location.state.abrirChatNome, 
+          fotoUrl: null 
+        })
+      }
+      window.history.replaceState({}, '')
+    }
+  }, [location.state, artistasUnicos.length, user])
 
   if (authLoading) {
     return (
@@ -112,16 +182,6 @@ const Profile = () => {
   }
 
   if (!user || !user.email) return null
-
-  const isAvaliado = (ag) => ag.avaliado === true
-  const proximas = agendamentos.filter(a => a.status === 'PENDENTE' || a.status === 'CONFIRMADO' || (a.status === 'REALIZADO' && !isAvaliado(a)))
-  const colecao = agendamentos.filter(a => a.status === 'REALIZADO' && isAvaliado(a))
-  const artistasUnicos = agendamentos
-    .filter(a => a.artista)
-    .reduce((acc, a) => {
-      if (!acc.find(x => x.id === a.artista.id)) acc.push(a.artista)
-      return acc
-    }, [])
 
   const showToast = (message, icon = 'info') => {
     const id = Date.now() + Math.random()
@@ -145,8 +205,9 @@ const Profile = () => {
           .then(() => showToast('Código de indicação copiado!', 'loyalty'))
         break
       case 'switch_account':
-        showToast('Funcionalidade em desenvolvimento', 'info')
         setSettingsOpen(false)
+        logout()
+        navigate('/login')
         break
       case 'logout':
         logout()
@@ -176,7 +237,8 @@ const Profile = () => {
           delete updatedUser.fotoUrl
           localStorage.setItem('user', JSON.stringify(updatedUser))
           showToast('Foto de perfil removida', 'check_circle')
-          setTimeout(() => window.location.reload(), 500)
+          // Forçar re-render atualizando o contexto
+          login(updatedUser, 'client', token)
         } catch (err) {
           showToast('Erro ao remover foto', 'error')
         }
@@ -209,7 +271,8 @@ const Profile = () => {
         localStorage.setItem('user', JSON.stringify(updatedUser))
         
         showToast('Foto atualizada com sucesso!', 'check_circle')
-        setTimeout(() => window.location.reload(), 500)
+        // Forçar re-render atualizando o contexto
+        login(updatedUser, 'client', token)
       } catch (err) {
         console.error('Erro de Upload:', err.response?.data || err.message || err);
         const errorMessage = err.response?.data?.message || err.response?.data || 'Erro de comunicação com o servidor ao carregar foto.'
@@ -226,20 +289,7 @@ const Profile = () => {
     }
     setDeleteAccountModal(prev => ({ ...prev, deleting: true }))
     try {
-      const API_URL = import.meta.env.VITE_API_URL
-        ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
-        : 'https://inkflowbackend-4w1g.onrender.com'
-      const response = await fetch(`${API_URL}/api/clientes/minha-conta`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ password: deleteAccountModal.password })
-      })
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}))
-        showToast(data.message || 'Senha incorreta', 'error')
-        setDeleteAccountModal(prev => ({ ...prev, deleting: false }))
-        return
-      }
+      await authService.deleteMinhaContaCliente(deleteAccountModal.password)
       localStorage.removeItem('user')
       localStorage.removeItem('token')
       localStorage.removeItem('userType')
@@ -247,7 +297,8 @@ const Profile = () => {
       setTimeout(() => navigate('/'), 1500)
     } catch (error) {
       console.error('Erro ao excluir conta:', error)
-      showToast('Erro ao excluir conta. Tente novamente.', 'error')
+      const errorMsg = error.response?.data?.message || 'Senha incorreta'
+      showToast(errorMsg, 'error')
       setDeleteAccountModal(prev => ({ ...prev, deleting: false }))
     }
   }
@@ -272,7 +323,8 @@ const Profile = () => {
       localStorage.setItem('user', JSON.stringify(updatedUser))
       setEditProfile(prev => ({ ...prev, isOpen: false }))
       showToast('Perfil atualizado com sucesso!', 'check_circle')
-      setTimeout(() => window.location.reload(), 500)
+      // Forçar re-render atualizando o contexto
+      login(updatedUser, 'client', token)
     } catch {
       showToast('Erro ao atualizar perfil.', 'error')
       setEditProfile(prev => ({ ...prev, saving: false }))
@@ -293,9 +345,36 @@ const Profile = () => {
     }
   }
 
+  const fecharChat = () => {
+    setChatAberto(false)
+    setArtistaDoChat(null)
+    setMensagens([])
+    if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null }
+  }
+
+  const enviarMensagem = async () => {
+    if (!inputMsg.trim() || !artistaDoChat) return
+    setLoadingMsg(true)
+    try {
+      const res = await mensagemServiceExtended.enviar({ 
+        remetenteId: user?.id, 
+        destinatarioId: artistaDoChat.id, 
+        conteudo: inputMsg.trim() 
+      })
+      const nova = res.data
+      setMensagens(prev => [...prev, nova])
+      ultimoTimestampRef.current = nova.createdAt
+      setInputMsg('')
+    } catch (error) { 
+      const errorMsg = error.response?.data?.message || 'Erro ao enviar mensagem'
+      showToast(errorMsg, 'error') 
+    }
+    finally { setLoadingMsg(false) }
+  }
+
   const handleAvaliarSessao = async (agendamentoId, avaliacao, observacoes) => {
     try {
-      await agendamentoService.avaliar(agendamentoId, { avaliacao })
+      await agendamentoService.avaliar(agendamentoId, { avaliacao, observacoes })
       await fetchMeusAgendamentos()
       showToast('Avaliação enviada com sucesso!', 'star')
       closeModal()
@@ -477,7 +556,9 @@ const Profile = () => {
             <div className="profile-section">
               <div className="section-header">
                 <h3><span className="material-symbols-outlined">auto_awesome_motion</span> Minha Coleção</h3>
-                <a onClick={() => {}}>Galeria Completa</a>
+                <a onClick={() => openModal('Galeria Completa', <ColecaoModalContent colecao={colecao} getFallbackImage={getFallbackImage} openModal={openModal} />)} style={{ cursor: 'pointer' }}>
+                  Galeria Completa
+                </a>
               </div>
 
               {colecao.length === 0 ? (
@@ -487,7 +568,7 @@ const Profile = () => {
                 </div>
               ) : (
                 <div className="gallery-layout">
-                  {colecao.map((ag, i) => (
+                  {colecao.slice(0, 4).map((ag, i) => (
                     <div 
                       key={ag.id} 
                       className="gallery-item" 
@@ -568,7 +649,7 @@ const Profile = () => {
               ) : (
                 <div className="artists-list">
                   {artistasUnicos.map(artista => (
-                    <div key={artista?.id} className="artist-item">
+                    <div key={artista?.id} className="artist-item" onClick={() => navigate('/artista/' + artista?.id)} style={{ cursor: 'pointer' }}>
                       <img
                         src={artista?.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artista?.nome || 'User')}`}
                         alt={artista?.nome || 'Artista'}
@@ -578,7 +659,7 @@ const Profile = () => {
                         <h5>{artista?.nome || 'Artista'}</h5>
                         <p>{artista?.role || 'Tatuador Residente'}</p>
                       </div>
-                      <button onClick={() => showToast(`Chat com ${artista?.nome || 'o artista'} em breve!`, 'chat')}>
+                      <button onClick={(e) => { e.stopPropagation(); abrirChat(artista) }}>
                         <span className="material-symbols-outlined">chat_bubble</span>
                       </button>
                     </div>
@@ -686,7 +767,7 @@ const Profile = () => {
                     onChange={e => setDeleteAccountModal(prev => ({ ...prev, password: e.target.value }))}
                     placeholder="Sua senha"
                     disabled={deleteAccountModal.deleting}
-                    onKeyPress={e => e.key === 'Enter' && handleDeleteAccount()}
+                    onKeyDown={e => e.key === 'Enter' && handleDeleteAccount()}
                     style={{ 
                       width: '100%', 
                       background: 'rgba(255,255,255,0.05)', 
@@ -793,6 +874,52 @@ const Profile = () => {
         </div>
       )}
 
+      {/* Modal de Chat */}
+      {chatAberto && artistaDoChat && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, width: '90%', maxWidth: 480, height: '70vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {/* Header */}
+            <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <img src={artistaDoChat.fotoUrl || `https://ui-avatars.com/api/?background=1a1919&color=ff8d8c&name=${encodeURIComponent(artistaDoChat.nome)}`} alt={artistaDoChat.nome} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem' }}>{artistaDoChat.nome}</p>
+                <p style={{ margin: 0, fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>Artista InkFlow</p>
+              </div>
+              <button onClick={fecharChat} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            {/* Mensagens */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {mensagens.length === 0 && (
+                <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem', marginTop: '2rem' }}>Nenhuma mensagem ainda. Diga olá!</p>
+              )}
+              {mensagens.map(m => {
+                const isCliente = m.remetenteId === user?.id
+                return (
+                  <div key={m.id} style={{ display: 'flex', justifyContent: isCliente ? 'flex-end' : 'flex-start' }}>
+                    <div style={{ maxWidth: '70%', padding: '10px 14px', borderRadius: isCliente ? '16px 16px 4px 16px' : '16px 16px 16px 4px', background: isCliente ? '#e63946' : 'rgba(255,255,255,0.08)', color: '#fff', fontSize: '0.875rem', lineHeight: 1.5 }}>
+                      <p style={{ margin: 0 }}>{m.conteudo}</p>
+                      <p style={{ margin: '4px 0 0', fontSize: '0.65rem', opacity: 0.6, textAlign: 'right' }}>{new Date(m.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}</p>
+                    </div>
+                  </div>
+                )
+              })}
+              <div ref={chatEndRef} />
+            </div>
+            {/* Input */}
+            <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 10 }}>
+              <input value={inputMsg} onChange={e => setInputMsg(e.target.value)} onKeyDown={e => e.key === 'Enter' && !loadingMsg && enviarMensagem()} placeholder="Digite uma mensagem..." disabled={loadingMsg}
+                style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', color: '#fff', fontSize: '0.875rem', outline: 'none' }} />
+              <button onClick={enviarMensagem} disabled={loadingMsg || !inputMsg.trim()}
+                style={{ background: '#e63946', border: 'none', borderRadius: 10, padding: '10px 16px', color: '#fff', cursor: loadingMsg || !inputMsg.trim() ? 'not-allowed' : 'pointer', opacity: loadingMsg || !inputMsg.trim() ? 0.5 : 1 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '1.1rem' }}>send</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toasts */}
       <div className="p-toasts-container">
         {toasts.map(toast => <Toast key={toast.id} {...toast} onExit={() => removeToast(toast.id)} />)}
@@ -857,10 +984,11 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
     'CANCELADO': 'Cancelada',
   }
 
-  const sessionDate = new Date(ag.dataHora);
   const now = new Date();
-  const diffHours = (sessionDate - now) / (1000 * 60 * 60);
-  const isCancellable = diffHours >= 24;
+  const createdAt = ag.createdAt ? new Date(ag.createdAt.endsWith('Z') ? ag.createdAt : ag.createdAt + 'Z') : null;
+  const horasDesdeCriacao = createdAt ? (now - createdAt) / (1000 * 60 * 60) : 999;
+  const isCancellable = horasDesdeCriacao <= 24;
+  const cancelMsg = 'O prazo de 24h após o agendamento já expirou. Entre em contato com o estúdio.'
 
   return (
     <>
@@ -872,7 +1000,7 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
       <div className="p-modal-grid">
         <div className="p-modal-card">
           <span>Data & Hora</span>
-          <strong>{new Date(ag.dataHora).toLocaleDateString('pt-BR')}<br/>{new Date(ag.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</strong>
+          <strong>{new Date(ag.dataHora).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}<br/>{new Date(ag.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}</strong>
         </div>
         <div className="p-modal-card">
           <span>Artista</span>
@@ -947,13 +1075,13 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
         />
       </div>
 
-      {ag.status === 'AGENDADO' || ag.status === 'CONFIRMADO' ? (
+      {ag.status === 'AGENDADO' || ag.status === 'CONFIRMADO' || ag.status === 'PENDENTE' ? (
         <>
           <p className="p-modal-note">Por favor, chegue com 15 minutos de antecedência.</p>
           {!isCancellable && (
             <p className="p-modal-note" style={{ color: '#ff6b7a', marginTop: '0.25rem' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '14px', verticalAlign: 'middle', marginRight: '4px' }}>warning</span>
-              Sessões com menos de 24 horas para o início não podem ser canceladas pelo sistema. Entre em contato com o estúdio.
+              {cancelMsg} Entre em contato com o estúdio.
             </p>
           )}
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
@@ -965,7 +1093,10 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
               style={{ 
                 flex: 1, 
                 opacity: !isCancellable ? 0.5 : 1, 
-                cursor: !isCancellable ? 'not-allowed' : 'pointer' 
+                cursor: !isCancellable ? 'not-allowed' : 'pointer',
+                background: '#e8192c',
+                color: '#fff',
+                border: 'none'
               }}
             >
               Cancelar Sessão
@@ -1007,6 +1138,50 @@ const SessionModalContent = ({ ag, onUpdate, onAvaliar }) => {
         </div>
       )}
     </>
+  )
+}
+
+const ColecaoModalContent = ({ colecao, getFallbackImage, openModal }) => {
+  if (colecao.length === 0) {
+    return <div style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '2rem' }}>Nenhuma tattoo na coleção ainda.</div>
+  }
+  return (
+    <div className="gallery-layout">
+      {colecao.map(ag => (
+        <div
+          key={ag.id}
+          className="gallery-item"
+          onClick={() => openModal('Tattoo Finalizada', (
+            <div style={{ padding: '0.5rem', textAlign: 'center', color: '#fff' }}>
+              <img
+                src={ag.imagemResultadoUrl || ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}
+                alt={ag.servico}
+                style={{ width: '100%', maxHeight: '40vh', borderRadius: '8px', objectFit: 'contain', backgroundColor: 'rgba(0,0,0,0.5)' }}
+              />
+              <h3 style={{ marginTop: '1rem', color: '#e63946', fontSize: '1.4rem' }}>{ag.servico}</h3>
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Obra de {ag.artista?.nome || (ag.servico?.match(/com\s+(.+)$/i)?.[1]) || 'Artista Studio'}
+              </p>
+              <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ color: '#ffb900', fontSize: '1.4rem', marginBottom: '0.5rem', letterSpacing: '4px' }}>
+                  {'★'.repeat(ag.avaliacao || 0)}{'☆'.repeat(5 - (ag.avaliacao || 0))}
+                </div>
+                <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1rem', fontStyle: 'italic', lineHeight: '1.5' }}>
+                  "{ag.observacoes || 'Sessão finalizada com muito profissionalismo!'}"
+                </p>
+              </div>
+            </div>
+          ))}
+        >
+          <div style={{
+            width: '100%', height: '100%',
+            backgroundImage: `url("${ag.imagemResultadoUrl || ag.imagemReferenciaUrl || getFallbackImage(ag.servico)}")`,
+            backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 'inherit'
+          }} />
+          <div className="gallery-overlay"><span className="material-symbols-outlined">zoom_in</span></div>
+        </div>
+      ))}
+    </div>
   )
 }
 

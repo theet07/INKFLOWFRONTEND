@@ -805,6 +805,24 @@
   color: #ef4444;
 }
 
+.ad-badge-blue {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.ad-badge-purple {
+  color: #a855f7;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.ad-badge-teal {
+  color: #14b8a6;
+  background: rgba(20, 184, 166, 0.15);
+  border: 1px solid rgba(20, 184, 166, 0.3);
+}
+
 
 /* ==========================================
    TABLE
@@ -1005,7 +1023,10 @@
    ========================================== */
 .ad-drawer-overlay {
   position: fixed;
-  inset: 0;
+  top: 64px;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 60;
   display: flex;
   justify-content: flex-end;
@@ -1401,6 +1422,7 @@
 .ad-req-table-container {
   background: var(--ad-surface-container-low);
   overflow-x: auto;
+  overflow-y: visible;
   border-radius: 8px;
 }
 

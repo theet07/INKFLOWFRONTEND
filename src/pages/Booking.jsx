@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { agendamentoService, clienteService, artistaService, portfolioService } from '../services/inkflowApi'
+import { agendamentoService, clienteService, artistaService, portfolioService, uploadService } from '../services/inkflowApi'
 import { formatPhone } from '../utils/formatPhone'
 import './Booking.css'
 
@@ -32,6 +32,7 @@ const Booking = () => {
     const [availableSlots, setAvailableSlots] = useState([])
     const [isLoadingAvailability, setIsLoadingAvailability] = useState(false)
     const [isLoadingSlots, setIsLoadingSlots] = useState(false)
+    const [currentMonthOffset, setCurrentMonthOffset] = useState(0)
 
     useEffect(() => {
         const userData = localStorage.getItem('user')
@@ -109,17 +110,25 @@ const Booking = () => {
         }
     }, [location.search, artistsOptions])
 
-    // Efeito para carregar disponibilidade do artista
+    // Calculo de mes/ano com base no offset
+    const brTime = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+    const rawMonth = brTime.getMonth() + currentMonthOffset;
+    const currentYear = brTime.getFullYear() + Math.floor(rawMonth / 12);
+    const adjustedMonth = ((rawMonth % 12) + 12) % 12;
+    const todayDate = currentMonthOffset === 0 ? brTime.getDate() : 0;
+    const currentHourBr = brTime.getHours();
+
+    // Efeito para carregar disponibilidade do artista (recarrega quando muda mes)
     useEffect(() => {
         const artistaSelecionado = artistsOptions.find(a => a?.name === bookingState.artist)
         if (artistaSelecionado) {
             setAvailableDays([]) // Limpa dados antigos
-            setBookingState(prev => ({ ...prev, day: '', time: '' })) // Reseta seleção
+            setBookingState(prev => ({ ...prev, day: '', time: '' })) // Reseta selecao
             setIsLoadingAvailability(true)
-            artistaService.getAvailability(artistaSelecionado.id)
+            artistaService.getAvailability(artistaSelecionado.id, currentYear, adjustedMonth + 1)
                 .then(res => {
-                    const mappedDays = (res.data || []).map(d => ({
-                        day: d.data.split('-')[2].replace(/^0/, ''),
+                    const mappedDays = (res.data || []).filter(d => d.data).map(d => ({
+                        day: parseInt(d.data.split('-')[2], 10).toString(),
                         fullDate: d.data,
                         active: d.disponivel
                     }))
@@ -128,7 +137,7 @@ const Booking = () => {
                 .catch(() => {})
                 .finally(() => setIsLoadingAvailability(false))
         }
-    }, [bookingState.artist, artistsOptions])
+    }, [bookingState.artist, artistsOptions, currentMonthOffset])
 
     // Efeito para carregar slots do dia selecionado
     useEffect(() => {
@@ -151,33 +160,33 @@ const Booking = () => {
         }
     }, [bookingState.day, bookingState.artist, artistsOptions, availableDays])
 
-    const brTime = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
-    const currentMonth = brTime.getMonth();
-    const currentYear = brTime.getFullYear();
-    const todayDate = brTime.getDate();
-    const currentHourBr = brTime.getHours();
-
     const monthNames = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
-    const currentMonthName = monthNames[currentMonth];
+    const currentMonthName = monthNames[adjustedMonth];
 
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, adjustedMonth + 1, 0).getDate();
+    const firstDayOfMonth = new Date(currentYear, adjustedMonth, 1).getDay();
     const startPadding = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
-    const prevMonthDaysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+    const prevMonthDaysInMonth = new Date(currentYear, adjustedMonth, 0).getDate();
     const emptyDays = Array.from({ length: startPadding }, (_, i) => prevMonthDaysInMonth - startPadding + i + 1);
 
-    const days = availableDays.length > 0 ? availableDays : Array.from({ length: daysInMonth }, (_, i) => {
+    const days = availableDays.length > 0 ? availableDays.map(d => {
+        // Desabilita dias passados mesmo nos dados do backend
+        let active = d.active;
+        const dayNum = parseInt(d.day, 10);
+        if (currentMonthOffset === 0 && dayNum < todayDate) active = false;
+        return { ...d, active, isDot: currentMonthOffset === 0 && dayNum === todayDate };
+    }) : Array.from({ length: daysInMonth }, (_, i) => {
         const d = i + 1;
-        const dayOfWeek = new Date(currentYear, currentMonth, d).getDay();
+        const dayOfWeek = new Date(currentYear, adjustedMonth, d).getDay();
         let active = true;
         if (dayOfWeek === 0) active = false; // Domingos fechados
-        if (d < todayDate) active = false; // Dias passados bloqueados
+        if (currentMonthOffset === 0 && d < todayDate) active = false; // Dias passados bloqueados apenas no mês atual
 
         return {
             day: d.toString(),
             active,
-            isDot: d === todayDate,
+            isDot: currentMonthOffset === 0 && d === todayDate,
             content: d.toString()
         };
     });
@@ -234,34 +243,27 @@ const Booking = () => {
     };
 
     const uploadImagemReferencia = async (file) => {
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET)
-
-        const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
-            { method: 'POST', body: formData }
-        )
-
-        if (!response.ok) throw new Error('Falha no upload da imagem de referência.')
-
-        const data = await response.json()
-        return data.secure_url
+        try {
+            const uploadRes = await uploadService.uploadImage(file, 'agendamentos')
+            return uploadRes.data.url
+        } catch (error) {
+            throw new Error('Falha no upload da imagem de referência.')
+        }
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
 
         if (!bookingState.style || !bookingState.artist || !bookingState.day || !bookingState.time) {
-            alert('Por favor, complete as etapas de Estilo, Artista, Data e Horário.');
+            showToast('Por favor, complete as etapas de Estilo, Artista, Data e Horário.', 'error');
             return;
         }
         if (!formData.name || !formData.phone || !formData.email || !formData.desc) {
-            alert('Por favor, preencha todos os seus dados.');
+            showToast('Por favor, preencha todos os seus dados.', 'error');
             return;
         }
         if (!formData.terms) {
-            alert('Você precisa aceitar os termos de agendamento para continuar.');
+            showToast('Você precisa aceitar os termos de agendamento para continuar.', 'error');
             return;
         }
 
@@ -274,7 +276,7 @@ const Booking = () => {
                 imagemUrl = await uploadImagemReferencia(formData.imagemReferenciaFile)
             }
 
-            const mm = (currentMonth + 1).toString().padStart(2, '0');
+            const mm = (adjustedMonth + 1).toString().padStart(2, '0');
             const formattedDate = `${currentYear}-${mm}-${bookingState.day.padStart(2, '0')}`;
             const isoTime = bookingState.time ? `${bookingState.time}:00` : '12:00:00';
             const dataHora = `${formattedDate}T${isoTime}`;
@@ -474,9 +476,13 @@ const Booking = () => {
                                 </div>
                                 <div className="calendar-panel">
                                     <div className="calendar-nav">
-                                        <button><span className="material-symbols-outlined">chevron_left</span></button>
+                                        <button 
+                                            onClick={() => setCurrentMonthOffset(prev => prev - 1)} 
+                                            disabled={currentMonthOffset <= 0}
+                                            style={currentMonthOffset <= 0 ? { opacity: 0.2, cursor: 'not-allowed' } : {}}
+                                        ><span className="material-symbols-outlined">chevron_left</span></button>
                                         <span>{`${currentMonthName} DE ${currentYear}`}</span>
-                                        <button><span className="material-symbols-outlined">chevron_right</span></button>
+                                        <button onClick={() => setCurrentMonthOffset(prev => prev + 1)}><span className="material-symbols-outlined">chevron_right</span></button>
                                     </div>
                                     <div className="calendar-weekdays">
                                         <span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span><span>DOM</span>
@@ -559,7 +565,10 @@ const Booking = () => {
                                     </div>
                                     <div className="form-field">
                                         <label>DESCRIÇÃO DO PROJETO</label>
-                                        <textarea id="form-desc" value={formData.desc} onChange={handleChange} placeholder="Descreva sua ideia de tatuagem..." rows="4" required></textarea>
+                                        <textarea id="form-desc" value={formData.desc} onChange={handleChange} placeholder="Descreva sua ideia de tatuagem..." rows="4" maxLength={1000} required></textarea>
+                                        <div style={{ textAlign: 'right', fontSize: '0.75rem', color: (formData.desc?.length || 0) > 900 ? '#e63946' : 'rgba(255,255,255,0.4)', marginTop: '4px' }}>
+                                          {formData.desc?.length || 0}/1000
+                                        </div>
                                     </div>
                                     <div className="form-row">
                                         <div className="form-field">

@@ -66,7 +66,7 @@ export const agendamentoService = {
 export const artistaService = {
   getAllArtists: () => api.get('/artists', { baseURL: API_BASE_URL.replace('/v1', '') }),
   getById: (id) => api.get(`/artists/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
-  getAvailability: (id) => api.get(`/artists/${id}/availability`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getAvailability: (id, ano, mes) => api.get(`/artists/${id}/availability`, { params: { ano, mes }, baseURL: API_BASE_URL.replace('/v1', '') }),
   getSlots: (id, data) => api.get(`/artists/${id}/availability/slots`, { params: { data }, baseURL: API_BASE_URL.replace('/v1', '') }),
   update: (id, data) => api.put(`/artistas/${id}`, data, { baseURL: API_BASE_URL.replace('/v1', '') }),
   uploadFoto: (id, formData) => api.post(`/artistas/${id}/foto`, formData, {
@@ -88,11 +88,90 @@ export const disponibilidadeService = {
   remover: (id) => api.delete(`/disponibilidade/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
 };
 
+export const mensagemService = {
+  enviar: (data) => api.post('/mensagens', data),
+  getConversa: (outroUsuarioId) => api.get(`/mensagens/conversa/${outroUsuarioId}`),
+  getNovas: (desde) => api.get(`/mensagens/novas?desde=${desde}`),
+  marcarLida: (id) => api.patch(`/mensagens/${id}/lida`),
+  countNaoLidas: () => api.get('/mensagens/nao-lidas/count'),
+  getConversas: () => api.get('/mensagens/conversas'),
+};
+
 export const adminService = {
   exportBackup: () => api.get('/api/v1/admin/backup/download', { responseType: 'blob', baseURL: API_BASE_URL.replace(/\/api.*$/, '') }),
+  enviarBackupEmail: () => api.get('/api/v1/admin/backup/testar-backup', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') }),
   getBackupStatus: () => api.get('/api/v1/admin/backup/status', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') }),
+  getStats: () => api.get('/admin/stats', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getUsuarios: () => api.get('/admin/usuarios', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getAgendamentos: () => api.get('/admin/agendamentos', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getArtistas: () => api.get('/admin/artistas', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getClientes: () => api.get('/admin/clientes', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  // Requisições de artistas
+  getRequisicoesArtista: () => api.get('/admin/requisicoes-artista', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getRequisicoesArtistaCount: () => api.get('/admin/requisicoes-artista/pendentes/count', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  aprovarRequisicao: (id, data) => api.post(`/admin/requisicoes-artista/${id}/aprovar`, data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  rejeitarRequisicao: (id) => api.post(`/admin/requisicoes-artista/${id}/rejeitar`, {}, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  deleteRequisicao: (id) => api.delete(`/admin/requisicoes-artista/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  // Atualizar usuários
+  updateCliente: (id, data) => api.put(`/admin/usuarios/cliente/${id}`, data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  updateArtista: (id, data) => api.put(`/admin/usuarios/artista/${id}`, data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  // Excluir usuários
+  deleteCliente: (id) => api.delete(`/admin/usuarios/cliente/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  deleteArtista: (id) => api.delete(`/admin/usuarios/artista/${id}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
 };
 
 export const testConnection = () => api.get('/api/health', { baseURL: API_BASE_URL.replace(/\/api.*$/, '') });
+
+// Serviços de Mensagens (sem /v1)
+export const mensagemServiceExtended = {
+  getNaoLidas: () => api.get('/mensagens/nao-lidas', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  marcarTodasLidas: () => api.patch('/mensagens/marcar-todas-lidas', {}, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getConversa: (artistaId, clienteId) => api.get(`/mensagens/conversa/${artistaId}/${clienteId}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getConversaSimples: (outroUsuarioId) => api.get(`/mensagens/conversa/${outroUsuarioId}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  marcarLidasPorRemetente: (remetenteId) => api.patch(`/mensagens/marcar-lidas-por-remetente/${remetenteId}`, {}, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getNovas: (desde) => api.get(`/mensagens/novas?desde=${desde}`, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  enviar: (data) => api.post('/mensagens', data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  marcarLida: (id) => api.patch(`/mensagens/${id}/lida`, {}, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getConversas: () => api.get('/mensagens/conversas', { baseURL: API_BASE_URL.replace('/v1', '') }),
+};
+
+// Serviços de Chatbot
+export const chatService = {
+  sendMessage: (message) => api.post('/chat', { message }, { baseURL: API_BASE_URL.replace('/v1', '') }),
+};
+
+// Serviços de Contato
+export const contatoService = {
+  enviar: (data) => api.post('/contato', data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+};
+
+// Serviços de Leads
+export const leadService = {
+  criarLeadArtista: (data) => api.post('/leads/artista', data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+};
+
+// Serviços de Autenticação (sem /v1)
+export const authService = {
+  solicitarCodigo: (data) => api.post('/clientes/solicitar-codigo', data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  verificarCodigo: (data) => api.post('/clientes/verificar-codigo', data, { baseURL: API_BASE_URL.replace('/v1', '') }),
+  getMinhaContaCliente: () => api.get('/clientes/minha-conta', { baseURL: API_BASE_URL.replace('/v1', '') }),
+  deleteMinhaContaCliente: (password) => api.delete('/clientes/minha-conta', { 
+    data: { password }, 
+    baseURL: API_BASE_URL.replace('/v1', '') 
+  }),
+};
+
+// Serviço de Upload (proxy para Cloudinary)
+export const uploadService = {
+  uploadImage: (file, folder = 'portfolio') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
+    return api.post('/upload', formData, { 
+      baseURL: API_BASE_URL.replace('/v1', ''),
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+};
 
 export default api;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { portfolioService } from '../../services/inkflowApi';
+import { portfolioService, uploadService } from '../../services/inkflowApi';
 
 const PortfolioTab = ({ showToast }) => {
   const [gallery, setGallery] = useState([]);
@@ -64,17 +64,20 @@ const PortfolioTab = ({ showToast }) => {
     showToast('Enviando obra ao portfólio...');
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('artistaId', user.artistaId || user.id || '');
-      formData.append('categoria', activeFilter !== 'Todos' ? activeFilter : 'Geral');
+      // Upload via backend proxy (esconde credenciais do Cloudinary)
+      const uploadRes = await uploadService.uploadImage(file, 'portfolio');
+      const imageUrl = uploadRes.data.url;
 
-      const res = await portfolioService.upload(formData);
-      
-      // Adiciona a obra nova à galeria local
-      if (res.data) {
-        setGallery(prev => [res.data, ...prev]);
-      }
+      if (!imageUrl) throw new Error('Upload falhou');
+
+      const res = await portfolioService.create({
+        artistaId: user.artistaId || user.id,
+        imagemUrl: imageUrl,
+        categoria: activeFilter !== 'Todos' ? activeFilter : 'Geral',
+        descricao: '',
+      });
+
+      if (res.data) setGallery(prev => [res.data, ...prev]);
       showToast('Obra adicionada com sucesso!');
     } catch (err) {
       console.error('Erro no upload:', err);

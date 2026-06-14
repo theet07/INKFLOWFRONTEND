@@ -126,6 +126,17 @@
     align-self: flex-start;
 }
 
+.bot-message a {
+    color: #E21B3C;
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.bot-message a:hover {
+    opacity: 0.8;
+}
+
 .quick-buttons {
     display: flex;
     flex-wrap: wrap;

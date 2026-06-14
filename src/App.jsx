@@ -5,7 +5,6 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import Chatbot from './components/Chatbot'
 import ErrorBoundary from './components/ErrorBoundary'
-
 import Home from './pages/Home'
 import About from './pages/About'
 import Portfolio from './pages/Portfolio'
@@ -22,32 +21,44 @@ import ArtistLandingPage from './pages/ArtistLandingPage/ArtistLandingPage'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [pathname])
-
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
   return null
 }
 
 const ProtectedRoute = ({ element, allowedTypes }) => {
   const { user, userType, loading } = useAuth()
+  if (loading) return null
+  if (!user) return <Navigate to="/login" replace />
+  if (!allowedTypes.includes(userType)) return <Navigate to="/" replace />
+  return element
+}
+
+// Redireciona artistas e admins logados para seus painéis em qualquer rota pública
+const RoleGuard = ({ children }) => {
+  const { user, userType, loading } = useAuth()
+  const { pathname } = useLocation()
 
   if (loading) return null
 
-  if (!user) return <Navigate to="/login" replace />
+  const isLoginPage = pathname === '/login'
 
-  if (!allowedTypes.includes(userType))
-    return <Navigate to="/" replace />
+  if (user && userType === 'artist' && pathname !== '/artist-dashboard' && !isLoginPage) {
+    return <Navigate to="/artist-dashboard" replace />
+  }
 
-  return element
+  if (user && userType === 'admin' && pathname !== '/admin' && !isLoginPage) {
+    return <Navigate to="/admin" replace />
+  }
+
+  return children
 }
 
 function AppContent() {
   const location = useLocation()
-  const isLoginPage = location.pathname === '/login'
+  const isLoginPage       = location.pathname === '/login'
   const isArtistDashboard = location.pathname === '/artist-dashboard'
-  const hideShell = isLoginPage || isArtistDashboard
+  const isAdminDashboard  = location.pathname === '/admin'
+  const hideShell = isLoginPage || isArtistDashboard || isAdminDashboard
 
   return (
     <div className="App">
@@ -55,18 +66,21 @@ function AppContent() {
       {!hideShell && <Header />}
       <main>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/sobre" element={<About />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/servicos" element={<Services />} />
-          <Route path="/contato" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/agendamento" element={<Booking />} />
-          <Route path="/artistas" element={<Artists />} />
-          <Route path="/artista/:id" element={<ArtistProfile />} />
-          <Route path="/para-tatuadores" element={<ArtistLandingPage />} />
+          {/* Rotas públicas — protegidas pelo RoleGuard */}
+          <Route path="/" element={<RoleGuard><Home /></RoleGuard>} />
+          <Route path="/sobre" element={<RoleGuard><About /></RoleGuard>} />
+          <Route path="/portfolio" element={<RoleGuard><Portfolio /></RoleGuard>} />
+          <Route path="/servicos" element={<RoleGuard><Services /></RoleGuard>} />
+          <Route path="/contato" element={<RoleGuard><Contact /></RoleGuard>} />
+          <Route path="/agendamento" element={<RoleGuard><Booking /></RoleGuard>} />
+          <Route path="/artistas" element={<RoleGuard><Artists /></RoleGuard>} />
+          <Route path="/artista/:id" element={<RoleGuard><ArtistProfile /></RoleGuard>} />
+          <Route path="/para-tatuadores" element={<RoleGuard><ArtistLandingPage /></RoleGuard>} />
 
-          {/* Protegidas */}
+          {/* Login — sem guard (artista precisa acessar para logar) */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Rotas protegidas */}
           <Route path="/admin" element={
             <ProtectedRoute allowedTypes={['admin']} element={<AdminDashboard />} />
           } />
@@ -76,11 +90,13 @@ function AppContent() {
           <Route path="/perfil" element={
             <ProtectedRoute allowedTypes={['client']} element={<Profile />} />
           } />
+
+          {/* Catch-all: redireciona URLs inválidas para Home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       {!hideShell && <Footer />}
       {!hideShell && <Chatbot />}
-
     </div>
   )
 }

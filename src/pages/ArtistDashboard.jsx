@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashboardTab from '../components/dashboard/DashboardTab'
 import RequestsTab from '../components/dashboard/RequestsTab'
 import ScheduleTab from '../components/dashboard/ScheduleTab'
 import PortfolioTab from '../components/dashboard/PortfolioTab'
 import SettingsTab from '../components/dashboard/SettingsTab'
-import { agendamentoService } from '../services/inkflowApi'
+import MessagesTab from '../components/dashboard/MessagesTab'
+import { agendamentoService, mensagemServiceExtended } from '../services/inkflowApi'
 import { useAuth } from '../contexts/AuthContext'
 import './ArtistDashboard.css'
 
@@ -15,9 +16,10 @@ const ArtistDashboard = () => {
   const [drawerAgendamento, setDrawerAgendamento] = useState(null)
   const [toasts, setToasts] = useState([])
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [refreshKey, setRefreshKey] = useState(0)
   const navigate = useNavigate()
 
-  const { token, loading } = useAuth()
+  const { token, loading, user } = useAuth()
 
   useEffect(() => {
     if (loading) return
@@ -62,6 +64,76 @@ const ArtistDashboard = () => {
     }, 3000)
   }, [])
 
+  const [viewMode, setViewMode] = useState('monthly')
+  const handleViewToggle = (mode) => setViewMode(mode)
+  const [studioOpen, setStudioOpen] = useState(true)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [notifItems, setNotifItems] = useState([])
+  const [artistaHasNew, setArtistaHasNew] = useState(false)
+  const [mensagensNaoLidas, setMensagensNaoLidas] = useState([])
+  const [prevMsgCount, setPrevMsgCount] = useState(0)
+  const audioContextRef = useRef(null)
+
+  const tocarBeep = () => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContext()
+    }
+    const ctx = audioContextRef.current
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.frequency.value = 880
+    gain.gain.setValueAtTime(0.1, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+    osc.start(ctx.currentTime)
+    osc.stop(ctx.currentTime + 0.3)
+  }
+
+  useEffect(() => {
+    const loadNotifs = async () => {
+      try {
+        const artistaId = user?.artistaId || user?.id
+        if (!artistaId) return
+        const res = await agendamentoService.getByArtista(artistaId)
+        const all = Array.isArray(res.data) ? res.data : []
+        setNotifItems([...all].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora)).slice(0, 5))
+        if (all.length > 0) {
+          const lastSeen = localStorage.getItem('notif_artista_lastSeen')
+          const maisRecente = all.reduce((a, b) => new Date(a.dataHora) > new Date(b.dataHora) ? a : b)
+          setArtistaHasNew(!lastSeen || new Date(maisRecente.dataHora) > new Date(lastSeen))
+        }
+      } catch {}
+    }
+
+    const loadMensagens = () => {
+      if (!token) return
+      mensagemServiceExtended.getNaoLidas()
+        .then(res => {
+          const novasMsgs = Array.isArray(res.data) ? res.data : []
+          setPrevMsgCount(prev => {
+            if (novasMsgs.length > prev && prev > 0) {
+              const somAtivo = localStorage.getItem('notif_som_ativo') === 'true'
+              if (somAtivo) tocarBeep()
+            }
+            return novasMsgs.length
+          })
+          setMensagensNaoLidas(novasMsgs)
+        })
+        .catch(() => {})
+    }
+
+    loadNotifs()
+    loadMensagens()
+
+    const interval = setInterval(() => {
+      loadNotifs()
+      loadMensagens()
+    }, 10000)
+
+    return () => clearInterval(interval)
+  }, [token, user])
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) setSidebarOpen(false)
@@ -76,7 +148,6 @@ const ArtistDashboard = () => {
   }, [drawerOpen])
 
   const openDrawer = (agendamento) => {
-    console.log('Agendamento selecionado:', agendamento)
     setDrawerAgendamento(agendamento)
     setDrawerOpen(true)
   }
@@ -108,13 +179,21 @@ const ArtistDashboard = () => {
       if (action === 'Declined') {
         await agendamentoService.updateStatus(drawerAgendamento.id, { status: 'CANCELADO' })
         showToast(`Solicitação de ${clientName} recusada.`, true)
-      } else {
+      } else if (action === 'Accepted') {
         await agendamentoService.updateStatus(drawerAgendamento.id, { status: 'CONFIRMADO' })
         showToast(`${clientName} agendado com sucesso!`)
+      } else if (action === 'StartSession') {
+        await agendamentoService.updateStatus(drawerAgendamento.id, { status: 'EM_ANDAMENTO' })
+        showToast(`Sessão de ${clientName} iniciada!`)
+      } else if (action === 'Complete') {
+        await agendamentoService.updateStatus(drawerAgendamento.id, { status: 'REALIZADO' })
+        showToast(`Sessão de ${clientName} concluída!`)
       }
     } catch (err) {
-      showToast('Erro ao atualizar status', true)
+      const msg = err.response?.data?.message || err.response?.data || 'Erro ao atualizar status'
+      showToast(typeof msg === 'string' ? msg : 'Erro ao atualizar status', true)
     }
+    setRefreshKey(k => k + 1)
     closeDrawer()
   }
 
@@ -125,17 +204,11 @@ const ArtistDashboard = () => {
     navigate('/login')
   }
 
-  const [viewMode, setViewMode] = useState('monthly')
-
-  const handleViewToggle = (mode) => {
-    setViewMode(mode)
-    showToast(`Visualização alterada para ${mode === 'monthly' ? 'Mensal' : 'Semanal'}`)
-  }
-
   const navItems = [
     { key: 'dashboard', icon: 'dashboard', label: 'Painel' },
     { key: 'requests', icon: 'potted_plant', label: 'Solicitações' },
     { key: 'schedule', icon: 'calendar_today', label: 'Agenda' },
+    { key: 'messages', icon: 'chat', label: 'Mensagens' },
     { key: 'portfolio', icon: 'brush', label: 'Portfólio' },
     { key: 'settings', icon: 'settings', label: 'Configurações' },
   ]
@@ -148,17 +221,26 @@ const ArtistDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardTab showToast={showToast} openDrawer={openDrawer} />
+        return <DashboardTab showToast={showToast} openDrawer={openDrawer} onNewArt={() => switchTab('portfolio')} refreshKey={refreshKey} />
       case 'requests':
-        return <RequestsTab showToast={showToast} openDrawer={openDrawer} />
+        return <RequestsTab showToast={showToast} openDrawer={openDrawer} refreshKey={refreshKey} />
       case 'schedule':
-        return <ScheduleTab showToast={showToast} />
+        return <ScheduleTab showToast={showToast} openDrawer={openDrawer} viewMode={viewMode} refreshKey={refreshKey} />
+      case 'messages':
+        return <MessagesTab 
+          showToast={showToast} 
+          mensagensNaoLidas={mensagensNaoLidas}
+          onMensagemLida={(clienteId) => {
+            // Remover mensagens deste remetente do estado global
+            setMensagensNaoLidas(prev => prev.filter(m => m.remetenteId !== clienteId))
+          }} 
+        />
       case 'portfolio':
         return <PortfolioTab showToast={showToast} />
       case 'settings':
-        return <SettingsTab showToast={showToast} />
+        return <SettingsTab showToast={showToast} studioOpen={studioOpen} setStudioOpen={setStudioOpen} switchTab={switchTab} />
       default:
-        return <DashboardTab showToast={showToast} openDrawer={openDrawer} />
+        return <DashboardTab showToast={showToast} openDrawer={openDrawer} onNewArt={() => switchTab('portfolio')} />
     }
   }
 
@@ -185,12 +267,68 @@ const ArtistDashboard = () => {
               >Semanal</button>
             </div>
           )}
-          <button className="ad-icon-btn">
-            <span className="material-symbols-outlined">notifications</span>
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button className="ad-icon-btn" title="Notificações" onClick={() => {
+              const abrindo = !notifOpen
+              setNotifOpen(abrindo)
+              if (!abrindo) {
+                // Ao fechar: apenas salvar lastSeen para controle de agendamentos
+                localStorage.setItem('notif_artista_lastSeen', new Date().toISOString())
+                setArtistaHasNew(false)
+                // NÃO marcar mensagens como lidas - isso só acontece ao abrir a conversa
+              }
+            }}>
+              <span className="material-symbols-outlined">notifications</span>
+              {(() => {
+                const sinoAtivo = localStorage.getItem('notif_sino_ativo') !== 'false'
+                const msgAtivo = localStorage.getItem('notif_msg_ativo') !== 'false'
+                return (sinoAtivo && artistaHasNew) || (msgAtivo && mensagensNaoLidas.length > 0)
+              })() && (
+                <span style={{ position: 'absolute', top: 2, right: 2, width: 8, height: 8, borderRadius: '50%', background: '#E21B3C', border: '1.5px solid #0a0a0a' }} />
+              )}
+            </button>
+            {notifOpen && (
+              <div style={{ position: 'absolute', top: '110%', right: 0, width: 320, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, zIndex: 999, boxShadow: '0 8px 32px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', fontWeight: 700, fontSize: '0.8rem', letterSpacing: 1, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>Notificações</div>
+                {notifItems.length === 0 ? (
+                  <div style={{ padding: '1.5rem', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '0.85rem' }}>Sem notificações</div>
+                ) : notifItems.map(ag => (
+                  <div key={ag.id} onClick={() => { openDrawer(ag); setNotifOpen(false) }}
+                    style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'center', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#E21B3C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.85rem', color: '#fff', flexShrink: 0 }}>
+                      {(ag.cliente?.fullName || ag.cliente?.nome || 'C').charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ag.cliente?.fullName || ag.cliente?.nome || 'Cliente'}</p>
+                      <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', margin: 0 }}>{ag.servico || 'Sessão'} · {ag.status}</p>
+                    </div>
+                  </div>
+                ))}
+                {mensagensNaoLidas.length > 0 && (
+                  <>
+                    <div style={{ padding: '8px 16px', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 1, borderTop: '1px solid rgba(255,255,255,0.08)' }}>Mensagens</div>
+                    {mensagensNaoLidas.map(m => (
+                      <div key={m.id} onClick={() => { switchTab('messages'); setNotifOpen(false) }}
+                        style={{ padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'background 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{m.remetenteNome}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>
+                          {m.conteudo.length > 40 ? m.conteudo.slice(0, 40) + '...' : m.conteudo}
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
+                <div onClick={() => { switchTab('requests'); setNotifOpen(false) }} style={{ padding: '10px 16px', textAlign: 'center', fontSize: '0.8rem', color: '#E21B3C', cursor: 'pointer', fontWeight: 600 }}>Ver todas</div>
+              </div>
+            )}
+          </div>
           <div className="ad-user-info">
             <div className="ad-user-text">
-              <p className="ad-user-name">{JSON.parse(localStorage.getItem('user') || '{}').nome || JSON.parse(localStorage.getItem('user') || '{}').fullName || 'Artista'}</p>
+              <p className="ad-user-name">{user?.nome || user?.fullName || 'Artista'}</p>
               <p className="ad-user-role">Artista</p>
             </div>
             <button className="ad-icon-btn" onClick={handleLogout} title="Sair">
@@ -213,9 +351,18 @@ const ArtistDashboard = () => {
               href="#"
               onClick={(e) => { e.preventDefault(); switchTab(item.key) }}
               className={`ad-nav-item ${activeTab === item.key ? 'active' : ''}`}
+              style={{ position: 'relative' }}
             >
               <span className="material-symbols-outlined">{item.icon}</span>
               <span>{item.label}</span>
+              {item.key === 'messages' && (() => {
+                const msgAtivo = localStorage.getItem('notif_msg_ativo') !== 'false'
+                return msgAtivo && mensagensNaoLidas.length > 0
+              })() && (
+                <span style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: '#E21B3C', color: '#fff', borderRadius: '50%', minWidth: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, padding: '0 6px' }}>
+                  {mensagensNaoLidas.length}
+                </span>
+              )}
             </a>
           ))}
         </nav>
@@ -223,8 +370,8 @@ const ArtistDashboard = () => {
           <div className="ad-studio-status">
             <p className="ad-studio-status-label">Status do Estúdio</p>
             <div className="ad-studio-status-value">
-              <span className="ad-pulse-dot"></span>
-              <span className="ad-status-text">Aceitando Agendamentos</span>
+              <span className="ad-pulse-dot" style={!studioOpen ? { background: '#888' } : {}}></span>
+              <span className="ad-status-text">{studioOpen ? 'Aceitando Agendamentos' : 'Pausado'}</span>
             </div>
           </div>
         </div>
@@ -237,7 +384,7 @@ const ArtistDashboard = () => {
 
       {/* Main Content */}
       <main className="ad-main">
-        <div className={`ad-content ${activeTab === 'schedule' ? 'full-width' : ''}`}>
+        <div className={`ad-content ${activeTab === 'schedule' || activeTab === 'messages' ? 'full-width' : ''}`}>
           {renderContent()}
         </div>
       </main>
@@ -306,7 +453,7 @@ const ArtistDashboard = () => {
                   ) : null}
                 </div>
               </div>
-              {drawerAgendamento?.status === 'AGENDADO' ? (
+              {(drawerAgendamento?.status === 'PENDENTE' || drawerAgendamento?.status === 'AGENDADO') ? (
                 <div className="ad-drawer-footer">
                   <button className="ad-drawer-btn-decline" onClick={() => handleDrawerAction('Declined')}>
                     Recusar
@@ -315,10 +462,25 @@ const ArtistDashboard = () => {
                     Aceitar e Agendar
                   </button>
                 </div>
+              ) : drawerAgendamento?.status === 'CONFIRMADO' ? (
+                <div className="ad-drawer-footer">
+                  <button className="ad-drawer-btn-decline" onClick={() => handleDrawerAction('Declined')}>
+                    Cancelar
+                  </button>
+                  <button className="ad-drawer-btn-accept" onClick={() => handleDrawerAction('StartSession')}>
+                    Iniciar Sessão
+                  </button>
+                </div>
+              ) : drawerAgendamento?.status === 'EM_ANDAMENTO' ? (
+                <div className="ad-drawer-footer">
+                  <button className="ad-drawer-btn-accept" style={{ width: '100%' }} onClick={() => handleDrawerAction('Complete')}>
+                    Concluir Sessão
+                  </button>
+                </div>
               ) : (
                 <div className="ad-drawer-footer">
                   <div style={{ width: '100%', textAlign: 'center', padding: '0.5rem', color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    Status: {drawerAgendamento?.status || '—'}
+                    {drawerAgendamento?.status === 'CANCELADO' ? '✕ Cancelado' : drawerAgendamento?.status === 'REALIZADO' ? '✓ Sessão Concluída' : drawerAgendamento?.status === 'FINALIZADO' ? '✓ Finalizado' : `Status: ${drawerAgendamento?.status || '—'}`}
                   </div>
                 </div>
               )}
@@ -349,18 +511,27 @@ const ArtistDashboard = () => {
             key={item.key}
             className={`ad-bottom-nav-item ${activeTab === item.key ? 'active' : ''}`}
             onClick={() => switchTab(item.key)}
+            style={{ position: 'relative' }}
           >
             <span
               className="material-symbols-outlined"
               style={activeTab === item.key ? { fontVariationSettings: "'FILL' 1" } : {}}
             >{item.icon}</span>
             <span>{item.label}</span>
+            {item.key === 'messages' && (() => {
+              const msgAtivo = localStorage.getItem('notif_msg_ativo') !== 'false'
+              return msgAtivo && mensagensNaoLidas.length > 0
+            })() && (
+              <span style={{ position: 'absolute', top: 4, right: 8, background: '#E21B3C', color: '#fff', borderRadius: '50%', minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700, padding: '0 4px' }}>
+                {mensagensNaoLidas.length}
+              </span>
+            )}
           </button>
         ))}
       </nav>
 
       {/* FAB Mobile */}
-      <button className="ad-fab" onClick={() => showToast('Abrindo formulário de nova sessão...')}>
+      <button className="ad-fab" onClick={() => switchTab('requests')}>
         <span className="material-symbols-outlined">add</span>
       </button>
 

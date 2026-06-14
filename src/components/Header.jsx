@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { agendamentoService } from '../services/inkflowApi'
+import { agendamentoService, mensagemServiceExtended } from '../services/inkflowApi'
 import { useAuth } from '../contexts/AuthContext'
 import './Header.css'
 
@@ -8,20 +8,91 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [agendamentos, setAgendamentos] = useState([])
+  const [clienteHasNew, setClienteHasNew] = useState(false)
+  const [mensagensNaoLidas, setMensagensNaoLidas] = useState([])
+  const [prevMsgCount, setPrevMsgCount] = useState(0)
   const notifRef = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, userType, logout } = useAuth()
+  const { user, userType, logout, token } = useAuth()
+
+  const audioCtxRef = useRef(null)
+
+  const tocarBeep = () => {
+    if (!audioCtxRef.current) audioCtxRef.current = new AudioContext()
+    const ctx = audioCtxRef.current
+    if (ctx.state === 'suspended') ctx.resume()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.frequency.value = 880
+    gain.gain.setValueAtTime(0.1, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+    osc.start(ctx.currentTime)
+    osc.stop(ctx.currentTime + 0.3)
+  }
 
   useEffect(() => {
-    if (userType === 'client' && user?.id) {
-      agendamentoService.getByCliente(user.id)
-        .then(res => setAgendamentos(res.data.slice(0, 3)))
-        .catch(() => {})
-    } else {
+    if (userType !== 'client' || !user?.id || !token) {
       setAgendamentos([])
+      setMensagensNaoLidas([])
+      setPrevMsgCount(0)
+      return
     }
-  }, [user, userType])
+
+    const fetchNotifs = () => {
+      // Fetch agendamentos
+      agendamentoService.getByCliente(user.id)
+        .then(res => setAgendamentos(
+          [...res.data].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora)).slice(0, 3)
+        ))
+        .catch(() => {})
+
+      // Fetch mensagens não lidas
+      mensagemServiceExtended.getNaoLidas()
+        .then(res => {
+          const novasMsgs = res.data || []
+          setPrevMsgCount(prev => {
+            if (novasMsgs.length > prev && prev > 0) {
+              const somAtivo = localStorage.getItem('notif_som_ativo') === 'true'
+              if (somAtivo) tocarBeep()
+            }
+            return novasMsgs.length
+          })
+          setMensagensNaoLidas(novasMsgs)
+        })
+        .catch(() => {})
+    }
+
+    fetchNotifs() // Roda imediatamente
+
+    const interval = setInterval(fetchNotifs, 10000) // Repete a cada 10s
+    return () => clearInterval(interval) // Limpa ao desmontar
+  }, [user, userType, token])
+
+  useEffect(() => {
+    if (agendamentos.length === 0) return
+    const lastSeen = localStorage.getItem('notif_cliente_lastSeen')
+    if (!lastSeen) { setClienteHasNew(true); return }
+    const maisRecente = agendamentos.reduce((a, b) =>
+      new Date(a.createdAt) > new Date(b.createdAt) ? a : b
+    )
+    setClienteHasNew(new Date(maisRecente.createdAt) > new Date(lastSeen))
+  }, [agendamentos])
+
+  const handleAbrirSinoCliente = () => {
+    const abrindo = !notifOpen
+    setNotifOpen(abrindo)
+
+    if (!abrindo) {
+      // está fechando → marca como lido
+      localStorage.setItem('notif_cliente_lastSeen', new Date().toISOString())
+      setClienteHasNew(false)
+      setMensagensNaoLidas([])
+      mensagemServiceExtended.marcarTodasLidas().catch(() => {})
+    }
+  }
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -35,13 +106,16 @@ const Header = () => {
 
   const formatDate = (dataHora) => {
     if (!dataHora) return ''
-    return new Date(dataHora).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase()
+    return new Date(dataHora).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', timeZone: 'America/Sao_Paulo' }).toUpperCase()
   }
 
   const statusColor = {
+    'PENDENTE': '#f59e0b',
     'AGENDADO': '#ff0000',
     'CONFIRMADO': '#10b981',
+    'EM_ANDAMENTO': '#8b5cf6',
     'REALIZADO': '#6366f1',
+    'FINALIZADO': '#14b8a6',
     'CANCELADO': 'rgba(255,255,255,0.3)'
   }
 
@@ -103,8 +177,16 @@ const Header = () => {
 
         {userType === 'client' && (
           <div className="notif-wrap" ref={notifRef}>
-            <button className="notif-btn" onClick={() => setNotifOpen(prev => !prev)}>
+            <button className="notif-btn" onClick={handleAbrirSinoCliente}
+              style={{ position: 'relative' }}>
               <span className="material-symbols-outlined">notifications</span>
+              {(() => {
+                const sinoAtivo = localStorage.getItem('notif_sino_ativo') !== 'false'
+                const msgAtivo = localStorage.getItem('notif_msg_ativo') !== 'false'
+                return (sinoAtivo && clienteHasNew) || (msgAtivo && mensagensNaoLidas.length > 0)
+              })() && (
+                <span style={{ position: 'absolute', top: 2, right: 2, width: 8, height: 8, borderRadius: '50%', background: '#E21B3C', border: '1.5px solid #0a0a0a' }} />
+              )}
             </button>
             {notifOpen && (
               <div className="notif-dropdown">
@@ -121,6 +203,23 @@ const Header = () => {
                         style={{ color: statusColor[ag.status] || '#fff' }}>{ag.status}</span>
                     </div>
                   ))
+                )}
+                {mensagensNaoLidas.length > 0 && (
+                  <>
+                    <div className="notif-header" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 4, paddingTop: 8 }}>
+                      Mensagens Não Lidas
+                    </div>
+                    {mensagensNaoLidas.map(m => (
+                      <div key={m.id} className="notif-item"
+                        onClick={() => {
+                          navigate('/perfil', { state: { abrirChatComId: m.remetenteId, abrirChatNome: m.remetenteNome } })
+                          setNotifOpen(false)
+                        }}>
+                        <div className="notif-item-title">{m.remetenteNome}</div>
+                        <div className="notif-item-sub">{m.conteudo.length > 40 ? m.conteudo.slice(0, 40) + '...' : m.conteudo}</div>
+                      </div>
+                    ))}
+                  </>
                 )}
                 <div className="notif-footer"
                   onClick={() => { navigate('/perfil'); setNotifOpen(false) }}>

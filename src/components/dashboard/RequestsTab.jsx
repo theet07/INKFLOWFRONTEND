@@ -1,34 +1,72 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { agendamentoService } from '../../services/inkflowApi'
 
 const formatDate = (dataHora) => {
   if (!dataHora) return ''
-  const d = new Date(dataHora)
-  const day = d.getDate()
   const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
-  return `${day} ${months[d.getMonth()]}, ${d.getFullYear()}`
+  const d = new Date(dataHora)
+  const parts = d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'America/Sao_Paulo' }).split('/')
+  return `${parts[0]} ${months[parseInt(parts[1], 10) - 1]}, ${parts[2]}`
 }
 
 const formatTime = (dataHora) => {
   if (!dataHora) return ''
-  return new Date(dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  return new Date(dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })
 }
 
 const statusConfig = {
-  'AGENDADO': { label: 'PENDENTE', badgeClass: 'ad-badge-yellow' },
-  'CONFIRMADO': { label: 'CONFIRMADO', badgeClass: 'ad-badge-green' },
-  'EM_ANDAMENTO': { label: 'EM ANDAMENTO', badgeClass: 'ad-badge-blue' },
-  'REALIZADO': { label: 'REALIZADO', badgeClass: 'ad-badge-purple' },
-  'FINALIZADO': { label: 'FINALIZADO', badgeClass: 'ad-badge-teal' },
-  'CANCELADO': { label: 'CANCELADO', badgeClass: 'ad-badge-red' },
+  'PENDENTE':     { label: 'PENDENTE',     badgeClass: 'ad-badge-yellow' },
+  'AGENDADO':     { label: 'AGENDADO',     badgeClass: 'ad-badge-yellow' },
+  'CONFIRMADO':   { label: 'CONFIRMADO',   badgeClass: 'ad-badge-green'  },
+  'EM_ANDAMENTO': { label: 'EM ANDAMENTO', badgeClass: 'ad-badge-blue'   },
+  'REALIZADO':    { label: 'REALIZADO',    badgeClass: 'ad-badge-purple' },
+  'FINALIZADO':   { label: 'FINALIZADO',   badgeClass: 'ad-badge-teal'   },
+  'CANCELADO':    { label: 'CANCELADO',    badgeClass: 'ad-badge-red'    },
 }
 
-const RequestsTab = ({ showToast, openDrawer }) => {
+const ClientAvatar = ({ ag }) => {
+  const nome = ag?.cliente?.fullName || ag?.cliente?.nome || 'C'
+  const foto = ag?.cliente?.fotoUrl
+  const [imgError, setImgError] = useState(false)
+
+  if (foto && !imgError) {
+    return (
+      <img
+        src={foto}
+        alt={nome}
+        onError={() => setImgError(true)}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+    )
+  }
+  return (
+    <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.8rem' }}>
+      {nome.charAt(0).toUpperCase()}
+    </div>
+  )
+}
+
+const getNextStatus = (current) => {
+  const flow = { 'PENDENTE': 'CONFIRMADO', 'AGENDADO': 'CONFIRMADO', 'CONFIRMADO': 'EM_ANDAMENTO', 'EM_ANDAMENTO': 'REALIZADO' }
+  return flow[current] || null
+}
+
+const RequestsTab = ({ showToast, openDrawer, refreshKey }) => {
   const [filter, setFilter] = useState('all')
   const [agendamentos, setAgendamentos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [menuOpen, setMenuOpen] = useState(null)
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
+  const [historicoCliente, setHistoricoCliente] = useState(null)
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+  useEffect(() => {
+    const close = () => setMenuOpen(null)
+    document.addEventListener('click', close)
+    return () => document.removeEventListener('click', close)
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,29 +86,34 @@ const RequestsTab = ({ showToast, openDrawer }) => {
       }
     }
     fetchData()
-  }, [])
+  }, [refreshKey])
 
   const getClientName = (ag) => ag?.cliente?.fullName || ag?.cliente?.nome || 'Cliente'
   const getClientEmail = (ag) => ag?.cliente?.email || ''
 
   const filters = [
     { key: 'all', label: 'Todos' },
-    { key: 'AGENDADO', label: 'Pendente' },
+    { key: 'PENDENTE', label: 'Pendente' },
     { key: 'CONFIRMADO', label: 'Confirmado' },
     { key: 'CANCELADO', label: 'Cancelado' },
   ]
 
   const filteredRows = filter === 'all' ? agendamentos : agendamentos.filter(a => a.status === filter)
 
+  const statusMessages = {
+    'CONFIRMADO': { msg: 'confirmada', error: false },
+    'EM_ANDAMENTO': { msg: 'iniciada', error: false },
+    'REALIZADO': { msg: 'concluída', error: false },
+    'FINALIZADO': { msg: 'finalizada', error: false },
+    'CANCELADO': { msg: 'cancelada', error: true },
+  }
+
   const handleStatusUpdate = async (agId, novoStatus, clienteNome) => {
     try {
       await agendamentoService.updateStatus(agId, { status: novoStatus })
       setAgendamentos(prev => prev.map(a => a.id === agId ? { ...a, status: novoStatus } : a))
-      if (novoStatus === 'CONFIRMADO') {
-        showToast(`Solicitação de ${clienteNome} confirmada!`)
-      } else {
-        showToast(`Solicitação de ${clienteNome} recusada.`, true)
-      }
+      const info = statusMessages[novoStatus] || { msg: 'atualizada', error: false }
+      showToast(`Sessão de ${clienteNome} ${info.msg}!`, info.error)
     } catch (err) {
       const msg = err.response?.data?.message || err.response?.data || 'Erro ao atualizar status'
       showToast(typeof msg === 'string' ? msg : 'Erro ao atualizar status', true)
@@ -89,11 +132,7 @@ const RequestsTab = ({ showToast, openDrawer }) => {
 
   const handleRowClick = (e, ag) => {
     if (e.target.closest('button')) return
-    console.log('Agendamento selecionado:', ag)
-    // Usa o drawer blindado do componente pai (ArtistDashboard)
-    if (openDrawer) {
-      openDrawer(ag)
-    }
+    if (openDrawer) openDrawer(ag)
   }
 
   return (
@@ -140,7 +179,9 @@ const RequestsTab = ({ showToast, openDrawer }) => {
             </thead>
             <tbody>
               {filteredRows.map(ag => {
-                const cfg = statusConfig[ag?.status] || { label: ag?.status || '—', badgeClass: '' }
+                const cfg = ag?.status === 'REALIZADO'
+                  ? { label: 'REALIZADO', badgeClass: ag?.avaliado ? 'ad-badge-teal' : 'ad-badge-purple' }
+                  : statusConfig[ag?.status] || { label: ag?.status || '—', badgeClass: '' }
                 return (
                   <tr
                     key={ag?.id}
@@ -150,9 +191,7 @@ const RequestsTab = ({ showToast, openDrawer }) => {
                     <td>
                       <div className="ad-req-client-cell">
                         <div className="ad-req-client-img">
-                          <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#e63946', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.8rem' }}>
-                            {getClientName(ag).charAt(0).toUpperCase()}
-                          </div>
+                          <ClientAvatar ag={ag} />
                         </div>
                         <div>
                           <p className="ad-req-client-name">{getClientName(ag)}</p>
@@ -171,9 +210,9 @@ const RequestsTab = ({ showToast, openDrawer }) => {
                     <td>
                       <span className={`ad-badge ${cfg.badgeClass}`}>{cfg.label}</span>
                     </td>
-                    <td className="ad-req-td-right">
+                    <td className="ad-req-td-right" style={{ overflow: 'visible', position: 'relative' }}>
                       <div className="ad-req-actions">
-                        {ag?.status === 'AGENDADO' ? (
+                        {(ag?.status === 'PENDENTE' || ag?.status === 'AGENDADO') ? (
                           <>
                             <button className="ad-req-action-accept" onClick={(e) => handleAccept(e, ag)}>
                               <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>check</span>
@@ -182,10 +221,23 @@ const RequestsTab = ({ showToast, openDrawer }) => {
                               <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>close</span>
                             </button>
                           </>
+                        ) : getNextStatus(ag?.status) ? (
+                          <div className="ad-req-actions" style={{ justifyContent: 'flex-end' }}>
+                            <button className="ad-req-action-accept" title={`Avançar para ${getNextStatus(ag?.status)}`} onClick={(e) => { e.stopPropagation(); handleStatusUpdate(ag.id, getNextStatus(ag.status), getClientName(ag)) }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>arrow_forward</span>
+                            </button>
+                          </div>
                         ) : (
-                          <button className="ad-req-action-options" onClick={(e) => { e.stopPropagation(); showToast(`${getClientName(ag)}: ${cfg.label}`) }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>more_vert</span>
-                          </button>
+                          <div className="ad-req-actions" style={{ justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
+                            <button className="ad-req-action-options" onClick={(e) => {
+                              e.stopPropagation()
+                              const rect = e.currentTarget.getBoundingClientRect()
+                              setMenuPos({ top: rect.top - 90, left: rect.right - 200 })
+                              setMenuOpen(menuOpen === ag.id ? null : ag.id)
+                            }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>more_vert</span>
+                            </button>
+                          </div>
                         )}
                       </div>
                     </td>
@@ -196,6 +248,72 @@ const RequestsTab = ({ showToast, openDrawer }) => {
           </table>
         )}
       </div>
+      {menuOpen && createPortal(
+        <div style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, zIndex: 9999, minWidth: 200, boxShadow: '0 8px 24px rgba(0,0,0,0.5)', overflow: 'hidden' }}
+          onClick={e => e.stopPropagation()}>
+          {(() => {
+            const ag = agendamentos.find(a => a.id === menuOpen)
+            if (!ag) return null
+            return (
+              <>
+                <button onClick={() => { navigator.clipboard.writeText(getClientEmail(ag)); showToast('E-mail copiado!'); setMenuOpen(null) }}
+                  style={{ width: '100%', padding: '10px 16px', background: 'none', border: 'none', color: '#fff', fontSize: '0.85rem', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: '#E21B3C' }}>content_copy</span>
+                  Copiar contato
+                </button>
+                <button onClick={() => {
+                  const clientId = ag.cliente?.id
+                  const nome = getClientName(ag)
+                  const historico = agendamentos.filter(a => a.cliente?.id === clientId).sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+                  setHistoricoCliente({ nome, agendamentos: historico })
+                  setMenuOpen(null)
+                }} style={{ width: '100%', padding: '10px 16px', background: 'none', border: 'none', color: '#fff', fontSize: '0.85rem', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '1rem', color: '#E21B3C' }}>history</span>
+                  Ver histórico
+                </button>
+              </>
+            )
+          })()}
+        </div>,
+        document.body
+      )}
+      {historicoCliente && (
+        <div onClick={() => setHistoricoCliente(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, width: '90%', maxWidth: 560, maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <p style={{ fontSize: '0.7rem', color: '#E21B3C', textTransform: 'uppercase', letterSpacing: 1, margin: 0 }}>Histórico do Cliente</p>
+                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>{historicoCliente.nome}</h3>
+              </div>
+              <button onClick={() => setHistoricoCliente(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              {historicoCliente.agendamentos.length === 0 ? (
+                <p style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>Nenhum agendamento encontrado.</p>
+              ) : historicoCliente.agendamentos.map(a => {
+                const cfg = a.status === 'REALIZADO'
+                  ? { label: 'REALIZADO', badgeClass: a.avaliado ? 'ad-badge-teal' : 'ad-badge-purple' }
+                  : statusConfig[a.status] || { label: a.status, badgeClass: '' }
+                return (
+                  <div key={a.id} style={{ padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600 }}>{a.servico || 'Sessão'}</p>
+                      <p style={{ margin: 0, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{formatDate(a.dataHora)} · {formatTime(a.dataHora)}</p>
+                    </div>
+                    <span className={`ad-badge ${cfg.badgeClass}`}>{cfg.label}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
