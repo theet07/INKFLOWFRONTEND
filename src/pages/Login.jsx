@@ -125,9 +125,14 @@ const Login = () => {
         })
 
         if (response.status === 200 || response.status === 201) {
-          showToast('Código de verificação enviado para seu e-mail!', 'success')
-          setRegisteredEmail(formData.email)
-          setIsVerifying(true)
+          if (response.data?.verificado) {
+            showToast('Conta criada com sucesso! Faça login para continuar.', 'success')
+            setIsLogin(true)
+          } else {
+            showToast('Código de verificação enviado para seu e-mail!', 'success')
+            setRegisteredEmail(formData.email)
+            setIsVerifying(true)
+          }
         } else {
           showToast('Erro ao solicitar código. Tente novamente.', 'error')
         }
