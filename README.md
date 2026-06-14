@@ -131,7 +131,7 @@ O frontend está hospedado no **Vercel** com redirecionamento de todas as rotas 
 
 ## 👤 Autores
 
-**Matheus** & **Nathan**
+**Matheus**
 
 ---
 
