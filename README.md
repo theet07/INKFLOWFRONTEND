@@ -123,37 +123,6 @@ Todos centralizados em `src/services/inkflowApi.js` com interceptors JWT automá
 
 ---
 
-## ▶️ Como Executar
-
-### Variáveis de Ambiente
-
-Crie um arquivo `.env.local` na raiz do projeto:
-
-```env
-VITE_API_URL=https://inkflowbackend-4w1g.onrender.com/api
-VITE_CLOUDINARY_CLOUD_NAME=<cloud_name>
-VITE_CLOUDINARY_UPLOAD_PRESET=<upload_preset>
-```
-
-### Localmente
-
-```bash
-git clone <url-do-repo>
-cd INKFLOWFRONTEND-LIMPO
-npm install
-npm run dev
-```
-
-Disponível em `http://localhost:3001`.
-
-### Build para Produção
-
-```bash
-npm run build
-```
-
----
-
 ## 🌐 Deploy
 
 O frontend está hospedado no **Vercel** com redirecionamento de todas as rotas para `index.html` (SPA).
